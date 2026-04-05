@@ -18,7 +18,7 @@ indent_size = 4
 tab_width = 4
 
 # New line preferences
-end_of_line = crlf
+end_of_line = lf
 insert_final_newline = false
 
 #### .NET Coding Conventions ####
@@ -123,6 +123,11 @@ csharp_style_unused_value_expression_statement_preference = discard_variable:sil
 
 # 'using' directive preferences
 csharp_using_directive_placement = outside_namespace:silent
+
+#### Rider / ReSharper Formatting ####
+
+# Never place attributes on the same line as the declaration (matches SA1134)
+resharper_place_attribute_on_same_line = never
 
 #### C# Formatting Rules ####
 

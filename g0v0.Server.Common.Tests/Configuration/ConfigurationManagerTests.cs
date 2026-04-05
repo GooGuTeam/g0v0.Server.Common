@@ -212,7 +212,8 @@ public class ConfigurationManagerTests
         public string Name { get; set; } = string.Empty;
         public int Value { get; set; }
 
-        [Reloadable] public string ReloadableValue { get; set; } = string.Empty;
+        [Reloadable]
+        public string ReloadableValue { get; set; } = string.Empty;
     }
 
     /// <summary>
