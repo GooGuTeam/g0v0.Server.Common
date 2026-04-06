@@ -34,6 +34,15 @@ public class ConfigurationManager<T>
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="ConfigurationManager{T}"/> class using a configuration path provider and loads the configuration from the file.
+    /// </summary>
+    /// <param name="configPathProvider">The path provider.</param>
+    public ConfigurationManager(IConfigPathProvider configPathProvider)
+        : this(configPathProvider.GetBasePath())
+    {
+    }
+
+    /// <summary>
     /// Gets the current loaded configuration value.
     /// </summary>
     public T Value => _value;
