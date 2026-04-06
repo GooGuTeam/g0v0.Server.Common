@@ -58,13 +58,11 @@ public class ConfigurationManager<T>
         Type t = typeof(T);
 
         var attribute = t.GetCustomAttribute<ConfigurationFileAttribute>();
-        if (attribute != null)
+        filename = attribute != null ? attribute.FileName : t.Name.ToSnakeCase() + ".json";
+
+        if (!filename.EndsWith(".json", StringComparison.Ordinal))
         {
-            filename = attribute.FileName;
-        }
-        else
-        {
-            filename = t.Name.ToSnakeCase() + ".json";
+            filename += ".json";
         }
 
         return Path.Combine(basePath, ConfigBasePath, filename);
