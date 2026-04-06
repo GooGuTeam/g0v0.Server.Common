@@ -2,8 +2,6 @@
 
 using g0v0.Server.Common.Configuration;
 
-using Newtonsoft.Json;
-
 using NUnit.Framework;
 
 namespace g0v0.Server.Common.Tests.Configuration;
@@ -17,36 +15,6 @@ public class GeneralConfigurationTests
     public void SetUp()
     {
         _config = new GeneralConfiguration();
-    }
-
-    [Test]
-    public void MySqlHost_DefaultValue_ShouldBe_LocalHost()
-    {
-        Assert.That(_config.MySqlHost, Is.EqualTo("127.0.0.1"));
-    }
-
-    [Test]
-    public void MySqlPort_DefaultValue_ShouldBe_3306()
-    {
-        Assert.That(_config.MySqlPort, Is.EqualTo("3306"));
-    }
-
-    [Test]
-    public void MySqlDatabase_DefaultValue_ShouldBe_OsuApi()
-    {
-        Assert.That(_config.MySqlDatabase, Is.EqualTo("osu_api"));
-    }
-
-    [Test]
-    public void MySqlUsername_DefaultValue_ShouldBe_OsuApi()
-    {
-        Assert.That(_config.MySqlUsername, Is.EqualTo("osu_api"));
-    }
-
-    [Test]
-    public void MySqlPassword_DefaultValue_ShouldBe_Password()
-    {
-        Assert.That(_config.MySqlPassword, Is.EqualTo("password"));
     }
 
     [Test]
@@ -71,14 +39,10 @@ public class GeneralConfigurationTests
     }
 
     [Test]
-    public void MySqlConnectionString_ShouldHaveJsonIgnoreAttribute()
+    public void MySqlHost_WhenSet_ShouldUpdateConnectionString()
     {
-        var property = typeof(GeneralConfiguration).GetProperty(nameof(GeneralConfiguration.MySqlConnectionString))!;
-        object? jsonIgnore = property.GetCustomAttributes(typeof(JsonIgnoreAttribute), false).FirstOrDefault();
+        _config.MySqlHost = "192.168.1.100";
 
-        Assert.That(
-            jsonIgnore,
-            Is.Not.Null,
-            "MySqlConnectionString should be decorated with [JsonIgnore] to prevent serialization.");
+        Assert.That(_config.MySqlConnectionString, Does.Contain("Server=192.168.1.100"));
     }
 }

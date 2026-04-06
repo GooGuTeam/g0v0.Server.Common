@@ -19,7 +19,6 @@ public class ConfigurationManager<T>
 {
     private const string ConfigBasePath = "config";
 
-    private readonly T _value;
     private readonly string _filePath;
 
     /// <summary>
@@ -30,7 +29,7 @@ public class ConfigurationManager<T>
     {
         _filePath = GetFilePath(basePath);
 
-        _value = LoadConfiguration();
+        Value = LoadConfiguration();
     }
 
     /// <summary>
@@ -45,7 +44,7 @@ public class ConfigurationManager<T>
     /// <summary>
     /// Gets the current loaded configuration value.
     /// </summary>
-    public T Value => _value;
+    public T Value { get; }
 
     /// <summary>
     /// Reload the configuration from the file. Only properties marked with <see cref="ReloadableAttribute"/> will be updated.
@@ -57,7 +56,7 @@ public class ConfigurationManager<T>
         foreach (var property in properties)
         {
             var newValue = property.GetValue(config);
-            property.SetValue(_value, newValue);
+            property.SetValue(Value, newValue);
         }
     }
 
