@@ -8,13 +8,13 @@ namespace g0v0.Server.Common.Database.PostgreSQL;
 /// <summary>
 /// Entity Framework Core database context for the PostgreSQL schema.
 /// </summary>
-public class AppDbContext : DbContext
+public class PostgreSqlDbContext : DbContext
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="AppDbContext"/> class.
+    /// Initializes a new instance of the <see cref="PostgreSqlDbContext"/> class.
     /// </summary>
     /// <param name="options">The EF Core context options.</param>
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public PostgreSqlDbContext(DbContextOptions<PostgreSqlDbContext> options)
         : base(options)
     {
     }

@@ -11,17 +11,17 @@ namespace g0v0.Server.Common.Tests.Database.Repository;
 [TestFixture]
 public class PostgreSqlOAuthTokenRepositoryTests
 {
-    private AppDbContext _context = null!;
+    private PostgreSqlDbContext _context = null!;
     private OAuthTokenRepository _repository = null!;
 
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+        var options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        _context = new AppDbContext(options);
+        _context = new PostgreSqlDbContext(options);
         _repository = new OAuthTokenRepository(_context);
     }
 

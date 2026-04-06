@@ -10,7 +10,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 /// PostgreSQL-backed implementation of <see cref="IOAuthTokenRepository"/>.
 /// </summary>
 /// <param name="context">The database context.</param>
-public class OAuthTokenRepository(AppDbContext context) : IOAuthTokenRepository, IPostgreSqlRepository
+public class OAuthTokenRepository(PostgreSqlDbContext context) : IOAuthTokenRepository, IPostgreSqlRepository
 {
     /// <inheritdoc />
     public async Task<OAuthToken?> GetByAccessTokenAsync(string token)

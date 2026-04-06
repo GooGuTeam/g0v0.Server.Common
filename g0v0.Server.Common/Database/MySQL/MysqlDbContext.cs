@@ -8,13 +8,13 @@ namespace g0v0.Server.Common.Database.MySQL;
 /// <summary>
 /// Entity Framework Core database context for the legacy MySQL schema.
 /// </summary>
-public class AppDbContext : DbContext
+public class MysqlDbContext : DbContext
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="AppDbContext"/> class.
+    /// Initializes a new instance of the <see cref="MysqlDbContext"/> class.
     /// </summary>
     /// <param name="options">The EF Core context options.</param>
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public MysqlDbContext(DbContextOptions<MysqlDbContext> options)
         : base(options)
     {
     }

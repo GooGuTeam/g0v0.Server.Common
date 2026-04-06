@@ -10,7 +10,7 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// MySQL-backed implementation of <see cref="IOAuthTokenRepository"/>.
 /// </summary>
 /// <param name="context">The database context.</param>
-public class OAuthTokenRepository(AppDbContext context) : IOAuthTokenRepository, IMySqlRepository
+public class OAuthTokenRepository(MysqlDbContext context) : IOAuthTokenRepository, IMySqlRepository
 {
     /// <inheritdoc />
     public async Task<OAuthToken?> GetByAccessTokenAsync(string token)
