@@ -1,9 +1,12 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using System.Reflection;
+using g0v0.Server.Common.Communication;
+using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.MySQL.Repository;
 using g0v0.Server.Common.Database.PostgreSQL.Repository;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace g0v0.Server.Common.Extensions;
 
@@ -44,6 +47,26 @@ public static class ServiceCollectionExtension
             }
         }
 
+        return services;
+    }
+
+    public static IServiceCollection AddRedis(this IServiceCollection services, string serverIdentify)
+    {
+        services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(services =>
+        {
+            var generalConfig = services.GetRequiredService<ConfigurationManager<GeneralConfiguration>>();
+            return ConnectionMultiplexer.Connect(generalConfig.Value.RedisHost);
+        });
+        services.AddSingleton<IInterProcessCommunicationTransport>(services =>
+        {
+            var connection = services.GetRequiredService<IConnectionMultiplexer>();
+            return new RedisInterProcessCommunicationTransport(connection);
+        });
+        services.AddSingleton<InterProcessCommunicationClient>(services =>
+        {
+            var transport = services.GetRequiredService<IInterProcessCommunicationTransport>();
+            return new InterProcessCommunicationClient(transport, serverIdentify);
+        });
         return services;
     }
 }

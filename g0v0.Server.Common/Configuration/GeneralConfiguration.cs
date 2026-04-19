@@ -56,6 +56,11 @@ public class GeneralConfiguration
     public string PostgresqlConnectionString { get; set; } =
         "Host=localhost;Port=5432;Username=g0v0;Password=password;Database=g0v0";
 
+    /// <summary>
+    /// Gets or sets Redis host.
+    /// </summary>
+    public string RedisHost { get; set; } = "localhost:6379";
+
     #endregion
 
     #region JWT

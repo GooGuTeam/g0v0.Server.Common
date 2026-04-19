@@ -1,9 +1,11 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Repository;
 using g0v0.Server.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using StackExchange.Redis;
 
 namespace g0v0.Server.Common.Tests.Extensions;
 
@@ -83,5 +85,28 @@ public class ServiceCollectionExtensionTests
 
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(descriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Scoped));
+    }
+
+    [Test]
+    public void AddRedis_ShouldRegisterIpcDependenciesAsSingletons()
+    {
+        var services = new ServiceCollection();
+
+        services.AddRedis("realtime");
+
+        ServiceDescriptor? redisDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IConnectionMultiplexer));
+        ServiceDescriptor? transportDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IInterProcessCommunicationTransport));
+        ServiceDescriptor? ipcClientDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(InterProcessCommunicationClient));
+
+        Assert.That(redisDescriptor, Is.Not.Null);
+        Assert.That(redisDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+
+        Assert.That(transportDescriptor, Is.Not.Null);
+        Assert.That(transportDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+
+        Assert.That(ipcClientDescriptor, Is.Not.Null);
+        Assert.That(ipcClientDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
     }
 }
