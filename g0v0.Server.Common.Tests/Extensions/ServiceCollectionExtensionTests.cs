@@ -3,6 +3,7 @@
 using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Repository;
 using g0v0.Server.Common.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using StackExchange.Redis;
@@ -108,5 +109,36 @@ public class ServiceCollectionExtensionTests
 
         Assert.That(ipcClientDescriptor, Is.Not.Null);
         Assert.That(ipcClientDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+    }
+
+    [Test]
+    public void AddOAuthAuthentication_ShouldRegisterAuthorizationServices()
+    {
+        var services = new ServiceCollection();
+
+        IServiceCollection result = services.AddOAuthAuthentication();
+
+        ServiceDescriptor? policyProviderDescriptor = services.LastOrDefault(
+            d => d.ServiceType == typeof(IAuthorizationPolicyProvider));
+        ServiceDescriptor? handlerDescriptor = services.FirstOrDefault(
+            d => d.ImplementationType == typeof(g0v0.Server.Common.Authentication.ScopeAuthorizationHandler));
+        ServiceDescriptor? optionsDescriptor = services.FirstOrDefault(
+            d => d.ImplementationType == typeof(g0v0.Server.Common.Authentication.ConfigureJwtBearerOptions));
+
+        Assert.That(result, Is.SameAs(services));
+
+        Assert.That(policyProviderDescriptor, Is.Not.Null);
+        Assert.That(
+            policyProviderDescriptor!.ImplementationType,
+            Is.EqualTo(typeof(g0v0.Server.Common.Authentication.ScopePolicyProvider)));
+        Assert.That(policyProviderDescriptor.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+
+        Assert.That(handlerDescriptor, Is.Not.Null);
+        Assert.That(
+            handlerDescriptor!.ImplementationType,
+            Is.EqualTo(typeof(g0v0.Server.Common.Authentication.ScopeAuthorizationHandler)));
+        Assert.That(handlerDescriptor.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+
+        Assert.That(optionsDescriptor, Is.Not.Null);
     }
 }

@@ -1,10 +1,13 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using System.Reflection;
+using g0v0.Server.Common.Authentication;
 using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.MySQL.Repository;
 using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
@@ -67,6 +70,32 @@ public static class ServiceCollectionExtension
             var transport = services.GetRequiredService<IInterProcessCommunicationTransport>();
             return new InterProcessCommunicationClient(transport, serverIdentify);
         });
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the shared g0v0 OAuth/JWT authentication and authorization components.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Requires <see cref="ConfigurationManager{T}"/> for <see cref="GeneralConfiguration"/> and
+    /// <c>IOAuthTokenRepository</c> to be registered beforehand.
+    /// </remarks>
+    public static IServiceCollection AddOAuthAuthentication(this IServiceCollection services)
+    {
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer();
+
+        services.ConfigureOptions<ConfigureJwtBearerOptions>();
+        services.AddAuthorization();
+        services.AddSingleton<IAuthorizationPolicyProvider, ScopePolicyProvider>();
+        services.AddSingleton<IAuthorizationHandler, ScopeAuthorizationHandler>();
+
         return services;
     }
 }
