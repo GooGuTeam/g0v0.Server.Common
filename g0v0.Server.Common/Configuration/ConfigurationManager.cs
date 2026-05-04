@@ -26,9 +26,9 @@ public class ConfigurationManager(string basePath)
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigurationManager"/> class using a configuration path provider and loads the configuration from the file.
     /// </summary>
-    /// <param name="configPathProvider">The path provider.</param>
-    public ConfigurationManager(IConfigPathProvider configPathProvider)
-        : this(configPathProvider.GetBasePath())
+    /// <param name="pathProvider">The path provider.</param>
+    public ConfigurationManager(IPathProvider pathProvider)
+        : this(pathProvider.GetBasePath())
     {
     }
 
