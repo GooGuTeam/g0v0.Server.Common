@@ -176,8 +176,8 @@ public sealed class InterProcessCommunicationClient
     {
         ValidateName(name);
 
-        var envelope = CreateInvocationEnvelope(MessageTypes.Notice, Guid.NewGuid(), name, payload, sourceServer: null);
-        return PublishEnvelopeAsync(targetServerIdentifier, envelope, cancellationToken);
+        var message = new IpcMessage(IpcMessageType.Notice, name, Guid.NewGuid(), payload);
+        return PublishMessageAsync(targetServerIdentifier, message, cancellationToken);
     }
 
     /// <summary>
@@ -239,8 +239,8 @@ public sealed class InterProcessCommunicationClient
 
         try
         {
-            var envelope = CreateInvocationEnvelope(MessageTypes.Request, requestId, name, payload, ServerIdentifier);
-            await PublishEnvelopeAsync(targetServerIdentifier, envelope, timeoutCancellationSource.Token).ConfigureAwait(false);
+            var message = new IpcMessage(IpcMessageType.Request, name, requestId, payload);
+            await PublishMessageAsync(targetServerIdentifier, message, timeoutCancellationSource.Token).ConfigureAwait(false);
 
             JToken? responsePayload = await pendingRequest.Task.ConfigureAwait(false);
             return ConvertPayload(responsePayload, responseType);
@@ -288,75 +288,10 @@ public sealed class InterProcessCommunicationClient
             $"Failed to convert the IPC payload to '{targetType.FullName}'.");
     }
 
-    private static InterProcessCommunicationEnvelope CreateErrorEnvelope(Guid uuid, string message)
+    private static IpcMessage DeserializeMessage(string rawMessage)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(message);
-
-        return new InterProcessCommunicationEnvelope
-        {
-            Type = MessageTypes.Error,
-            Uuid = uuid,
-            Data = JObject.FromObject(
-                new InterProcessCommunicationErrorData
-                {
-                    Message = message,
-                },
-                Serializer),
-        };
-    }
-
-    private static InterProcessCommunicationEnvelope CreateInvocationEnvelope(
-        string messageType,
-        Guid uuid,
-        string name,
-        object? payload,
-        string? sourceServer)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(messageType);
-        ValidateName(name);
-
-        return new InterProcessCommunicationEnvelope
-        {
-            Type = messageType,
-            Uuid = uuid,
-            Data = JObject.FromObject(
-                new InterProcessCommunicationInvocationData
-                {
-                    Name = name,
-                    SourceServer = sourceServer,
-                    Payload = ToToken(payload),
-                },
-                Serializer),
-        };
-    }
-
-    private static InterProcessCommunicationEnvelope CreateResponseEnvelope(Guid uuid, object? payload)
-    {
-        return new InterProcessCommunicationEnvelope
-        {
-            Type = MessageTypes.Response,
-            Uuid = uuid,
-            Data = JObject.FromObject(
-                new InterProcessCommunicationResponseData
-                {
-                    Payload = ToToken(payload),
-                },
-                Serializer),
-        };
-    }
-
-    private static TData DeserializeData<TData>(JObject data)
-        where TData : class
-    {
-        TData? deserializedData = data.ToObject<TData>(Serializer);
-        return deserializedData ?? throw new JsonSerializationException(
-            $"Failed to deserialize IPC data as '{typeof(TData).FullName}'.");
-    }
-
-    private static InterProcessCommunicationEnvelope DeserializeEnvelope(string rawMessage)
-    {
-        InterProcessCommunicationEnvelope? envelope = JsonConvert.DeserializeObject<InterProcessCommunicationEnvelope>(rawMessage);
-        return envelope ?? throw new JsonSerializationException("Failed to deserialize the IPC message envelope.");
+        IpcMessage? message = JsonConvert.DeserializeObject<IpcMessage>(rawMessage);
+        return message ?? throw new JsonSerializationException("Failed to deserialize the IPC message.");
     }
 
     private static JToken? ToToken(object? payload)
@@ -385,71 +320,83 @@ public sealed class InterProcessCommunicationClient
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
     }
 
-    private async Task HandleNoticeAsync(InterProcessCommunicationEnvelope envelope)
+    private static IpcMessage CreateErrorIpcMessage(Guid uuid, int code, string message)
     {
-        InterProcessCommunicationInvocationData noticeData = DeserializeData<InterProcessCommunicationInvocationData>(envelope.Data);
-        if (!_noticeHandlers.TryGetValue(noticeData.Name, out TypedHandlerRegistration? handlerRegistration))
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+
+        return new IpcMessage(IpcMessageType.Error, string.Empty, uuid, new IpcErrorBody(code, message));
+    }
+
+    private async Task HandleNoticeAsync(IpcMessage message)
+    {
+        if (!_noticeHandlers.TryGetValue(message.Name, out TypedHandlerRegistration? handlerRegistration))
         {
             return;
         }
 
-        object? payload = ConvertPayload(noticeData.Payload, handlerRegistration.PayloadType);
+        object? payload = ConvertPayload(message.Data as JToken, handlerRegistration.PayloadType);
         await handlerRegistration.Handler(payload).ConfigureAwait(false);
     }
 
-    private void HandleResponse(InterProcessCommunicationEnvelope envelope)
+    private void HandleResponse(IpcMessage message)
     {
-        if (!_pendingRequests.TryGetValue(envelope.Uuid, out PendingRequest? pendingRequest))
+        if (!_pendingRequests.TryGetValue(message.Uuid, out PendingRequest? pendingRequest))
         {
             return;
         }
 
-        InterProcessCommunicationResponseData responseData = DeserializeData<InterProcessCommunicationResponseData>(envelope.Data);
-        pendingRequest.TrySetResult(responseData.Payload);
+        pendingRequest.TrySetResult(message.Data as JToken);
     }
 
-    private void HandleError(InterProcessCommunicationEnvelope envelope)
+    private void HandleError(IpcMessage message)
     {
-        if (!_pendingRequests.TryGetValue(envelope.Uuid, out PendingRequest? pendingRequest))
+        if (!_pendingRequests.TryGetValue(message.Uuid, out PendingRequest? pendingRequest))
         {
             return;
         }
 
-        InterProcessCommunicationErrorData errorData = DeserializeData<InterProcessCommunicationErrorData>(envelope.Data);
-        pendingRequest.TrySetException(new InterProcessCommunicationRemoteException(envelope.Uuid, errorData.Message));
+        // Error data is always a structured IpcErrorBody
+        IpcErrorBody? errorBody = null;
+        if (message.Data is JObject jObject)
+        {
+            errorBody = jObject.ToObject<IpcErrorBody>(Serializer);
+        }
+
+        int code = errorBody?.Code ?? 0;
+        string msg = errorBody?.Message ?? "Unknown IPC error";
+        pendingRequest.TrySetException(new InterProcessCommunicationRemoteException(message.Uuid, code, msg));
     }
 
-    private async Task HandleRequestAsync(InterProcessCommunicationEnvelope envelope)
+    private async Task HandleRequestAsync(IpcMessage message)
     {
-        InterProcessCommunicationInvocationData requestData = DeserializeData<InterProcessCommunicationInvocationData>(envelope.Data);
-        if (string.IsNullOrWhiteSpace(requestData.SourceServer))
+        if (string.IsNullOrWhiteSpace(message.SourceServer))
         {
             return;
         }
 
-        if (!_responders.TryGetValue(requestData.Name, out TypedResponderRegistration? responderRegistration))
+        if (!_responders.TryGetValue(message.Name, out TypedResponderRegistration? responderRegistration))
         {
-            await PublishEnvelopeAsync(
-                requestData.SourceServer,
-                CreateErrorEnvelope(envelope.Uuid, $"No responder registered for '{requestData.Name}'."),
+            await PublishMessageAsync(
+                message.SourceServer,
+                CreateErrorIpcMessage(message.Uuid, 404, $"No responder registered for '{message.Name}'."),
                 CancellationToken.None).ConfigureAwait(false);
             return;
         }
 
         try
         {
-            object? payload = ConvertPayload(requestData.Payload, responderRegistration.PayloadType);
+            object? payload = ConvertPayload(message.Data as JToken, responderRegistration.PayloadType);
             object? response = await responderRegistration.Responder(payload).ConfigureAwait(false);
-            await PublishEnvelopeAsync(
-                requestData.SourceServer,
-                CreateResponseEnvelope(envelope.Uuid, response),
+            await PublishMessageAsync(
+                message.SourceServer,
+                new IpcMessage(IpcMessageType.Response, string.Empty, message.Uuid, ToToken(response)),
                 CancellationToken.None).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            await PublishEnvelopeAsync(
-                requestData.SourceServer,
-                CreateErrorEnvelope(envelope.Uuid, ex.Message),
+            await PublishMessageAsync(
+                message.SourceServer,
+                CreateErrorIpcMessage(message.Uuid, 500, ex.Message),
                 CancellationToken.None).ConfigureAwait(false);
         }
     }
@@ -458,23 +405,23 @@ public sealed class InterProcessCommunicationClient
     {
         try
         {
-            InterProcessCommunicationEnvelope envelope = DeserializeEnvelope(rawMessage);
-            switch (envelope.Type)
+            IpcMessage message = DeserializeMessage(rawMessage);
+            switch (message.Type)
             {
-                case MessageTypes.Notice:
-                    await HandleNoticeAsync(envelope).ConfigureAwait(false);
+                case IpcMessageType.Notice:
+                    await HandleNoticeAsync(message).ConfigureAwait(false);
                     break;
 
-                case MessageTypes.Request:
-                    await HandleRequestAsync(envelope).ConfigureAwait(false);
+                case IpcMessageType.Request:
+                    await HandleRequestAsync(message).ConfigureAwait(false);
                     break;
 
-                case MessageTypes.Response:
-                    HandleResponse(envelope);
+                case IpcMessageType.Response:
+                    HandleResponse(message);
                     break;
 
-                case MessageTypes.Error:
-                    HandleError(envelope);
+                case IpcMessageType.Error:
+                    HandleError(message);
                     break;
             }
         }
@@ -484,25 +431,19 @@ public sealed class InterProcessCommunicationClient
         }
     }
 
-    private Task PublishEnvelopeAsync(
+    private Task PublishMessageAsync(
         string targetServerIdentifier,
-        InterProcessCommunicationEnvelope envelope,
+        IpcMessage message,
         CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(targetServerIdentifier);
-        ArgumentNullException.ThrowIfNull(envelope);
+        ArgumentNullException.ThrowIfNull(message);
+
+        message.SourceServer = ServerIdentifier;
 
         string channel = GetChannelName(targetServerIdentifier);
-        string payload = JsonConvert.SerializeObject(envelope);
+        string payload = JsonConvert.SerializeObject(message);
         return _transport.PublishAsync(channel, payload).WaitAsync(cancellationToken);
-    }
-
-    private static class MessageTypes
-    {
-        public const string Error = "error";
-        public const string Notice = "notice";
-        public const string Request = "request";
-        public const string Response = "response";
     }
 
     private sealed class TypedHandlerRegistration
@@ -539,45 +480,5 @@ public sealed class InterProcessCommunicationClient
 
         public bool TrySetResult(JToken? payload)
             => _completionSource.TrySetResult(payload);
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class InterProcessCommunicationEnvelope
-    {
-        [JsonProperty("type", Required = Required.Always)]
-        public string Type { get; set; } = string.Empty;
-
-        [JsonProperty("uuid", Required = Required.Always)]
-        public Guid Uuid { get; set; }
-
-        [JsonProperty("data", Required = Required.Always)]
-        public JObject Data { get; set; } = new();
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class InterProcessCommunicationInvocationData
-    {
-        [JsonProperty("name", Required = Required.Always)]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonProperty("source_server", NullValueHandling = NullValueHandling.Ignore)]
-        public string? SourceServer { get; set; }
-
-        [JsonProperty("payload", NullValueHandling = NullValueHandling.Include)]
-        public JToken? Payload { get; set; }
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class InterProcessCommunicationResponseData
-    {
-        [JsonProperty("payload", NullValueHandling = NullValueHandling.Include)]
-        public JToken? Payload { get; set; }
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    private sealed class InterProcessCommunicationErrorData
-    {
-        [JsonProperty("message", Required = Required.Always)]
-        public string Message { get; set; } = string.Empty;
     }
 }

@@ -45,7 +45,25 @@ public sealed class InterProcessCommunicationRemoteException : Exception
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="InterProcessCommunicationRemoteException"/> class.
+    /// </summary>
+    /// <param name="requestId">The request identifier that caused the remote error.</param>
+    /// <param name="code">The remote error code.</param>
+    /// <param name="message">The remote error message.</param>
+    public InterProcessCommunicationRemoteException(Guid requestId, int code, string message)
+        : base(message)
+    {
+        RequestId = requestId;
+        Code = code;
+    }
+
+    /// <summary>
     /// Gets the request identifier associated with the remote error.
     /// </summary>
     public Guid? RequestId { get; }
+
+    /// <summary>
+    /// Gets the remote error code.
+    /// </summary>
+    public int Code { get; }
 }
