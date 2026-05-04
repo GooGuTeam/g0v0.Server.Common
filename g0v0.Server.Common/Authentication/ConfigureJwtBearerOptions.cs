@@ -14,22 +14,22 @@ namespace g0v0.Server.Common.Authentication;
 /// </summary>
 public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
 {
-    private readonly ConfigurationManager<GeneralConfiguration> _config;
+    private readonly ConfigurationManager _manager;
     private readonly ILogger<DatabaseJwtTokenHandler> _logger;
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigureJwtBearerOptions"/> class.
     /// </summary>
-    /// <param name="config">The configuration manager for general settings.</param>
+    /// <param name="manager">The configuration manager for general settings.</param>
     /// <param name="serviceProvider">The root service provider used to resolve scoped dependencies.</param>
     /// <param name="logger">The logger for token handler setup diagnostics.</param>
     public ConfigureJwtBearerOptions(
-        ConfigurationManager<GeneralConfiguration> config,
+        ConfigurationManager manager,
         IServiceProvider serviceProvider,
         ILogger<DatabaseJwtTokenHandler> logger)
     {
-        _config = config;
+        _manager = manager;
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
@@ -55,17 +55,17 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <param name="options">The options to configure.</param>
     public void Configure(JwtBearerOptions options)
     {
-        var jwtConfig = _config.Value;
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.JwtSecretKey));
+        var generalConfig = _manager.Get<GeneralConfiguration>();
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(generalConfig.JwtSecretKey));
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = key,
-            ValidateAudience = !string.IsNullOrEmpty(jwtConfig.JwtAudience),
-            ValidAudience = jwtConfig.JwtAudience,
-            ValidateIssuer = !string.IsNullOrEmpty(jwtConfig.JwtIssuer),
-            ValidIssuer = jwtConfig.JwtIssuer,
+            ValidateAudience = !string.IsNullOrEmpty(generalConfig.JwtAudience),
+            ValidAudience = generalConfig.JwtAudience,
+            ValidateIssuer = !string.IsNullOrEmpty(generalConfig.JwtIssuer),
+            ValidIssuer = generalConfig.JwtIssuer,
             ValidateLifetime = true,
             NameClaimType = OAuthClaimTypes.Subject,
         };

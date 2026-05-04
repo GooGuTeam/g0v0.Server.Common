@@ -55,19 +55,20 @@ public static class ServiceCollectionExtension
 
     public static IServiceCollection AddRedis(this IServiceCollection services, string serverIdentify)
     {
-        services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(services =>
+        services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(serviceProvider =>
         {
-            var generalConfig = services.GetRequiredService<ConfigurationManager<GeneralConfiguration>>();
-            return ConnectionMultiplexer.Connect(generalConfig.Value.RedisHost);
+            var manager = serviceProvider.GetRequiredService<ConfigurationManager>();
+            var generalConfig = manager.Get<GeneralConfiguration>();
+            return ConnectionMultiplexer.Connect(generalConfig.RedisHost);
         });
-        services.AddSingleton<IInterProcessCommunicationTransport>(services =>
+        services.AddSingleton<IInterProcessCommunicationTransport>(serviceProvider =>
         {
-            var connection = services.GetRequiredService<IConnectionMultiplexer>();
+            var connection = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
             return new RedisInterProcessCommunicationTransport(connection);
         });
-        services.AddSingleton<InterProcessCommunicationClient>(services =>
+        services.AddSingleton<InterProcessCommunicationClient>(serviceProvider =>
         {
-            var transport = services.GetRequiredService<IInterProcessCommunicationTransport>();
+            var transport = serviceProvider.GetRequiredService<IInterProcessCommunicationTransport>();
             return new InterProcessCommunicationClient(transport, serverIdentify);
         });
         return services;
@@ -79,7 +80,7 @@ public static class ServiceCollectionExtension
     /// <param name="services">The service collection.</param>
     /// <returns>The updated service collection.</returns>
     /// <remarks>
-    /// Requires <see cref="ConfigurationManager{T}"/> for <see cref="GeneralConfiguration"/> and
+    /// Requires <see cref="ConfigurationManager"/> and
     /// <c>IOAuthTokenRepository</c> to be registered beforehand.
     /// </remarks>
     public static IServiceCollection AddOAuthAuthentication(this IServiceCollection services)

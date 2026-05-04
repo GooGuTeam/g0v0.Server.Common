@@ -10,7 +10,7 @@ namespace g0v0.Server.Common.Authentication;
 /// OAuth scope claims. Tokens from known clients (osu! client / web client)
 /// bypass scope checks, mirroring the Python <c>_validate_token</c> logic.
 /// </summary>
-public class ScopeAuthorizationHandler(ConfigurationManager<GeneralConfiguration> config)
+public class ScopeAuthorizationHandler(ConfigurationManager config)
     : AuthorizationHandler<ScopeAuthorizationRequirement>
 {
     /// <summary>
@@ -23,7 +23,7 @@ public class ScopeAuthorizationHandler(ConfigurationManager<GeneralConfiguration
         AuthorizationHandlerContext context,
         ScopeAuthorizationRequirement requirement)
     {
-        var generalConfig = config.Value;
+        var generalConfig = config.Get<GeneralConfiguration>();
 
         var clientIdClaim = context.User.FindFirst(OAuthClaimTypes.ClientId);
         if (clientIdClaim != null)

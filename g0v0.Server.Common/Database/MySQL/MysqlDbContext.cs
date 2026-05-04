@@ -22,12 +22,12 @@ public class MysqlDbContext : DbContext
     /// <summary>
     /// Gets or sets the users table set.
     /// </summary>
-    public DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the OAuth tokens table set.
     /// </summary>
-    public DbSet<OAuthToken> OAuthTokens { get; set; }
+    public DbSet<OAuthToken> OAuthTokens { get; set; } = null!;
 
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

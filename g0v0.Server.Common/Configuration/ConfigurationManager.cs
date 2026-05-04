@@ -14,26 +14,17 @@ namespace g0v0.Server.Common.Configuration;
 /// or by a custom filename specified using the <see cref="ConfigurationFileAttribute"/>.
 /// Only properties marked with the <see cref="ReloadableAttribute"/> will be updated when reloading the configuration.
 /// </summary>
-/// <typeparam name="T">The configuration type.</typeparam>
-public class ConfigurationManager<T>
+/// <remarks>
+/// Initializes a new instance of the <see cref="ConfigurationManager"/> class and loads the configuration from the file.
+/// </remarks>
+/// <param name="basePath">The base path to find `config/{filename}.json`.</param>
+public class ConfigurationManager(string basePath)
 {
     private const string ConfigBasePath = "config";
-
-    private readonly string _filePath;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ConfigurationManager{T}"/> class and loads the configuration from the file.
-    /// </summary>
-    /// <param name="basePath">The base path to find `config/{filename}.json`.</param>
-    public ConfigurationManager(string basePath)
-    {
-        _filePath = GetFilePath(basePath);
-
-        Value = LoadConfiguration();
-    }
+    private readonly Dictionary<Type, object> _configCache = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConfigurationManager{T}"/> class using a configuration path provider and loads the configuration from the file.
+    /// Initializes a new instance of the <see cref="ConfigurationManager"/> class using a configuration path provider and loads the configuration from the file.
     /// </summary>
     /// <param name="configPathProvider">The path provider.</param>
     public ConfigurationManager(IConfigPathProvider configPathProvider)
@@ -42,25 +33,44 @@ public class ConfigurationManager<T>
     }
 
     /// <summary>
-    /// Gets the current loaded configuration value.
+    /// Gets a configuration of the specified type. If the configuration is not yet cached, it will be loaded from the file.
     /// </summary>
-    public T Value { get; }
+    /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
+    /// <returns>The configuration instance.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the configuration file cannot be loaded.</exception>
+    public T Get<T>()
+    {
+        // try to get cached value
+        if (_configCache.TryGetValue(typeof(T), out var cachedValue) && cachedValue is T cachedConfig)
+        {
+            return cachedConfig;
+        }
+
+        // otherwise, load from file and cache it
+        var value = LoadConfiguration<T>() ??
+                    throw new InvalidOperationException("Configuration of type " + typeof(T).FullName +
+                                                        " is not loaded.");
+        _configCache.Add(typeof(T), value);
+        return value;
+    }
 
     /// <summary>
     /// Reload the configuration from the file. Only properties marked with <see cref="ReloadableAttribute"/> will be updated.
     /// </summary>
-    public void Reload()
+    /// <typeparam name="T">The type of configuration to reload.</typeparam>
+    public void Reload<T>()
     {
-        T config = LoadConfiguration();
+        T config = LoadConfiguration<T>();
+        var value = Get<T>();
         var properties = typeof(T).GetProperties().Where(p => p.GetCustomAttribute<ReloadableAttribute>() != null);
         foreach (var property in properties)
         {
             var newValue = property.GetValue(config);
-            property.SetValue(Value, newValue);
+            property.SetValue(value, newValue);
         }
     }
 
-    private static string GetFilePath(string basePath)
+    private static string GetFilePath<T>(string basePath)
     {
         string filename;
         Type t = typeof(T);
@@ -76,15 +86,17 @@ public class ConfigurationManager<T>
         return Path.Combine(basePath, ConfigBasePath, filename);
     }
 
-    private T LoadConfiguration()
+    private T LoadConfiguration<T>()
     {
-        if (!File.Exists(_filePath))
+        var filePath = GetFilePath<T>(basePath);
+
+        if (!File.Exists(filePath))
         {
-            throw new FileNotFoundException($"Configuration file not found: {_filePath}");
+            throw new FileNotFoundException($"Configuration file not found: {filePath}");
         }
 
-        string jsonRaw = File.ReadAllText(_filePath);
+        string jsonRaw = File.ReadAllText(filePath);
         T? config = JsonConvert.DeserializeObject<T>(jsonRaw);
-        return config ?? throw new InvalidDataException($"Failed to deserialize configuration file: {_filePath}");
+        return config ?? throw new InvalidDataException($"Failed to deserialize configuration file: {filePath}");
     }
 }
