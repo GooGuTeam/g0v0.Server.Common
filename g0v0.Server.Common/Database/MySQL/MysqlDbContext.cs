@@ -29,10 +29,22 @@ public class MysqlDbContext : DbContext
     /// </summary>
     public DbSet<OAuthToken> OAuthTokens { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the relationships table set.
+    /// </summary>
+    public DbSet<Relationship> Relationships { get; set; } = null!;
+
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
             .UseSnakeCaseNamingConvention();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(MysqlDbContext).Assembly);
     }
 }
