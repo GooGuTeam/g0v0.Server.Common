@@ -6,6 +6,8 @@ using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.MySQL.Repository;
 using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using g0v0.Server.Common.Storage;
+using g0v0.Server.Common.Threading;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,6 +73,45 @@ public static class ServiceCollectionExtension
             var transport = serviceProvider.GetRequiredService<IInterProcessCommunicationTransport>();
             return new InterProcessCommunicationClient(transport, serverIdentify);
         });
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the configured storage service implementation.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Requires <see cref="ConfigurationManager"/> to be registered beforehand. Local storage also requires
+    /// <see cref="IPathProvider"/> so relative paths can be resolved from the server base path.
+    /// </remarks>
+    public static IServiceCollection AddStorage(this IServiceCollection services)
+    {
+        services.AddSingleton<StorageService>(serviceProvider =>
+        {
+            var manager = serviceProvider.GetRequiredService<ConfigurationManager>();
+            var storageConfig = manager.Get<StorageConfiguration>();
+            IPathProvider? pathProvider = storageConfig.Type == StorageConfiguration.StorageType.Local
+                ? serviceProvider.GetRequiredService<IPathProvider>()
+                : null;
+
+            return StorageServiceFactory.Create(storageConfig, pathProvider);
+        });
+        services.AddSingleton<IStorageService>(serviceProvider => serviceProvider.GetRequiredService<StorageService>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the shared background task runner.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    public static IServiceCollection AddBackgroundTaskRunner(this IServiceCollection services)
+    {
+        services.AddSingleton<BackgroundTaskRunner>();
+        services.AddSingleton<IBackgroundTaskRunner>(serviceProvider => serviceProvider.GetRequiredService<BackgroundTaskRunner>());
+
         return services;
     }
 

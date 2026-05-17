@@ -3,6 +3,7 @@
 using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Repository;
 using g0v0.Server.Common.Extensions;
+using g0v0.Server.Common.Threading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -22,12 +23,19 @@ public class ServiceCollectionExtensionTests
 
         ServiceDescriptor? descriptor = services.FirstOrDefault(
             d => d.ServiceType == typeof(IOAuthTokenRepository));
+        ServiceDescriptor? beatmapDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IBeatmapRepository));
 
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(
             descriptor!.ImplementationType!.FullName,
             Does.Contain("MySQL"),
             "Should register the MySQL repository implementation.");
+        Assert.That(beatmapDescriptor, Is.Not.Null);
+        Assert.That(
+            beatmapDescriptor!.ImplementationType!.FullName,
+            Does.Contain("MySQL"),
+            "Should register the MySQL beatmap repository implementation.");
     }
 
     [Test]
@@ -39,12 +47,19 @@ public class ServiceCollectionExtensionTests
 
         ServiceDescriptor? descriptor = services.FirstOrDefault(
             d => d.ServiceType == typeof(IOAuthTokenRepository));
+        ServiceDescriptor? beatmapDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IBeatmapRepository));
 
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(
             descriptor!.ImplementationType!.FullName,
             Does.Contain("PostgreSQL"),
             "Should register the PostgreSQL repository implementation.");
+        Assert.That(beatmapDescriptor, Is.Not.Null);
+        Assert.That(
+            beatmapDescriptor!.ImplementationType!.FullName,
+            Does.Contain("PostgreSQL"),
+            "Should register the PostgreSQL beatmap repository implementation.");
     }
 
     [Test]
@@ -109,6 +124,23 @@ public class ServiceCollectionExtensionTests
 
         Assert.That(ipcClientDescriptor, Is.Not.Null);
         Assert.That(ipcClientDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+    }
+
+    [Test]
+    public void AddBackgroundTaskRunner_ShouldRegisterRunnerAsSingleton()
+    {
+        var services = new ServiceCollection();
+
+        IServiceCollection result = services.AddBackgroundTaskRunner();
+
+        ServiceDescriptor? runnerDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(BackgroundTaskRunner));
+        ServiceDescriptor? interfaceDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IBackgroundTaskRunner));
+
+        Assert.That(result, Is.SameAs(services));
+        Assert.That(runnerDescriptor, Is.Not.Null);
+        Assert.That(runnerDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+        Assert.That(interfaceDescriptor, Is.Not.Null);
+        Assert.That(interfaceDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
     }
 
     [Test]
