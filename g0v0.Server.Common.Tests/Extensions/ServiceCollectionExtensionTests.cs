@@ -25,6 +25,10 @@ public class ServiceCollectionExtensionTests
             d => d.ServiceType == typeof(IOAuthTokenRepository));
         ServiceDescriptor? beatmapDescriptor = services.FirstOrDefault(
             d => d.ServiceType == typeof(IBeatmapRepository));
+        ServiceDescriptor? scoreDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IScoreRepository));
+        ServiceDescriptor? userDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IUserRepository));
 
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(
@@ -36,6 +40,16 @@ public class ServiceCollectionExtensionTests
             beatmapDescriptor!.ImplementationType!.FullName,
             Does.Contain("MySQL"),
             "Should register the MySQL beatmap repository implementation.");
+        Assert.That(scoreDescriptor, Is.Not.Null);
+        Assert.That(
+            scoreDescriptor!.ImplementationType!.FullName,
+            Does.Contain("MySQL"),
+            "Should register the MySQL score repository implementation.");
+        Assert.That(userDescriptor, Is.Not.Null);
+        Assert.That(
+            userDescriptor!.ImplementationType!.FullName,
+            Does.Contain("MySQL"),
+            "Should register the MySQL user repository implementation.");
     }
 
     [Test]
@@ -49,6 +63,10 @@ public class ServiceCollectionExtensionTests
             d => d.ServiceType == typeof(IOAuthTokenRepository));
         ServiceDescriptor? beatmapDescriptor = services.FirstOrDefault(
             d => d.ServiceType == typeof(IBeatmapRepository));
+        ServiceDescriptor? scoreDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IScoreRepository));
+        ServiceDescriptor? userDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IUserRepository));
 
         Assert.That(descriptor, Is.Not.Null);
         Assert.That(
@@ -60,6 +78,16 @@ public class ServiceCollectionExtensionTests
             beatmapDescriptor!.ImplementationType!.FullName,
             Does.Contain("PostgreSQL"),
             "Should register the PostgreSQL beatmap repository implementation.");
+        Assert.That(scoreDescriptor, Is.Not.Null);
+        Assert.That(
+            scoreDescriptor!.ImplementationType!.FullName,
+            Does.Contain("PostgreSQL"),
+            "Should register the PostgreSQL score repository implementation.");
+        Assert.That(userDescriptor, Is.Not.Null);
+        Assert.That(
+            userDescriptor!.ImplementationType!.FullName,
+            Does.Contain("PostgreSQL"),
+            "Should register the PostgreSQL user repository implementation.");
     }
 
     [Test]

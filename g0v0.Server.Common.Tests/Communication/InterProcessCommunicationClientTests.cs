@@ -31,6 +31,58 @@ public class InterProcessCommunicationClientTests
     }
 
     [Test]
+    public async Task SendNoticeAsync_WithTypedSourceHandler_ShouldPassSourceServerAndConvertPayload()
+    {
+        var transport = new InMemoryInterProcessCommunicationTransport();
+        var sender = new InterProcessCommunicationClient(transport, "lazer");
+        var receiver = new InterProcessCommunicationClient(transport, "realtime");
+        var receivedNotice = new TaskCompletionSource<(string Source, AddRequest Payload)>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        receiver.RegisterNoticeHandler<AddRequest>("math.notice", (source, payload) =>
+        {
+            receivedNotice.TrySetResult((source, payload!));
+            return Task.CompletedTask;
+        });
+
+        await sender.SendNoticeAsync("realtime", "math.notice", new { left = 8, right = 13 });
+
+        var notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        Assert.Multiple(() =>
+        {
+            Assert.That(notice.Source, Is.EqualTo("lazer"));
+            Assert.That(notice.Payload.Left, Is.EqualTo(8));
+            Assert.That(notice.Payload.Right, Is.EqualTo(13));
+        });
+    }
+
+    [Test]
+    public async Task SendNoticeAsync_WithExplicitSourceHandler_ShouldPassSourceServerAndConvertPayload()
+    {
+        var transport = new InMemoryInterProcessCommunicationTransport();
+        var sender = new InterProcessCommunicationClient(transport, "gateway");
+        var receiver = new InterProcessCommunicationClient(transport, "realtime");
+        var receivedNotice = new TaskCompletionSource<(string Source, AddRequest Payload)>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
+        receiver.RegisterNoticeHandler("math.notice", typeof(AddRequest), (source, payload) =>
+        {
+            receivedNotice.TrySetResult((source, (AddRequest)payload!));
+            return Task.CompletedTask;
+        });
+
+        await sender.SendNoticeAsync("realtime", "math.notice", new { left = 21, right = 34 });
+
+        var notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        Assert.Multiple(() =>
+        {
+            Assert.That(notice.Source, Is.EqualTo("gateway"));
+            Assert.That(notice.Payload.Left, Is.EqualTo(21));
+            Assert.That(notice.Payload.Right, Is.EqualTo(34));
+        });
+    }
+
+    [Test]
     public async Task RequestAsync_WithExplicitPayloadType_ShouldConvertRequestAndResponsePayloads()
     {
         var transport = new InMemoryInterProcessCommunicationTransport();
