@@ -106,6 +106,31 @@ public sealed class InterProcessCommunicationClient
         });
 
     /// <summary>
+    /// Registers a notice handler that receives the source server identifier alongside the payload.
+    /// </summary>
+    /// <typeparam name="TPayload">The payload type.</typeparam>
+    /// <param name="name">The notice name.</param>
+    /// <param name="handler">The notice handler receiving the source server identifier and the payload.</param>
+    public void RegisterNoticeHandler<TPayload>(string name, Func<string, TPayload?, Task> handler)
+        => RegisterNoticeHandler(name, typeof(TPayload), (source, payload) => handler(source, CastPayload<TPayload>(payload)));
+
+    /// <summary>
+    /// Registers a notice handler that receives the source server identifier alongside the payload.
+    /// </summary>
+    /// <param name="name">The notice name.</param>
+    /// <param name="payloadType">The payload type to deserialize to.</param>
+    /// <param name="handler">The notice handler receiving the source server identifier and the payload.</param>
+    public void RegisterNoticeHandler(string name, Type payloadType, Func<string, object?, Task> handler)
+    {
+        ValidateHandlerRegistration(name, payloadType, handler);
+
+        if (!_noticeHandlers.TryAdd(name, new TypedHandlerRegistration(payloadType, handler, true)))
+        {
+            throw new InvalidOperationException($"A notice handler named '{name}' is already registered.");
+        }
+    }
+
+    /// <summary>
     /// Registers a responder without a specific payload type.
     /// </summary>
     /// <param name="name">The request name.</param>
@@ -335,7 +360,16 @@ public sealed class InterProcessCommunicationClient
         }
 
         object? payload = ConvertPayload(message.Data as JToken, handlerRegistration.PayloadType);
-        await handlerRegistration.Handler(payload).ConfigureAwait(false);
+        if (handlerRegistration.IncludeSourceServer)
+        {
+            var sourcedHandler = (Func<string, object?, Task>)handlerRegistration.Handler;
+            await sourcedHandler(message.SourceServer ?? string.Empty, payload).ConfigureAwait(false);
+        }
+        else
+        {
+            var handler = (Func<object?, Task>)handlerRegistration.Handler;
+            await handler(payload).ConfigureAwait(false);
+        }
     }
 
     private void HandleResponse(IpcMessage message)
@@ -452,11 +486,21 @@ public sealed class InterProcessCommunicationClient
         {
             PayloadType = payloadType;
             Handler = handler;
+            IncludeSourceServer = false;
+        }
+
+        public TypedHandlerRegistration(Type payloadType, Func<string, object?, Task> handler, bool includeSourceServer)
+        {
+            PayloadType = payloadType;
+            Handler = handler;
+            IncludeSourceServer = includeSourceServer;
         }
 
         public Type PayloadType { get; }
 
-        public Func<object?, Task> Handler { get; }
+        public Delegate Handler { get; }
+
+        public bool IncludeSourceServer { get; }
     }
 
     private sealed class TypedResponderRegistration(Type payloadType, Func<object?, Task<object?>> responder)
