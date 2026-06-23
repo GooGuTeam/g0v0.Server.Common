@@ -34,10 +34,34 @@ public class PostgreSqlDbContext : DbContext
     /// </summary>
     public DbSet<Relationship> Relationships { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the beatmaps table set.
+    /// </summary>
+    public DbSet<Beatmap> Beatmaps { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the scores table set.
+    /// </summary>
+    public DbSet<Score> Scores { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the score tokens table set.
+    /// </summary>
+    public DbSet<ScoreToken> ScoreTokens { get; set; } = null!;
+
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
             .UseSnakeCaseNamingConvention();
+    }
+
+    /// <inheritdoc/>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(PostgreSqlDbContext).Assembly,
+            type => type.Namespace == "g0v0.Server.Common.Database.PostgreSQL.Configurations");
     }
 }
