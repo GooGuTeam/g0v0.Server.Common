@@ -114,7 +114,10 @@ public class S3StorageService : StorageService
         using var stream = new MemoryStream(content, writable: false);
         var request = new PutObjectRequest
         {
-            BucketName = BucketName, Key = filePath, InputStream = stream, ContentType = contentType,
+            BucketName = BucketName,
+            Key = filePath,
+            InputStream = stream,
+            ContentType = contentType,
         };
         request.Headers.CacheControl = cacheControl;
 
@@ -261,15 +264,6 @@ public class S3StorageService : StorageService
     }
 
     /// <summary>
-    /// Joins a public URL base with a file path.
-    /// </summary>
-    /// <param name="publicUrlBase">The public URL base.</param>
-    /// <param name="filePath">The object key.</param>
-    /// <returns>The public URL.</returns>
-    private static string JoinPublicUrl(string publicUrlBase, string filePath)
-        => $"{publicUrlBase.TrimEnd('/')}/{filePath.TrimStart('/')}";
-
-    /// <summary>
     /// Gets the path component from a URL.
     /// </summary>
     /// <param name="url">The URL.</param>
@@ -299,6 +293,15 @@ public class S3StorageService : StorageService
     /// <param name="value">The value to normalize.</param>
     /// <returns><see langword="null"/> for empty strings; otherwise, the original value.</returns>
     protected static string? NullIfEmpty(string value) => value.Length == 0 ? null : value;
+
+    /// <summary>
+    /// Joins a public URL base with a file path.
+    /// </summary>
+    /// <param name="publicUrlBase">The public URL base.</param>
+    /// <param name="filePath">The object key.</param>
+    /// <returns>The public URL.</returns>
+    private static string JoinPublicUrl(string publicUrlBase, string filePath)
+        => $"{publicUrlBase.TrimEnd('/')}/{filePath.TrimStart('/')}";
 
     private static int GetPathEndIndex(string value)
     {
