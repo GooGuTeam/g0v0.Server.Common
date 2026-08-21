@@ -30,18 +30,18 @@ public static class ServiceCollectionExtension
     /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddRepositories(this IServiceCollection services, bool useLegacyDatabase = true)
     {
-        var assembly = Assembly.GetExecutingAssembly();
+        Assembly assembly = Assembly.GetExecutingAssembly();
 
-        var types = assembly.GetTypes();
+        Type[] types = assembly.GetTypes();
 
-        var interfaces = types
+        IEnumerable<Type> interfaces = types
             .Where(t => t.IsInterface && t.Name.EndsWith("Repository", StringComparison.Ordinal));
 
-        var markerType = useLegacyDatabase ? typeof(IMySqlRepository) : typeof(IPostgreSqlRepository);
+        Type markerType = useLegacyDatabase ? typeof(IMySqlRepository) : typeof(IPostgreSqlRepository);
 
-        foreach (var iface in interfaces)
+        foreach (Type? iface in interfaces)
         {
-            var impl = types.FirstOrDefault(t =>
+            Type? impl = types.FirstOrDefault(t =>
                 t is { IsClass: true, IsAbstract: false } &&
                 string.Equals(iface.Name[1..], t.Name, StringComparison.Ordinal) &&
                 markerType.IsAssignableFrom(t));
@@ -55,22 +55,28 @@ public static class ServiceCollectionExtension
         return services;
     }
 
+    /// <summary>
+    /// Registers the Redis connection multiplexer, IPC transport, and inter-process communication client.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="serverIdentify">The server identifier used for IPC channel naming.</param>
+    /// <returns>The updated service collection.</returns>
     public static IServiceCollection AddRedis(this IServiceCollection services, string serverIdentify)
     {
         services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(serviceProvider =>
         {
-            var manager = serviceProvider.GetRequiredService<ConfigurationManager>();
-            var generalConfig = manager.Get<GeneralConfiguration>();
+            ConfigurationManager manager = serviceProvider.GetRequiredService<ConfigurationManager>();
+            GeneralConfiguration generalConfig = manager.Get<GeneralConfiguration>();
             return ConnectionMultiplexer.Connect(generalConfig.RedisHost);
         });
         services.AddSingleton<IInterProcessCommunicationTransport>(serviceProvider =>
         {
-            var connection = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+            IConnectionMultiplexer connection = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
             return new RedisInterProcessCommunicationTransport(connection);
         });
         services.AddSingleton<InterProcessCommunicationClient>(serviceProvider =>
         {
-            var transport = serviceProvider.GetRequiredService<IInterProcessCommunicationTransport>();
+            IInterProcessCommunicationTransport transport = serviceProvider.GetRequiredService<IInterProcessCommunicationTransport>();
             return new InterProcessCommunicationClient(transport, serverIdentify);
         });
         return services;
@@ -89,8 +95,8 @@ public static class ServiceCollectionExtension
     {
         services.AddSingleton<StorageService>(serviceProvider =>
         {
-            var manager = serviceProvider.GetRequiredService<ConfigurationManager>();
-            var storageConfig = manager.Get<StorageConfiguration>();
+            ConfigurationManager manager = serviceProvider.GetRequiredService<ConfigurationManager>();
+            StorageConfiguration storageConfig = manager.Get<StorageConfiguration>();
             IPathProvider? pathProvider = storageConfig.Type == StorageConfiguration.StorageType.Local
                 ? serviceProvider.GetRequiredService<IPathProvider>()
                 : null;

@@ -7,8 +7,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace g0v0.Server.Common.Database.MySQL.Configurations;
 
+/// <summary>
+/// Configures the <see cref="Score"/> entity mapping for the legacy MySQL schema.
+/// </summary>
 public class ScoreConfig : IEntityTypeConfiguration<Score>
 {
+    /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<Score> builder)
     {
         builder.Ignore(s => s.Statistics);
@@ -145,7 +149,7 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
 
     private static void SetIndexName(EntityTypeBuilder<Score> builder, IReadOnlyCollection<string> propertyNames, string databaseName)
     {
-        var index = builder.Metadata.GetIndexes()
+        Microsoft.EntityFrameworkCore.Metadata.IMutableIndex index = builder.Metadata.GetIndexes()
             .Single(i => i.Properties.Select(p => p.Name).SequenceEqual(propertyNames, StringComparer.Ordinal));
         index.SetDatabaseName(databaseName);
     }

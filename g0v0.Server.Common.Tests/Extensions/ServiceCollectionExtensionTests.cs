@@ -17,7 +17,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddRepositories_WithLegacyDatabase_ShouldRegisterMySqlImplementations()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         services.AddRepositories(useLegacyDatabase: true);
 
@@ -55,7 +55,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddRepositories_WithPostgresDatabase_ShouldRegisterPostgresImplementations()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         services.AddRepositories(useLegacyDatabase: false);
 
@@ -93,7 +93,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddRepositories_DefaultParameter_ShouldUseLegacyDatabase()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         services.AddRepositories();
 
@@ -110,7 +110,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddRepositories_ShouldReturnSameServiceCollection()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         IServiceCollection result = services.AddRepositories();
 
@@ -120,7 +120,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddRepositories_ShouldRegisterAsScoped()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         services.AddRepositories(useLegacyDatabase: true);
 
@@ -134,7 +134,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddRedis_ShouldRegisterIpcDependenciesAsSingletons()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         services.AddRedis("realtime");
 
@@ -157,7 +157,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddBackgroundTaskRunner_ShouldRegisterRunnerAsSingleton()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         IServiceCollection result = services.AddBackgroundTaskRunner();
 
@@ -174,7 +174,7 @@ public class ServiceCollectionExtensionTests
     [Test]
     public void AddOAuthAuthentication_ShouldRegisterAuthorizationServices()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
 
         IServiceCollection result = services.AddOAuthAuthentication();
 

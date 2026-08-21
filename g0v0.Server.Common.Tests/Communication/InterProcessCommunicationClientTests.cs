@@ -12,14 +12,14 @@ public class InterProcessCommunicationClientTests
     [Test]
     public async Task SendNoticeAsync_WithExplicitPayloadType_ShouldConvertPayloadBeforeInvokingHandler()
     {
-        var transport = new InMemoryInterProcessCommunicationTransport();
-        var sender = new InterProcessCommunicationClient(transport, "gateway");
-        var receiver = new InterProcessCommunicationClient(transport, "realtime");
-        var receivedPayload = new TaskCompletionSource<AddRequest>(TaskCreationOptions.RunContinuationsAsynchronously);
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient sender = new(transport, "gateway");
+        InterProcessCommunicationClient receiver = new(transport, "realtime");
+        TaskCompletionSource<AddRequest> receivedPayload = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        receiver.RegisterNoticeHandler("math.notice", typeof(AddRequest), payload =>
+        receiver.RegisterNoticeHandler<AddRequest>("math.notice", payload =>
         {
-            receivedPayload.TrySetResult((AddRequest)payload!);
+            receivedPayload.TrySetResult(payload!);
             return Task.CompletedTask;
         });
 
@@ -33,10 +33,10 @@ public class InterProcessCommunicationClientTests
     [Test]
     public async Task SendNoticeAsync_WithTypedSourceHandler_ShouldPassSourceServerAndConvertPayload()
     {
-        var transport = new InMemoryInterProcessCommunicationTransport();
-        var sender = new InterProcessCommunicationClient(transport, "lazer");
-        var receiver = new InterProcessCommunicationClient(transport, "realtime");
-        var receivedNotice = new TaskCompletionSource<(string Source, AddRequest Payload)>(
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient sender = new(transport, "lazer");
+        InterProcessCommunicationClient receiver = new(transport, "realtime");
+        TaskCompletionSource<(string Source, AddRequest Payload)> receivedNotice = new(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
         receiver.RegisterNoticeHandler<AddRequest>("math.notice", (source, payload) =>
@@ -47,7 +47,7 @@ public class InterProcessCommunicationClientTests
 
         await sender.SendNoticeAsync("realtime", "math.notice", new { left = 8, right = 13 });
 
-        var notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        (string Source, AddRequest Payload) notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
         Assert.Multiple(() =>
         {
             Assert.That(notice.Source, Is.EqualTo("lazer"));
@@ -59,21 +59,21 @@ public class InterProcessCommunicationClientTests
     [Test]
     public async Task SendNoticeAsync_WithExplicitSourceHandler_ShouldPassSourceServerAndConvertPayload()
     {
-        var transport = new InMemoryInterProcessCommunicationTransport();
-        var sender = new InterProcessCommunicationClient(transport, "gateway");
-        var receiver = new InterProcessCommunicationClient(transport, "realtime");
-        var receivedNotice = new TaskCompletionSource<(string Source, AddRequest Payload)>(
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient sender = new(transport, "gateway");
+        InterProcessCommunicationClient receiver = new(transport, "realtime");
+        TaskCompletionSource<(string Source, AddRequest Payload)> receivedNotice = new(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
-        receiver.RegisterNoticeHandler("math.notice", typeof(AddRequest), (source, payload) =>
+        receiver.RegisterNoticeHandler<AddRequest>("math.notice", (source, payload) =>
         {
-            receivedNotice.TrySetResult((source, (AddRequest)payload!));
+            receivedNotice.TrySetResult((source, payload!));
             return Task.CompletedTask;
         });
 
         await sender.SendNoticeAsync("realtime", "math.notice", new { left = 21, right = 34 });
 
-        var notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        (string Source, AddRequest Payload) notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
         Assert.Multiple(() =>
         {
             Assert.That(notice.Source, Is.EqualTo("gateway"));
@@ -85,13 +85,13 @@ public class InterProcessCommunicationClientTests
     [Test]
     public async Task RequestAsync_WithExplicitPayloadType_ShouldConvertRequestAndResponsePayloads()
     {
-        var transport = new InMemoryInterProcessCommunicationTransport();
-        var requester = new InterProcessCommunicationClient(transport, "gateway");
-        var responder = new InterProcessCommunicationClient(transport, "realtime");
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient requester = new(transport, "gateway");
+        InterProcessCommunicationClient responder = new(transport, "realtime");
 
-        responder.RegisterResponder("math.sum", typeof(AddRequest), payload =>
+        responder.RegisterResponder<AddRequest>("math.sum", payload =>
         {
-            var request = (AddRequest)payload!;
+            AddRequest request = payload!;
             return Task.FromResult<object?>(new AddResponse { Total = request.Left + request.Right });
         });
 
@@ -107,14 +107,11 @@ public class InterProcessCommunicationClientTests
     [Test]
     public void RequestAsync_WhenResponderThrows_ShouldSurfaceRemoteException()
     {
-        var transport = new InMemoryInterProcessCommunicationTransport();
-        var requester = new InterProcessCommunicationClient(transport, "gateway");
-        var responder = new InterProcessCommunicationClient(transport, "realtime");
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient requester = new(transport, "gateway");
+        InterProcessCommunicationClient responder = new(transport, "realtime");
 
-        responder.RegisterResponder(
-            "math.fail",
-            typeof(AddRequest),
-            _ => Task.FromException<object?>(new InvalidOperationException("boom")));
+        responder.RegisterResponder<AddRequest>("math.fail", _ => Task.FromException<object?>(new InvalidOperationException("boom")));
 
         Assert.That(
             async () => await requester.RequestAsync<object?>(

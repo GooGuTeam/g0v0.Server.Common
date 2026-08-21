@@ -11,7 +11,7 @@ public class AuthorizationAttributeTests
     [Test]
     public void ClientOnlyAttribute_ShouldUseClientOnlyPolicy()
     {
-        var attribute = new ClientOnlyAttribute();
+        ClientOnlyAttribute attribute = new();
 
         Assert.That(attribute.Policy, Is.EqualTo(AuthorizationPolicyNames.ClientOnly));
     }
@@ -19,7 +19,7 @@ public class AuthorizationAttributeTests
     [Test]
     public void RequireUserIdAttribute_ShouldUseRequireUserIdPolicy()
     {
-        var attribute = new RequireUserIdAttribute();
+        RequireUserIdAttribute attribute = new();
 
         Assert.That(attribute.Policy, Is.EqualTo(AuthorizationPolicyNames.RequireUserId));
     }
@@ -27,7 +27,7 @@ public class AuthorizationAttributeTests
     [Test]
     public void RequireScopeAttribute_ShouldEncodeScopesIntoPolicyName()
     {
-        var attribute = new RequireScopeAttribute("chat.read", "chat.write");
+        RequireScopeAttribute attribute = new("chat.read", "chat.write");
 
         Assert.That(attribute.Policy, Is.EqualTo("Scope:chat.read,chat.write"));
     }

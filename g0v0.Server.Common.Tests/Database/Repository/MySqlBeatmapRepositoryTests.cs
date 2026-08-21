@@ -18,7 +18,7 @@ public class MySqlBeatmapRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -35,7 +35,7 @@ public class MySqlBeatmapRepositoryTests
     [Test]
     public async Task GetByIdAsync_WhenBeatmapExists_ShouldReturnBeatmap()
     {
-        var beatmap = CreateBeatmap(id: 321);
+        BeatmapModel beatmap = CreateBeatmap(id: 321);
         _context.Beatmaps.Add(beatmap);
         await _context.SaveChangesAsync();
 
@@ -49,7 +49,7 @@ public class MySqlBeatmapRepositoryTests
     [Test]
     public async Task GetByChecksumAsync_WhenBeatmapExists_ShouldReturnBeatmap()
     {
-        var beatmap = CreateBeatmap(checksum: "abc123");
+        BeatmapModel beatmap = CreateBeatmap(checksum: "abc123");
         _context.Beatmaps.Add(beatmap);
         await _context.SaveChangesAsync();
 
@@ -92,7 +92,7 @@ public class MySqlBeatmapRepositoryTests
     [Test]
     public async Task CreateAsync_ShouldPersistBeatmap()
     {
-        var beatmap = CreateBeatmap();
+        BeatmapModel beatmap = CreateBeatmap();
 
         await _repository.CreateAsync(beatmap);
 
@@ -103,7 +103,7 @@ public class MySqlBeatmapRepositoryTests
     [Test]
     public async Task UpdateAsync_ShouldPersistChanges()
     {
-        var beatmap = CreateBeatmap(version: "Hard");
+        BeatmapModel beatmap = CreateBeatmap(version: "Hard");
         _context.Beatmaps.Add(beatmap);
         await _context.SaveChangesAsync();
 
@@ -120,7 +120,7 @@ public class MySqlBeatmapRepositoryTests
     [Test]
     public async Task DeleteAsync_ShouldRemoveBeatmap()
     {
-        var beatmap = CreateBeatmap(id: 404);
+        BeatmapModel beatmap = CreateBeatmap(id: 404);
         _context.Beatmaps.Add(beatmap);
         await _context.SaveChangesAsync();
 
@@ -139,15 +139,15 @@ public class MySqlBeatmapRepositoryTests
     [Test]
     public void MysqlDbContext_ShouldApplyBeatmapConfigurationAutomatically()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseMySql(
                 "Server=localhost;Database=g0v0_test;User=root;Password=test;",
                 new MySqlServerVersion(new Version(8, 0, 36)))
             .Options;
 
-        using var relationalContext = new MysqlDbContext(options);
+        using MysqlDbContext relationalContext = new(options);
 
-        var entityType = relationalContext.Model.FindEntityType(typeof(BeatmapModel));
+        Microsoft.EntityFrameworkCore.Metadata.IEntityType? entityType = relationalContext.Model.FindEntityType(typeof(BeatmapModel));
 
         Assert.That(entityType, Is.Not.Null);
         Assert.That(entityType!.GetTableName(), Is.EqualTo("beatmaps"));
@@ -181,7 +181,7 @@ public class MySqlBeatmapRepositoryTests
 
     private static void AssertIndexName(Microsoft.EntityFrameworkCore.Metadata.IEntityType entityType, string propertyName, string expectedName)
     {
-        var index = entityType.GetIndexes().Single(i => i.Properties.Count == 1 && i.Properties[0].Name == propertyName);
+        Microsoft.EntityFrameworkCore.Metadata.IIndex index = entityType.GetIndexes().Single(i => i.Properties.Count == 1 && string.Equals(i.Properties[0].Name, propertyName, StringComparison.Ordinal));
         Assert.That(index.GetDatabaseName(), Is.EqualTo(expectedName));
     }
 

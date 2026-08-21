@@ -13,15 +13,15 @@ public class MySqlUserModelConfigurationTests
     [Test]
     public void MysqlDbContext_ShouldApplyUserConfigurationAutomatically()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseMySql(
                 "Server=localhost;Database=g0v0_test;User=root;Password=test;",
                 new MySqlServerVersion(new Version(8, 0, 36)))
             .Options;
 
-        using var relationalContext = new MysqlDbContext(options);
+        using MysqlDbContext relationalContext = new(options);
 
-        var entityType = relationalContext.Model.FindEntityType(typeof(User));
+        Microsoft.EntityFrameworkCore.Metadata.IEntityType? entityType = relationalContext.Model.FindEntityType(typeof(User));
 
         Assert.That(entityType, Is.Not.Null);
         Assert.That(entityType!.GetTableName(), Is.EqualTo("lazer_users"));
@@ -43,10 +43,10 @@ public class MySqlUserModelConfigurationTests
             Assert.That(entityType.FindProperty(nameof(User.Username))!.GetColumnName(), Is.EqualTo("username"));
         });
 
-        var countryCodeIndex = entityType.GetIndexes().Single(i => i.Properties.Count == 1 && i.Properties[0].Name == nameof(User.CountryCode));
+        Microsoft.EntityFrameworkCore.Metadata.IIndex countryCodeIndex = entityType.GetIndexes().Single(i => i.Properties.Count == 1 && string.Equals(i.Properties[0].Name, nameof(User.CountryCode), StringComparison.Ordinal));
         Assert.That(countryCodeIndex.GetDatabaseName(), Is.EqualTo("ix_lazer_users_country_code"));
 
-        var usernameIndex = entityType.GetIndexes().Single(i => i.Properties.Count == 1 && i.Properties[0].Name == nameof(User.Username));
+        Microsoft.EntityFrameworkCore.Metadata.IIndex usernameIndex = entityType.GetIndexes().Single(i => i.Properties.Count == 1 && string.Equals(i.Properties[0].Name, nameof(User.Username), StringComparison.Ordinal));
         Assert.That(usernameIndex.IsUnique, Is.True);
         Assert.That(usernameIndex.GetDatabaseName(), Is.EqualTo("ix_lazer_users_username"));
     }

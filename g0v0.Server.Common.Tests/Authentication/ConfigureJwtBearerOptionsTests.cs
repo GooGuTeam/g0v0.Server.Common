@@ -50,8 +50,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure(options);
 
@@ -77,8 +77,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure(options);
 
@@ -98,8 +98,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure(options);
 
@@ -117,8 +117,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure(options);
 
@@ -136,8 +136,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure(options);
 
@@ -154,8 +154,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure(JwtBearerDefaults.AuthenticationScheme, options);
 
@@ -172,8 +172,8 @@ public class ConfigureJwtBearerOptionsTests
 
         _manager = new ConfigurationManager(_tempDir);
 
-        var options = new JwtBearerOptions();
-        var configurer = new ConfigureJwtBearerOptions(_manager, _serviceProvider, _logger);
+        JwtBearerOptions options = new();
+        ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
 
         configurer.Configure("OtherScheme", options);
 

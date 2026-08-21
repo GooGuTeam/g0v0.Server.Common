@@ -21,7 +21,7 @@ public class PostgreSqlScoreRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
+        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -52,7 +52,7 @@ public class PostgreSqlScoreRepositoryTests
     [Test]
     public async Task GetScoreByToken_WhenTokenHasScore_ShouldReturnScore()
     {
-        var score = CreateScore(id: 42);
+        ScoreModel score = CreateScore(id: 42);
         _context.Scores.Add(score);
         _context.ScoreTokens.Add(new ScoreToken
         {

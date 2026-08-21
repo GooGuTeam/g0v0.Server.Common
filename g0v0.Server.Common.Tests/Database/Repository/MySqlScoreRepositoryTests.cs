@@ -21,7 +21,7 @@ public class MySqlScoreRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -38,7 +38,7 @@ public class MySqlScoreRepositoryTests
     [Test]
     public async Task GetByIdAsync_WhenScoreExists_ShouldReturnScore()
     {
-        var score = CreateScore(id: 111);
+        ScoreModel score = CreateScore(id: 111);
         _context.Scores.Add(score);
         await _context.SaveChangesAsync();
 
@@ -116,7 +116,7 @@ public class MySqlScoreRepositoryTests
     [Test]
     public async Task GetScoreByToken_WhenTokenHasScore_ShouldReturnScore()
     {
-        var score = CreateScore(id: 500);
+        ScoreModel score = CreateScore(id: 500);
         _context.Scores.Add(score);
         _context.ScoreTokens.Add(new ScoreToken
         {
@@ -170,7 +170,7 @@ public class MySqlScoreRepositoryTests
     [Test]
     public async Task CreateAsync_ShouldPersistScore()
     {
-        var score = CreateScore(id: 1234, checksum: "persist-me");
+        ScoreModel score = CreateScore(id: 1234, checksum: "persist-me");
 
         await _repository.CreateAsync(score);
 
@@ -187,7 +187,7 @@ public class MySqlScoreRepositoryTests
     [Test]
     public async Task UpdateAsync_ShouldPersistChanges()
     {
-        var score = CreateScore(id: 4321, pp: 200);
+        ScoreModel score = CreateScore(id: 4321, pp: 200);
         _context.Scores.Add(score);
         await _context.SaveChangesAsync();
 
@@ -213,7 +213,7 @@ public class MySqlScoreRepositoryTests
     [Test]
     public async Task DeleteAsync_ShouldRemoveScore()
     {
-        var score = CreateScore(id: 999);
+        ScoreModel score = CreateScore(id: 999);
         _context.Scores.Add(score);
         await _context.SaveChangesAsync();
 
@@ -232,15 +232,15 @@ public class MySqlScoreRepositoryTests
     [Test]
     public void MysqlDbContext_ShouldApplyScoreConfigurationAutomatically()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseMySql(
                 "Server=localhost;Database=g0v0_test;User=root;Password=test;",
                 new MySqlServerVersion(new Version(8, 0, 36)))
             .Options;
 
-        using var relationalContext = new MysqlDbContext(options);
+        using MysqlDbContext relationalContext = new(options);
 
-        var entityType = relationalContext.Model.FindEntityType(typeof(ScoreModel));
+        Microsoft.EntityFrameworkCore.Metadata.IEntityType? entityType = relationalContext.Model.FindEntityType(typeof(ScoreModel));
 
         Assert.That(entityType, Is.Not.Null);
         Assert.That(entityType!.GetTableName(), Is.EqualTo("scores"));
@@ -266,19 +266,19 @@ public class MySqlScoreRepositoryTests
             Assert.That(entityType.FindProperty("NLargeTickMiss")!.GetColumnName(), Is.EqualTo("nlarge_tick_miss"));
         });
 
-        AssertIndexName(entityType, new[] { nameof(ScoreModel.UserId), nameof(ScoreModel.Mode), nameof(ScoreModel.EndedAt), nameof(ScoreModel.Id) }, "idx_score_user_mode_date");
-        AssertIndexName(entityType, new[] { nameof(ScoreModel.UserId), nameof(ScoreModel.Mode), nameof(ScoreModel.Pp), nameof(ScoreModel.Id) }, "idx_score_user_mode_pp");
-        AssertIndexName(entityType, new[] { nameof(ScoreModel.BeatmapId) }, "ix_scores_beatmap_id");
-        AssertIndexName(entityType, new[] { nameof(ScoreModel.Mode) }, "ix_scores_gamemode");
-        AssertIndexName(entityType, new[] { nameof(ScoreModel.BeatmapChecksum) }, "ix_scores_map_md5");
-        AssertIndexName(entityType, new[] { nameof(ScoreModel.UserId) }, "ix_scores_user_id");
+        AssertIndexName(entityType, [nameof(ScoreModel.UserId), nameof(ScoreModel.Mode), nameof(ScoreModel.EndedAt), nameof(ScoreModel.Id)], "idx_score_user_mode_date");
+        AssertIndexName(entityType, [nameof(ScoreModel.UserId), nameof(ScoreModel.Mode), nameof(ScoreModel.Pp), nameof(ScoreModel.Id)], "idx_score_user_mode_pp");
+        AssertIndexName(entityType, [nameof(ScoreModel.BeatmapId)], "ix_scores_beatmap_id");
+        AssertIndexName(entityType, [nameof(ScoreModel.Mode)], "ix_scores_gamemode");
+        AssertIndexName(entityType, [nameof(ScoreModel.BeatmapChecksum)], "ix_scores_map_md5");
+        AssertIndexName(entityType, [nameof(ScoreModel.UserId)], "ix_scores_user_id");
 
-        var beatmapForeignKey = entityType.GetForeignKeys().Single(fk => fk.Properties.Select(p => p.Name).SequenceEqual(new[] { nameof(ScoreModel.BeatmapId) }, StringComparer.Ordinal));
+        Microsoft.EntityFrameworkCore.Metadata.IForeignKey beatmapForeignKey = entityType.GetForeignKeys().Single(fk => fk.Properties.Select(p => p.Name).SequenceEqual([nameof(ScoreModel.BeatmapId)], StringComparer.Ordinal));
         Assert.That(beatmapForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(Beatmap)));
         Assert.That(beatmapForeignKey.GetConstraintName(), Is.EqualTo("scores_ibfk_1"));
         Assert.That(beatmapForeignKey.DeleteBehavior, Is.EqualTo(DeleteBehavior.Restrict));
 
-        var userForeignKey = entityType.GetForeignKeys().Single(fk => fk.Properties.Select(p => p.Name).SequenceEqual(new[] { nameof(ScoreModel.UserId) }, StringComparer.Ordinal));
+        Microsoft.EntityFrameworkCore.Metadata.IForeignKey userForeignKey = entityType.GetForeignKeys().Single(fk => fk.Properties.Select(p => p.Name).SequenceEqual([nameof(ScoreModel.UserId)], StringComparer.Ordinal));
         Assert.That(userForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(User)));
         Assert.That(userForeignKey.GetConstraintName(), Is.EqualTo("scores_ibfk_2"));
         Assert.That(userForeignKey.DeleteBehavior, Is.EqualTo(DeleteBehavior.Restrict));
@@ -286,7 +286,7 @@ public class MySqlScoreRepositoryTests
 
     private static void AssertIndexName(Microsoft.EntityFrameworkCore.Metadata.IEntityType entityType, IReadOnlyCollection<string> propertyNames, string expectedName)
     {
-        var index = entityType.GetIndexes().Single(i => i.Properties.Select(p => p.Name).SequenceEqual(propertyNames, StringComparer.Ordinal));
+        Microsoft.EntityFrameworkCore.Metadata.IIndex index = entityType.GetIndexes().Single(i => i.Properties.Select(p => p.Name).SequenceEqual(propertyNames, StringComparer.Ordinal));
         Assert.That(index.GetDatabaseName(), Is.EqualTo(expectedName));
     }
 

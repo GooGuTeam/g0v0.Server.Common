@@ -18,7 +18,7 @@ public class MySqlUserRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -90,7 +90,7 @@ public class MySqlUserRepositoryTests
     [Test]
     public async Task UpdateAsync_ShouldPersistChanges()
     {
-        var user = CreateUser(id: 15, username: "before");
+        User user = CreateUser(id: 15, username: "before");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 

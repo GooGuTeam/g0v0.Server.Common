@@ -39,7 +39,7 @@ public class DatabaseJwtTokenHandler(
         string token,
         TokenValidationParameters validationParameters)
     {
-        var result = await _inner.ValidateTokenAsync(token, validationParameters);
+        TokenValidationResult result = await _inner.ValidateTokenAsync(token, validationParameters);
 
         if (!result.IsValid)
         {
@@ -50,8 +50,8 @@ public class DatabaseJwtTokenHandler(
 
         try
         {
-            using var scope = serviceProvider.CreateScope();
-            var tokenRepository = scope.ServiceProvider.GetRequiredService<IOAuthTokenRepository>();
+            using IServiceScope scope = serviceProvider.CreateScope();
+            IOAuthTokenRepository tokenRepository = scope.ServiceProvider.GetRequiredService<IOAuthTokenRepository>();
             tokenRecord = await tokenRepository.GetByAccessTokenAsync(token);
         }
         catch (Exception ex)
@@ -74,10 +74,10 @@ public class DatabaseJwtTokenHandler(
             };
         }
 
-        var identity = result.ClaimsIdentity;
+        ClaimsIdentity identity = result.ClaimsIdentity;
         identity.AddClaim(new Claim(OAuthClaimTypes.ClientId, tokenRecord.ClientId.ToString()));
 
-        foreach (var scope in tokenRecord.Scope.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        foreach (string scope in tokenRecord.Scope.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             identity.AddClaim(new Claim(OAuthClaimTypes.Scope, scope));
         }

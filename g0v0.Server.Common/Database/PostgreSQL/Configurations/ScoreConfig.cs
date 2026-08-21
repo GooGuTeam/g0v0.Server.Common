@@ -7,8 +7,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace g0v0.Server.Common.Database.PostgreSQL.Configurations;
 
+/// <summary>
+/// Configures the <see cref="Score"/> entity mapping for the PostgreSQL schema.
+/// </summary>
 public class ScoreConfig : IEntityTypeConfiguration<Score>
 {
+    /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<Score> builder)
     {
         builder.Property(s => s.ClientVersion)

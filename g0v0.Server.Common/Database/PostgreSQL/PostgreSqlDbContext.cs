@@ -77,6 +77,6 @@ public class PostgreSqlDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(PostgreSqlDbContext).Assembly,
-            type => type.Namespace == "g0v0.Server.Common.Database.PostgreSQL.Configurations");
+            type => string.Equals(type.Namespace, "g0v0.Server.Common.Database.PostgreSQL.Configurations", StringComparison.Ordinal));
     }
 }

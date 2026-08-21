@@ -1,7 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Configurations;
-using g0v0.Server.Common.Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using osu.Game.Online.Multiplayer;
@@ -13,7 +12,7 @@ using OsuMatchType = osu.Game.Online.Rooms.MatchType;
 namespace g0v0.Server.Common.Database.MySQL.Configurations;
 
 /// <summary>
-/// Maps <see cref="Room"/> to the legacy lazer API <c>rooms</c> table.
+/// Maps <see cref="DbRoom"/> to the legacy lazer API <c>rooms</c> table.
 ///
 /// <para>
 /// Only explicit mappings that EF Core cannot infer are declared here:

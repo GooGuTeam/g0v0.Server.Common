@@ -11,7 +11,7 @@ public class S3StorageServiceTests
     [Test]
     public async Task GetFileUrlAsync_WithPublicUrlBase_ShouldJoinBaseAndPathWithoutNetwork()
     {
-        await using var service = new S3StorageService(
+        await using S3StorageService service = new(
             "access",
             "secret",
             "bucket",
@@ -24,9 +24,9 @@ public class S3StorageServiceTests
     }
 
     [Test]
-    public async Task AWSS3GetFileNameByUrl_ShouldExtractS3UrlFormats()
+    public async Task AwsS3GetFileNameByUrlShouldExtractS3UrlFormats()
     {
-        await using var service = new S3StorageService(
+        await using S3StorageService service = new(
             "access",
             "secret",
             "bucket",
@@ -48,7 +48,7 @@ public class S3StorageServiceTests
     [Test]
     public async Task CloudflareR2GetFileNameByUrl_ShouldExtractR2UrlFormats()
     {
-        await using var service = new CloudflareR2StorageService(
+        await using CloudflareR2StorageService service = new(
             "account",
             "access",
             "secret",

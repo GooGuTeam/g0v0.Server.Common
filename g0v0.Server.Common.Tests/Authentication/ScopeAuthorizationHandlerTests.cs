@@ -41,14 +41,14 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.ClientId, "100"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.ClientId, value: "100"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -64,14 +64,14 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.ClientId, "200"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.ClientId, value: "200"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -87,14 +87,14 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.ClientId, "999"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.ClientId, value: "999"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -110,14 +110,14 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read", "chat.write");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.Scope, "*"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read", "chat.write");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.Scope, value: "*"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -133,15 +133,15 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read", "chat.write");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.Scope, "chat.read"),
-            new Claim(OAuthClaimTypes.Scope, "chat.write"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read", "chat.write");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.Scope, value: "chat.read"),
+            new Claim(type: OAuthClaimTypes.Scope, value: "chat.write"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -157,14 +157,14 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read", "admin");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.Scope, "chat.read"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read", "admin");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.Scope, value: "chat.read"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -180,11 +180,11 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement = new ScopeAuthorizationRequirement("chat.read");
-        var user = new ClaimsPrincipal(new ClaimsIdentity());
-        var context = new AuthorizationHandlerContext(new[] { requirement }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement = new("chat.read");
+        ClaimsPrincipal user = new(new ClaimsIdentity());
+        AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
@@ -200,15 +200,15 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var handler = new ScopeAuthorizationHandler(manager);
-        var requirement1 = new ScopeAuthorizationRequirement("chat.read");
-        var requirement2 = new ScopeAuthorizationRequirement("chat.write");
-        var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-        {
-            new Claim(OAuthClaimTypes.Scope, "chat.read"),
-        }));
-        var context = new AuthorizationHandlerContext(new[] { requirement1, requirement2 }, user, null);
+        ConfigurationManager manager = new(_tempDir);
+        ScopeAuthorizationHandler handler = new(manager);
+        ScopeAuthorizationRequirement requirement1 = new("chat.read");
+        ScopeAuthorizationRequirement requirement2 = new("chat.write");
+        ClaimsPrincipal user = new(new ClaimsIdentity(
+        [
+            new Claim(type: OAuthClaimTypes.Scope, value: "chat.read"),
+        ]));
+        AuthorizationHandlerContext context = new([requirement1, requirement2], user, resource: null);
 
         await handler.HandleAsync(context);
 

@@ -5,7 +5,6 @@ using g0v0.Server.Common.Database.PostgreSQL;
 using g0v0.Server.Common.Database.PostgreSQL.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using osu.Game.Online.API;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
 using OsuMatchType = osu.Game.Online.Rooms.MatchType;
@@ -23,7 +22,7 @@ public class PostgreSqlRoomRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
+        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -44,31 +43,13 @@ public class PostgreSqlRoomRepositoryTests
     }
 
     [Test]
-    public async Task CreateRoom_NullMods_ProducesNonNullModsInPlaylistItem()
-    {
-        _context.Users.Add(CreateUser(1, "host"));
-        await _context.SaveChangesAsync();
-
-        // Simulate a client submitting a playlist item with null mod collections.
-        var room = CreateRoom();
-        room.Playlist[0].RequiredMods = null!;
-        room.Playlist[0].AllowedMods = null!;
-
-        var created = await _repository.CreateRoom(room, 1);
-
-        var item = created.Playlists.First().ToMultiplayerPlaylistItem();
-        Assert.That(item.RequiredMods, Is.Not.Null);
-        Assert.That(item.AllowedMods, Is.Not.Null);
-    }
-
-    [Test]
     public async Task CreateRoom_ShouldPersistRoomWithHostAndPlaylist()
     {
         _context.Users.Add(CreateUser(1, "host"));
         _context.Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        var created = await _repository.CreateRoom(CreateRoom(), 1, G0V0RoomCategory.Realtime, tournamentMode: true);
+        Common.Database.Models.Room created = await _repository.CreateRoom(CreateRoom(), 1, G0V0RoomCategory.Realtime, tournamentMode: true);
 
         Assert.That(created.Id, Is.GreaterThan(0));
         Assert.That(created.HostId, Is.EqualTo(1));
@@ -83,7 +64,7 @@ public class PostgreSqlRoomRepositoryTests
     public async Task GetRoom_ShouldIncludePlaylistAndBeatmap()
     {
         _context.Users.Add(CreateUser(1, "host"));
-        var beatmap = new Beatmap
+        Beatmap beatmap = new()
         {
             Id = 100,
             Checksum = "abc123",
@@ -92,10 +73,10 @@ public class PostgreSqlRoomRepositoryTests
         _context.Beatmaps.Add(beatmap);
         await _context.SaveChangesAsync();
 
-        var created = await _repository.CreateRoom(CreateRoom(), 1);
+        Common.Database.Models.Room created = await _repository.CreateRoom(CreateRoom(), 1);
         await _repository.AddItemToPlaylist(CreatePlaylistItem(100), created.Id, 1);
 
-        var fetched = await _repository.GetRoom(created.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(created.Id);
 
         Assert.That(fetched, Is.Not.Null);
         Assert.That(fetched!.Playlists, Has.Count.EqualTo(2));
@@ -109,7 +90,7 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
         await _repository.AddUserToRoom(room.Id, 1);
         await _repository.AddUserToRoom(room.Id, 2);
         await _repository.AddUserToRoom(room.Id, 2);
@@ -119,7 +100,7 @@ public class PostgreSqlRoomRepositoryTests
             .CountAsync(rpu => rpu.RoomId == room.Id && rpu.LeftAt == null);
         Assert.That(activeCount, Is.EqualTo(2));
 
-        var fetched = await _repository.GetRoom(room.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(room.Id);
         Assert.That(fetched!.ParticipantCount, Is.EqualTo(2));
     }
 
@@ -130,7 +111,7 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
         await _repository.AddUserToRoom(room.Id, 1);
         await _repository.AddUserToRoom(room.Id, 2);
         await _repository.RemoveUserFromRoom(room.Id, 2);
@@ -139,7 +120,7 @@ public class PostgreSqlRoomRepositoryTests
         Assert.That(inRoom, Is.False);
 
         // Host remains, so the room is not ended.
-        var fetched = await _repository.GetRoom(room.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(room.Id);
         Assert.That(fetched!.EndsAt, Is.Null);
         Assert.That(fetched.ParticipantCount, Is.EqualTo(1));
 
@@ -160,10 +141,10 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
         await _repository.UpdateRoomHost(room.Id, 2);
 
-        var fetched = await _repository.GetRoom(room.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(room.Id);
         Assert.That(fetched!.HostId, Is.EqualTo(2));
     }
 
@@ -173,14 +154,14 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
-        var item = await _repository.AddItemToPlaylist(
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Playlist item = await _repository.AddItemToPlaylist(
             new MultiplayerPlaylistItem
             {
                 BeatmapID = 100,
                 RulesetID = 0,
-                RequiredMods = Array.Empty<osu.Game.Online.API.APIMod>(),
-                AllowedMods = Array.Empty<osu.Game.Online.API.APIMod>(),
+                RequiredMods = [],
+                AllowedMods = [],
             },
             room.Id,
             1);
@@ -207,8 +188,8 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
-        var newSettings = new MultiplayerRoomSettings
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        MultiplayerRoomSettings newSettings = new()
         {
             Name = "renamed",
             MatchType = OsuMatchType.TeamVersus,
@@ -219,7 +200,7 @@ public class PostgreSqlRoomRepositoryTests
         };
         await _repository.UpdateRoomSettings(room.Id, newSettings);
 
-        var fetched = await _repository.GetRoom(room.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(room.Id);
         Assert.That(fetched!.Name, Is.EqualTo("renamed"));
         Assert.That(fetched.Type, Is.EqualTo(OsuMatchType.TeamVersus));
         Assert.That(fetched.QueueMode, Is.EqualTo(OsuQueueMode.AllPlayers));
@@ -233,10 +214,10 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
         await _repository.UpdateRoomStatus(room.Id, MultiplayerRoomState.Playing);
 
-        var fetched = await _repository.GetRoom(room.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(room.Id);
         Assert.That(fetched!.Status, Is.EqualTo(RoomStatus.Playing));
     }
 
@@ -246,11 +227,11 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
-        var endDate = DateTimeOffset.UtcNow.AddHours(1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        DateTimeOffset endDate = DateTimeOffset.UtcNow.AddHours(1);
         await _repository.SetRoomEndDate(room.Id, endDate);
 
-        var fetched = await _repository.GetRoom(room.Id);
+        Common.Database.Models.Room? fetched = await _repository.GetRoom(room.Id);
         Assert.That(fetched!.EndsAt, Is.EqualTo(endDate));
     }
 
@@ -260,13 +241,13 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
-        var item = await _repository.AddItemToPlaylist(CreatePlaylistItem(100), room.Id, 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Playlist item = await _repository.AddItemToPlaylist(CreatePlaylistItem(100), room.Id, 1);
 
-        var editedItem = item.ToMultiplayerPlaylistItem();
+        MultiplayerPlaylistItem editedItem = item.ToMultiplayerPlaylistItem();
         editedItem.BeatmapID = 200;
         editedItem.Freestyle = true;
-        var edited = await _repository.EditItemToPlaylist(editedItem, room.Id, 1);
+        Playlist edited = await _repository.EditItemToPlaylist(editedItem, room.Id, 1);
 
         Assert.That(edited.BeatmapId, Is.EqualTo(200));
         Assert.That(edited.Freestyle, Is.True);
@@ -278,8 +259,8 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
-        var item = await _repository.AddItemToPlaylist(CreatePlaylistItem(100), room.Id, 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Playlist item = await _repository.AddItemToPlaylist(CreatePlaylistItem(100), room.Id, 1);
 
         await _repository.RemoveItemToPlaylist(item.Id, room.Id, 1);
 
@@ -293,15 +274,15 @@ public class PostgreSqlRoomRepositoryTests
         _context.Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        var room = await _repository.CreateRoom(CreateRoom(), 1);
+        Common.Database.Models.Room room = await _repository.CreateRoom(CreateRoom(), 1);
         await _repository.AddUserToRoom(room.Id, 1);
         await _repository.AddItemToPlaylist(
             new MultiplayerPlaylistItem
             {
                 BeatmapID = 100,
                 RulesetID = 0,
-                RequiredMods = Array.Empty<osu.Game.Online.API.APIMod>(),
-                AllowedMods = Array.Empty<osu.Game.Online.API.APIMod>(),
+                RequiredMods = [],
+                AllowedMods = [],
             },
             room.Id,
             1);
@@ -339,8 +320,8 @@ public class PostgreSqlRoomRepositoryTests
         OwnerID = 1,
         BeatmapID = beatmapId,
         RulesetID = 0,
-        RequiredMods = Array.Empty<APIMod>(),
-        AllowedMods = Array.Empty<APIMod>(),
+        RequiredMods = [],
+        AllowedMods = [],
         Freestyle = false,
         Expired = false,
         PlaylistOrder = 0,

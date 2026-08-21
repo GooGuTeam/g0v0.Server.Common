@@ -36,16 +36,16 @@ public class ScopePolicyProviderTests
     [Test]
     public async Task GetPolicyAsync_ClientOnly_ShouldRequireConfiguredClientIds()
     {
-        var provider = CreateProvider();
+        ScopePolicyProvider provider = CreateProvider();
 
-        var policy = await provider.GetPolicyAsync(AuthorizationPolicyNames.ClientOnly);
+        AuthorizationPolicy? policy = await provider.GetPolicyAsync(AuthorizationPolicyNames.ClientOnly);
 
         Assert.That(policy, Is.Not.Null);
         Assert.That(policy!.Requirements.OfType<DenyAnonymousAuthorizationRequirement>(), Has.One.Items);
 
         ClaimsAuthorizationRequirement claimRequirement = policy.Requirements
             .OfType<ClaimsAuthorizationRequirement>()
-            .Single(r => r.ClaimType == OAuthClaimTypes.ClientId);
+            .Single(r => string.Equals(r.ClaimType, OAuthClaimTypes.ClientId, StringComparison.Ordinal));
 
         Assert.That(claimRequirement.AllowedValues, Is.EquivalentTo(ConfiguredClientIds));
     }
@@ -53,9 +53,9 @@ public class ScopePolicyProviderTests
     [Test]
     public async Task GetPolicyAsync_RequireUserId_ShouldRequireSubjectClaim()
     {
-        var provider = CreateProvider();
+        ScopePolicyProvider provider = CreateProvider();
 
-        var policy = await provider.GetPolicyAsync(AuthorizationPolicyNames.RequireUserId);
+        AuthorizationPolicy? policy = await provider.GetPolicyAsync(AuthorizationPolicyNames.RequireUserId);
 
         Assert.That(policy, Is.Not.Null);
         Assert.That(policy!.Requirements.OfType<DenyAnonymousAuthorizationRequirement>(), Has.One.Items);
@@ -70,9 +70,9 @@ public class ScopePolicyProviderTests
     [Test]
     public async Task GetPolicyAsync_RequireScope_ShouldBuildScopeRequirement()
     {
-        var provider = CreateProvider();
+        ScopePolicyProvider provider = CreateProvider();
 
-        var policy = await provider.GetPolicyAsync(AuthorizationPolicyNames.RequireScope(RequiredScopes));
+        AuthorizationPolicy? policy = await provider.GetPolicyAsync(AuthorizationPolicyNames.RequireScope(RequiredScopes));
 
         Assert.That(policy, Is.Not.Null);
 
@@ -85,8 +85,8 @@ public class ScopePolicyProviderTests
 
     private ScopePolicyProvider CreateProvider()
     {
-        var options = Options.Create(new AuthorizationOptions());
-        var config = new ConfigurationManager(_basePath);
+        IOptions<AuthorizationOptions> options = Options.Create(new AuthorizationOptions());
+        ConfigurationManager config = new(_basePath);
 
         return new ScopePolicyProvider(options, config);
     }

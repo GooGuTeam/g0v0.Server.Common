@@ -20,11 +20,13 @@ Run from the repo root:
 - Single fixture: `dotnet test --filter "FullyQualifiedName~MySqlBeatmapRepositoryTests"`
 - Format check (CI runs this): `dotnet format --verify-no-changes`
 - Apply formatting fixes: `dotnet format`
+- Install InspectCode: `dotnet tool install --global JetBrains.ReSharper.GlobalTools --version 2026.2.1`
+- InspectCode: `jb inspectcode g0v0.Server.Common.sln --no-build --no-updates --severity=WARNING --output=artifacts/inspectcode.sarif`
 - Strict build like CI: `dotnet build --configuration Release /warnaserror`
 
-CI (`.github/workflows/ci.yml`) runs three jobs: build, `dotnet format --verify-no-changes` + `/warnaserror` build, and
-tests. Format drift or any analyzer warning fails CI even though local builds do not — run `dotnet format` before
-pushing.
+CI (`.github/workflows/ci.yml`) runs three jobs: build, code style/quality, and tests. The code-style job runs
+`dotnet format --verify-no-changes`, a `/warnaserror` build, and warning-level JetBrains InspectCode. It prints every
+warning/error and uploads the SARIF report. Format drift or any analyzer/InspectCode warning fails CI.
 
 ## Code style (non-default)
 
@@ -116,5 +118,5 @@ registered; `AddStorage` additionally needs `IPathProvider` for local storage. R
 - NUnit 4 + `Microsoft.EntityFrameworkCore.InMemory`. No real database, Redis, or S3 is needed.
 - Convention: each repository has paired `MySql*` and `PostgreSql*` fixtures using
   `UseInMemoryDatabase(Guid.NewGuid().ToString())` for isolation. When adding a new repository, add both.
-- The test project sets `<NoWarn>SA0001;CS1591</NoWarn>` — XML doc warnings are intentionally suppressed in tests, do
+- The test project sets `<NoWarn>SA0001;SA1600;SA1602;CS1591</NoWarn>` — XML doc warnings are intentionally suppressed in tests, do
   not "fix" them by adding doc comments everywhere.

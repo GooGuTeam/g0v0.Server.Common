@@ -17,7 +17,7 @@ public class MySqlOAuthTokenRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -36,7 +36,7 @@ public class MySqlOAuthTokenRepositoryTests
     [Test]
     public async Task GetByAccessTokenAsync_WhenTokenExistsAndNotExpired_ShouldReturnToken()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "valid_token",
             RefreshToken = "refresh_1",
@@ -55,7 +55,7 @@ public class MySqlOAuthTokenRepositoryTests
     [Test]
     public async Task GetByAccessTokenAsync_WhenTokenExpired_ShouldReturnNull()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "expired_token",
             RefreshToken = "refresh_2",
@@ -85,7 +85,7 @@ public class MySqlOAuthTokenRepositoryTests
     [Test]
     public async Task CheckAccessTokenIsValidAsync_WhenTokenExistsAndNotExpired_ShouldReturnTrue()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "check_valid",
             RefreshToken = "refresh_3",
@@ -103,7 +103,7 @@ public class MySqlOAuthTokenRepositoryTests
     [Test]
     public async Task CheckAccessTokenIsValidAsync_WhenTokenExpired_ShouldReturnFalse()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "check_expired",
             RefreshToken = "refresh_4",

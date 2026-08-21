@@ -62,12 +62,9 @@ public class LocalStorageService : StorageService
     public override async Task<byte[]> ReadFileAsync(string filePath, CancellationToken cancellationToken = default)
     {
         string fullPath = GetFullPath(filePath);
-        if (!File.Exists(fullPath))
-        {
-            throw new FileNotFoundException($"File not found: {filePath}", filePath);
-        }
-
-        return await File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
+        return !File.Exists(fullPath)
+            ? throw new FileNotFoundException($"File not found: {filePath}", filePath)
+            : await File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -143,17 +140,14 @@ public class LocalStorageService : StorageService
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
         string cleanPath = filePath.TrimStart('/', '\\');
-        if (string.IsNullOrWhiteSpace(cleanPath))
-        {
-            throw new ArgumentException("File path cannot be empty.", nameof(filePath));
-        }
-
-        return cleanPath;
+        return string.IsNullOrWhiteSpace(cleanPath)
+            ? throw new ArgumentException("File path cannot be empty.", nameof(filePath))
+            : cleanPath;
     }
 
     private static string GetUrlPath(string url)
     {
-        if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        if (Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
         {
             return uri.AbsolutePath.TrimStart('/');
         }
@@ -167,12 +161,9 @@ public class LocalStorageService : StorageService
         int queryIndex = value.IndexOf('?', StringComparison.Ordinal);
         int fragmentIndex = value.IndexOf('#', StringComparison.Ordinal);
 
-        if (queryIndex < 0)
-        {
-            return fragmentIndex < 0 ? value.Length : fragmentIndex;
-        }
-
-        return fragmentIndex < 0 ? queryIndex : Math.Min(queryIndex, fragmentIndex);
+        return queryIndex < 0
+            ? fragmentIndex < 0 ? value.Length : fragmentIndex
+            : fragmentIndex < 0 ? queryIndex : Math.Min(queryIndex, fragmentIndex);
     }
 
     private string GetFullPath(string filePath)
@@ -180,12 +171,7 @@ public class LocalStorageService : StorageService
         string cleanPath = NormalizeRelativeFilePath(filePath);
         string fullPath = Path.GetFullPath(Path.Combine(StoragePath, cleanPath));
 
-        if (!IsInsideStoragePath(fullPath))
-        {
-            throw new ArgumentException($"Invalid file path: {filePath}", nameof(filePath));
-        }
-
-        return fullPath;
+        return !IsInsideStoragePath(fullPath) ? throw new ArgumentException($"Invalid file path: {filePath}", nameof(filePath)) : fullPath;
     }
 
     private bool IsInsideStoragePath(string fullPath)

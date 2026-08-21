@@ -17,7 +17,7 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
+        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -36,7 +36,7 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [Test]
     public async Task GetByAccessTokenAsync_WhenTokenExistsAndNotExpired_ShouldReturnToken()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "pg_valid_token",
             RefreshToken = "pg_refresh_1",
@@ -55,7 +55,7 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [Test]
     public async Task GetByAccessTokenAsync_WhenTokenExpired_ShouldReturnNull()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "pg_expired_token",
             RefreshToken = "pg_refresh_2",
@@ -85,7 +85,7 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [Test]
     public async Task CheckAccessTokenIsValidAsync_WhenTokenExistsAndNotExpired_ShouldReturnTrue()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "pg_check_valid",
             RefreshToken = "pg_refresh_3",
@@ -103,7 +103,7 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [Test]
     public async Task CheckAccessTokenIsValidAsync_WhenTokenExpired_ShouldReturnFalse()
     {
-        var token = new OAuthToken
+        OAuthToken token = new()
         {
             AccessToken = "pg_check_expired",
             RefreshToken = "pg_refresh_4",

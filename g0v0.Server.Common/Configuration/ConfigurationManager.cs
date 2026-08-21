@@ -41,13 +41,13 @@ public class ConfigurationManager(string basePath)
     public T Get<T>()
     {
         // try to get cached value
-        if (_configCache.TryGetValue(typeof(T), out var cachedValue) && cachedValue is T cachedConfig)
+        if (_configCache.TryGetValue(typeof(T), out object? cachedValue) && cachedValue is T cachedConfig)
         {
             return cachedConfig;
         }
 
         // otherwise, load from file and cache it
-        var value = LoadConfiguration<T>() ??
+        T value = LoadConfiguration<T>() ??
                     throw new InvalidOperationException("Configuration of type " + typeof(T).FullName +
                                                         " is not loaded.");
         _configCache.Add(typeof(T), value);
@@ -61,11 +61,11 @@ public class ConfigurationManager(string basePath)
     public void Reload<T>()
     {
         T config = LoadConfiguration<T>();
-        var value = Get<T>();
-        var properties = typeof(T).GetProperties().Where(p => p.GetCustomAttribute<ReloadableAttribute>() != null);
-        foreach (var property in properties)
+        T? value = Get<T>();
+        IEnumerable<PropertyInfo> properties = typeof(T).GetProperties().Where(p => p.GetCustomAttribute<ReloadableAttribute>() != null);
+        foreach (PropertyInfo? property in properties)
         {
-            var newValue = property.GetValue(config);
+            object? newValue = property.GetValue(config);
             property.SetValue(value, newValue);
         }
     }
@@ -75,7 +75,7 @@ public class ConfigurationManager(string basePath)
         string filename;
         Type t = typeof(T);
 
-        var attribute = t.GetCustomAttribute<ConfigurationFileAttribute>();
+        ConfigurationFileAttribute? attribute = t.GetCustomAttribute<ConfigurationFileAttribute>();
         filename = attribute != null ? attribute.FileName : t.Name.ToSnakeCase() + ".json";
 
         if (!filename.EndsWith(".json", StringComparison.Ordinal))
@@ -88,7 +88,7 @@ public class ConfigurationManager(string basePath)
 
     private T LoadConfiguration<T>()
     {
-        var filePath = GetFilePath<T>(basePath);
+        string filePath = GetFilePath<T>(basePath);
 
         if (!File.Exists(filePath))
         {

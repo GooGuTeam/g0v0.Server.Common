@@ -97,7 +97,7 @@ internal static class ConfigurationHelper
 
     public static ScoreRank ConvertDatabaseValueToRank(string value)
     {
-        return Enum.TryParse(value, true, out ScoreRank rank) && SupportedRanks.Contains(rank)
+        return Enum.TryParse(value: value, ignoreCase: true, out ScoreRank rank) && SupportedRanks.Contains(rank)
             ? rank
             : throw new InvalidOperationException($"Unsupported score rank '{value}'.");
     }
@@ -124,7 +124,7 @@ internal static class ConfigurationHelper
             return null;
         }
 
-        var payload = statistics
+        Dictionary<string, int> payload = statistics
             .OrderBy(entry => entry.Key.ToString(), StringComparer.Ordinal)
             .ToDictionary(entry => entry.Key.ToString(), entry => entry.Value, StringComparer.Ordinal);
 
@@ -138,9 +138,9 @@ internal static class ConfigurationHelper
             return new Dictionary<HitResult, int>();
         }
 
-        var payload = JsonConvert.DeserializeObject<Dictionary<string, int>>(value, JsonSettings) ??
+        Dictionary<string, int> payload = JsonConvert.DeserializeObject<Dictionary<string, int>>(value, JsonSettings) ??
                       new Dictionary<string, int>(StringComparer.Ordinal);
-        var statistics = new Dictionary<HitResult, int>();
+        Dictionary<HitResult, int> statistics = new();
 
         foreach ((string key, int count) in payload)
         {
@@ -211,11 +211,6 @@ internal static class ConfigurationHelper
 
     private static bool TryParseHitResult(string key, out HitResult result)
     {
-        if (Enum.TryParse(key, true, out result))
-        {
-            return true;
-        }
-
-        return Enum.TryParse(key.ToPascalCase(), true, out result);
+        return Enum.TryParse(value: key, ignoreCase: true, out result) ? true : Enum.TryParse(value: key.ToPascalCase(), ignoreCase: true, out result);
     }
 }

@@ -18,7 +18,7 @@ public class PostgreSqlBeatmapRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
+        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -62,7 +62,7 @@ public class PostgreSqlBeatmapRepositoryTests
     [Test]
     public async Task CreateUpdateDeleteAsync_ShouldPersistBeatmapChanges()
     {
-        var beatmap = CreateBeatmap(id: 10, version: "Hard");
+        BeatmapModel beatmap = CreateBeatmap(id: 10, version: "Hard");
 
         await _repository.CreateAsync(beatmap);
         beatmap.Version = "Extra";

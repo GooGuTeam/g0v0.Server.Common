@@ -98,8 +98,14 @@ public class Room
     [StringLength(40)] // https://github.com/ppy/osu/blob/b1062f68a24b7d649a0053fab5b6ce15d1540b3b/osu.Game/Screens/OnlinePlay/Multiplayer/Match/MultiplayerMatchSettingsOverlay.cs#L251-L257
     public string? Password { get; set; }
 
+    /// <summary>
+    /// Gets or sets the maximum number of participants allowed in the room.
+    /// </summary>
     public byte? MaxParticipants { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the room is a tournament room.
+    /// </summary>
     public bool TournamentMode { get; set; }
 
     /// <summary>
@@ -108,6 +114,9 @@ public class Room
     [ForeignKey(nameof(HostId))]
     public User? Host { get; set; }
 
+    /// <summary>
+    /// Gets or sets the playlists associated with the room.
+    /// </summary>
     [InverseProperty(nameof(Playlist.Room))]
     public virtual ICollection<Playlist> Playlists { get; set; }
         = new List<Playlist>();

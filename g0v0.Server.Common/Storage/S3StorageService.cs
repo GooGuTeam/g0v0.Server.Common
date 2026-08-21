@@ -111,8 +111,8 @@ public class S3StorageService : StorageService
         ArgumentException.ThrowIfNullOrWhiteSpace(contentType);
         ArgumentException.ThrowIfNullOrWhiteSpace(cacheControl);
 
-        using var stream = new MemoryStream(content, writable: false);
-        var request = new PutObjectRequest
+        using MemoryStream stream = new(content, writable: false);
+        PutObjectRequest request = new()
         {
             BucketName = BucketName,
             Key = filePath,
@@ -142,7 +142,7 @@ public class S3StorageService : StorageService
             using GetObjectResponse response = await _client.GetObjectAsync(
                 new GetObjectRequest { BucketName = BucketName, Key = filePath, },
                 cancellationToken).ConfigureAwait(false);
-            using var output = new MemoryStream();
+            using MemoryStream output = new();
             await response.ResponseStream.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
             return output.ToArray();
         }
@@ -209,7 +209,7 @@ public class S3StorageService : StorageService
             return JoinPublicUrl(PublicUrlBase, filePath);
         }
 
-        var request = new GetPreSignedUrlRequest
+        GetPreSignedUrlRequest request = new()
         {
             BucketName = BucketName,
             Key = filePath,
@@ -242,24 +242,25 @@ public class S3StorageService : StorageService
         }
 
         string? host = GetUrlHost(url);
-        if (string.Equals(host, "s3.amazonaws.com", StringComparison.Ordinal))
+        if (!string.Equals(host, "s3.amazonaws.com", StringComparison.Ordinal))
         {
-            string[] parts = path.Split('/', 2);
-            return parts.Length > 1 ? NullIfEmpty(parts[1]) : null;
+            return NullIfEmpty(path);
         }
 
-        return NullIfEmpty(path);
+        string[] parts = path.Split('/', 2);
+        return parts.Length > 1 ? NullIfEmpty(parts[1]) : null;
     }
 
     /// <inheritdoc />
     public override Task CloseAsync()
     {
-        if (!_disposed)
+        if (_disposed)
         {
-            _client.Dispose();
-            _disposed = true;
+            return Task.CompletedTask;
         }
 
+        _client.Dispose();
+        _disposed = true;
         return Task.CompletedTask;
     }
 
@@ -270,7 +271,7 @@ public class S3StorageService : StorageService
     /// <returns>The path without a leading slash.</returns>
     protected static string GetUrlPath(string url)
     {
-        if (Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        if (Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
         {
             return uri.AbsolutePath.TrimStart('/');
         }
@@ -285,7 +286,7 @@ public class S3StorageService : StorageService
     /// <param name="url">The URL.</param>
     /// <returns>The host, or <see langword="null"/> when the URL is not absolute.</returns>
     protected static string? GetUrlHost(string url)
-        => Uri.TryCreate(url, UriKind.Absolute, out var uri) ? uri.Host : null;
+        => Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ? uri.Host : null;
 
     /// <summary>
     /// Converts empty strings to <see langword="null"/>.
@@ -308,12 +309,9 @@ public class S3StorageService : StorageService
         int queryIndex = value.IndexOf('?', StringComparison.Ordinal);
         int fragmentIndex = value.IndexOf('#', StringComparison.Ordinal);
 
-        if (queryIndex < 0)
-        {
-            return fragmentIndex < 0 ? value.Length : fragmentIndex;
-        }
-
-        return fragmentIndex < 0 ? queryIndex : Math.Min(queryIndex, fragmentIndex);
+        return queryIndex < 0
+            ? fragmentIndex < 0 ? value.Length : fragmentIndex
+            : fragmentIndex < 0 ? queryIndex : Math.Min(queryIndex, fragmentIndex);
     }
 
     private static bool IsNotFound(AmazonS3Exception exception)
@@ -328,8 +326,8 @@ public class S3StorageService : StorageService
         string regionName,
         string? endpointUrl)
     {
-        var credentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
-        var config = new AmazonS3Config();
+        BasicAWSCredentials credentials = new(accessKeyId, secretAccessKey);
+        AmazonS3Config config = new();
         if (string.IsNullOrWhiteSpace(endpointUrl))
         {
             config.RegionEndpoint = RegionEndpoint.GetBySystemName(regionName);

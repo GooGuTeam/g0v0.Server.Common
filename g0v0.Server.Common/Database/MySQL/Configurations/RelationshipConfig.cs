@@ -6,8 +6,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace g0v0.Server.Common.Database.MySQL.Configurations;
 
+/// <summary>
+/// Configures the <see cref="Relationship"/> entity mapping for the legacy MySQL schema.
+/// </summary>
 public class RelationshipConfig : IEntityTypeConfiguration<Relationship>
 {
+    /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<Relationship> builder)
     {
         builder.ToTable("relationship");

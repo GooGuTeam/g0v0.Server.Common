@@ -9,8 +9,12 @@ using Room = g0v0.Server.Common.Database.Models.Room;
 
 namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 
+/// <summary>
+/// Persists multiplayer room state in the PostgreSQL schema.
+/// </summary>
 public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPostgreSqlRepository
 {
+    /// <inheritdoc/>
     public async Task<Room> CreateRoom(
         MultiplayerRoom room,
         int hostUserId,
@@ -23,7 +27,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             throw new InvalidOperationException($"User with ID {hostUserId} does not exist.");
         }
 
-        var dbRoom = new Room
+        Room dbRoom = new()
         {
             Name = room.Settings.Name,
             HostId = hostUserId,
@@ -42,7 +46,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         await context.SaveChangesAsync().ConfigureAwait(false);
         await context.Entry(dbRoom).ReloadAsync().ConfigureAwait(false);
 
-        foreach (var playlist in room.Playlist)
+        foreach (MultiplayerPlaylistItem playlist in room.Playlist)
         {
             await AddItemToDb(playlist, dbRoom.Id, hostUserId).ConfigureAwait(false);
         }
@@ -52,6 +56,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             .FirstAsync(r => r.Id == dbRoom.Id).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<Room?> GetRoom(long roomId)
     {
         return await context.Rooms
@@ -60,6 +65,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             .FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task AddUserToRoom(long roomId, int userId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, userId).ConfigureAwait(false);
@@ -70,7 +76,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         }
 
         // Reject joins to ended rooms.
-        var room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
+        Room? room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
         if (room?.EndsAt != null)
         {
             throw new InvalidOperationException($"Room with ID {roomId} has ended.");
@@ -78,14 +84,14 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
 
         // clean up duplicate active records (keep only the earliest),
         // refresh the join time of the survivor, otherwise create a fresh participation record.
-        var activeRecords = await context.RoomParticipatedUsers
+        List<RoomParticipatedUser> activeRecords = await context.RoomParticipatedUsers
             .Where(rpu => rpu.RoomId == roomId && rpu.UserId == userId && rpu.LeftAt == null)
             .OrderBy(rpu => rpu.JoinedAt)
             .ToListAsync().ConfigureAwait(false);
 
         if (activeRecords.Count > 0)
         {
-            foreach (var extra in activeRecords.Skip(1))
+            foreach (RoomParticipatedUser? extra in activeRecords.Skip(1))
             {
                 extra.LeftAt = DateTimeOffset.UtcNow;
                 context.Update(extra);
@@ -93,11 +99,10 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
 
             activeRecords[0].JoinedAt = DateTimeOffset.UtcNow;
             context.Update(activeRecords[0]);
-            await context.SaveChangesAsync().ConfigureAwait(false);
         }
         else
         {
-            var newRoomUser = new RoomParticipatedUser
+            RoomParticipatedUser newRoomUser = new()
             {
                 RoomId = roomId,
                 UserId = userId,
@@ -105,12 +110,13 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
                 LeftAt = null,
             };
             context.Add(newRoomUser);
-            await context.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        await context.SaveChangesAsync().ConfigureAwait(false);
         await UpdateRoomParticipantCount(roomId).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task RemoveUserFromRoom(long roomId, int userId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, userId).ConfigureAwait(false);
@@ -121,7 +127,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         }
 
         // If the room has already ended, return immediately.
-        var room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
+        Room? room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
         if (room?.EndsAt != null)
         {
             return;
@@ -129,7 +135,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
 
         // Only the active participation record is relevant; historical records
         // (LeftAt != null) may exist from previous join/leave cycles.
-        var roomUser = await context.RoomParticipatedUsers
+        RoomParticipatedUser? roomUser = await context.RoomParticipatedUsers
             .SingleOrDefaultAsync(rpu => rpu.RoomId == roomId && rpu.UserId == userId && rpu.LeftAt == null)
             .ConfigureAwait(false);
 
@@ -149,27 +155,19 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         await EndRoomIfEmpty(roomId).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task UpdateRoomHost(long roomId, int? hostUserId)
     {
-        var dbRoom = await GetRoomForUpdate(roomId);
-        if (dbRoom == null)
-        {
-            throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
-        }
-
+        Room? dbRoom = await GetRoomForUpdate(roomId) ?? throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
         dbRoom.HostId = hostUserId;
         context.Update(dbRoom);
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task UpdateRoomSettings(long roomId, MultiplayerRoomSettings settings)
     {
-        var dbRoom = await GetRoomForUpdate(roomId);
-        if (dbRoom == null)
-        {
-            throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
-        }
-
+        Room? dbRoom = await GetRoomForUpdate(roomId) ?? throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
         dbRoom.Name = settings.Name;
         dbRoom.Password = settings.Password;
         dbRoom.Type = settings.MatchType;
@@ -181,34 +179,27 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task UpdateRoomStatus(long roomId, MultiplayerRoomState state)
     {
-        var dbRoom = await GetRoomForUpdate(roomId);
-        if (dbRoom == null)
-        {
-            throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
-        }
-
-        dbRoom.Status = state == MultiplayerRoomState.Playing || state == MultiplayerRoomState.WaitingForLoad
+        Room? dbRoom = await GetRoomForUpdate(roomId) ?? throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
+        dbRoom.Status = state is MultiplayerRoomState.Playing or MultiplayerRoomState.WaitingForLoad
             ? RoomStatus.Playing
             : RoomStatus.Idle;
         context.Update(dbRoom);
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task SetRoomEndDate(long roomId, DateTimeOffset? endDate)
     {
-        var dbRoom = await GetRoomForUpdate(roomId);
-        if (dbRoom == null)
-        {
-            throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
-        }
-
+        Room? dbRoom = await GetRoomForUpdate(roomId) ?? throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
         dbRoom.EndsAt = endDate;
         context.Update(dbRoom);
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<Playlist> AddItemToPlaylist(MultiplayerPlaylistItem item, long roomId, int ownerId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, ownerId).ConfigureAwait(false);
@@ -217,6 +208,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             : await AddItemToDb(item, roomId, ownerId).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<Playlist> EditItemToPlaylist(MultiplayerPlaylistItem item, long roomId, int ownerId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, ownerId).ConfigureAwait(false);
@@ -225,18 +217,13 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             throw new InvalidOperationException($"User with ID {ownerId} or Room with ID {roomId} does not exist.");
         }
 
-        var dbPlaylist = await context.Playlists
-            .SingleOrDefaultAsync(p => p.Id == item.ID && p.RoomId == roomId).ConfigureAwait(false);
-        if (dbPlaylist == null)
-        {
-            throw new InvalidOperationException($"Playlist item with ID {item.ID} does not exist in room {roomId}.");
-        }
-
+        Playlist? dbPlaylist = await context.Playlists
+            .SingleOrDefaultAsync(p => p.Id == item.ID && p.RoomId == roomId).ConfigureAwait(false) ?? throw new InvalidOperationException($"Playlist item with ID {item.ID} does not exist in room {roomId}.");
         dbPlaylist.BeatmapId = item.BeatmapID;
         dbPlaylist.RulesetId = item.RulesetID;
         dbPlaylist.OwnerId = item.OwnerID;
-        dbPlaylist.AllowedMods = item.AllowedMods?.ToList() ?? new List<osu.Game.Online.API.APIMod>();
-        dbPlaylist.RequiredMods = item.RequiredMods?.ToList() ?? new List<osu.Game.Online.API.APIMod>();
+        dbPlaylist.AllowedMods = item.AllowedMods.ToList();
+        dbPlaylist.RequiredMods = item.RequiredMods.ToList();
         dbPlaylist.Freestyle = item.Freestyle;
         dbPlaylist.Expired = item.Expired;
         dbPlaylist.PlaylistOrder = item.PlaylistOrder;
@@ -249,6 +236,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         return dbPlaylist;
     }
 
+    /// <inheritdoc/>
     public async Task<Playlist> RemoveItemToPlaylist(long itemId, long roomId, int ownerId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, ownerId).ConfigureAwait(false);
@@ -257,47 +245,47 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             throw new InvalidOperationException($"User with ID {ownerId} or Room with ID {roomId} does not exist.");
         }
 
-        var dbPlaylist = await context.Playlists
-            .SingleOrDefaultAsync(p => p.Id == itemId && p.RoomId == roomId).ConfigureAwait(false);
-        if (dbPlaylist == null)
-        {
-            throw new InvalidOperationException($"Playlist item with ID {itemId} does not exist in room {roomId}.");
-        }
-
+        Playlist? dbPlaylist = await context.Playlists
+            .SingleOrDefaultAsync(p => p.Id == itemId && p.RoomId == roomId).ConfigureAwait(false) ?? throw new InvalidOperationException($"Playlist item with ID {itemId} does not exist in room {roomId}.");
         context.Playlists.Remove(dbPlaylist);
         await context.SaveChangesAsync().ConfigureAwait(false);
         return dbPlaylist;
     }
 
+    /// <summary>
+    /// Checks whether the user has an active participation record in the room.
+    /// </summary>
+    /// <param name="roomId">The room ID.</param>
+    /// <param name="userId">The user ID.</param>
+    /// <returns><see langword="true"/> when the user is currently in the room; otherwise, <see langword="false"/>.</returns>
     public async Task<bool> CheckUserInRoom(long roomId, int userId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, userId).ConfigureAwait(false);
-        if (!userAndRoomExists)
-        {
-            return false;
-        }
-
-        return await context.RoomParticipatedUsers
-            .AnyAsync(rpu => rpu.RoomId == roomId && rpu.UserId == userId && rpu.LeftAt == null).ConfigureAwait(false);
+        return !userAndRoomExists
+            ? false
+            : await context.RoomParticipatedUsers
+                .AnyAsync(rpu => rpu.RoomId == roomId && rpu.UserId == userId && rpu.LeftAt == null).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task<bool> AnyScoreTokenExistsFor(long playlistItemId)
     {
         return await context.ScoreTokens
             .AnyAsync(t => t.PlaylistItemId == playlistItemId).ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task DeleteRoom(long roomId)
     {
-        var participants = await context.RoomParticipatedUsers
+        List<RoomParticipatedUser> participants = await context.RoomParticipatedUsers
             .Where(rpu => rpu.RoomId == roomId).ToListAsync().ConfigureAwait(false);
         context.RoomParticipatedUsers.RemoveRange(participants);
 
-        var playlists = await context.Playlists
+        List<Playlist> playlists = await context.Playlists
             .Where(p => p.RoomId == roomId).ToListAsync().ConfigureAwait(false);
         context.Playlists.RemoveRange(playlists);
 
-        var room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
+        Room? room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
         if (room != null)
         {
             context.Rooms.Remove(room);
@@ -308,13 +296,13 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
 
     private async Task<Playlist> AddItemToDb(MultiplayerPlaylistItem item, long roomId, int ownerId)
     {
-        var dbPlaylist = new Playlist
+        Playlist dbPlaylist = new()
         {
             RoomId = roomId,
             BeatmapId = item.BeatmapID,
             RulesetId = item.RulesetID,
-            AllowedMods = item.AllowedMods?.ToList() ?? new List<osu.Game.Online.API.APIMod>(),
-            RequiredMods = item.RequiredMods?.ToList() ?? new List<osu.Game.Online.API.APIMod>(),
+            AllowedMods = item.AllowedMods.ToList(),
+            RequiredMods = item.RequiredMods.ToList(),
             Freestyle = item.Freestyle,
             Expired = item.Expired,
             OwnerId = ownerId,
@@ -346,7 +334,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         int count = await context.RoomParticipatedUsers
             .CountAsync(rpu => rpu.RoomId == roomId && rpu.LeftAt == null).ConfigureAwait(false);
 
-        var room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
+        Room? room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
         if (room != null)
         {
             room.ParticipantCount = count;
@@ -368,8 +356,8 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             return;
         }
 
-        var room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
-        if (room != null && room.EndsAt == null)
+        Room? room = await context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
+        if (room is { EndsAt: null })
         {
             room.EndsAt = DateTimeOffset.UtcNow;
             room.ParticipantCount = 0;

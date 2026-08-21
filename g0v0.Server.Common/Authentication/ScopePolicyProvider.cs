@@ -57,18 +57,18 @@ public class ScopePolicyProvider : IAuthorizationPolicyProvider
             return CreateRequireUserIdPolicy();
         }
 
-        if (policyName.StartsWith(AuthorizationPolicyNames.ScopePrefix, StringComparison.Ordinal))
+        if (!policyName.StartsWith(AuthorizationPolicyNames.ScopePrefix, StringComparison.Ordinal))
         {
-            var scopes = policyName[AuthorizationPolicyNames.ScopePrefix.Length..]
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-
-            var builder = new AuthorizationPolicyBuilder();
-            builder.RequireAuthenticatedUser();
-            builder.AddRequirements(new ScopeAuthorizationRequirement(scopes));
-            return builder.Build();
+            return await _fallback.GetPolicyAsync(policyName);
         }
 
-        return await _fallback.GetPolicyAsync(policyName);
+        string[] scopes = policyName[AuthorizationPolicyNames.ScopePrefix.Length..]
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        AuthorizationPolicyBuilder builder = new();
+        builder.RequireAuthenticatedUser();
+        builder.AddRequirements(new ScopeAuthorizationRequirement(scopes));
+        return builder.Build();
     }
 
     private static AuthorizationPolicy CreateRequireUserIdPolicy()

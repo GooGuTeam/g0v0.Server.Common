@@ -12,7 +12,7 @@ public class ConfigurationFileAttributeTests
     [Test]
     public void FileName_ShouldReturnValuePassedToConstructor()
     {
-        var attribute = new ConfigurationFileAttribute("my_config.json");
+        ConfigurationFileAttribute attribute = new("my_config.json");
 
         Assert.That(attribute.FileName, Is.EqualTo("my_config.json"));
     }
@@ -20,7 +20,7 @@ public class ConfigurationFileAttributeTests
     [Test]
     public void FileName_ShouldPreserveExactString_WithoutExtension()
     {
-        var attribute = new ConfigurationFileAttribute("general");
+        ConfigurationFileAttribute attribute = new(fileName: "general");
 
         Assert.That(attribute.FileName, Is.EqualTo("general"));
     }
@@ -28,7 +28,7 @@ public class ConfigurationFileAttributeTests
     [Test]
     public void FileName_ShouldPreserveExactString_WithPathSeparators()
     {
-        var attribute = new ConfigurationFileAttribute("sub/my_config.json");
+        ConfigurationFileAttribute attribute = new(fileName: "sub/my_config.json");
 
         Assert.That(attribute.FileName, Is.EqualTo("sub/my_config.json"));
     }
@@ -36,8 +36,8 @@ public class ConfigurationFileAttributeTests
     [Test]
     public void Attribute_ShouldOnlyTargetClasses()
     {
-        var usageAttr = typeof(ConfigurationFileAttribute)
-            .GetCustomAttributes(typeof(AttributeUsageAttribute), false)
+        AttributeUsageAttribute usageAttr = typeof(ConfigurationFileAttribute)
+            .GetCustomAttributes(attributeType: typeof(AttributeUsageAttribute), inherit: false)
             .Cast<AttributeUsageAttribute>()
             .Single();
 
@@ -47,8 +47,8 @@ public class ConfigurationFileAttributeTests
     [Test]
     public void Attribute_CanBeAppliedToClass()
     {
-        var attr = typeof(SampleClassWithConfigFile)
-            .GetCustomAttributes(typeof(ConfigurationFileAttribute), false)
+        ConfigurationFileAttribute? attr = typeof(SampleClassWithConfigFile)
+            .GetCustomAttributes(attributeType: typeof(ConfigurationFileAttribute), inherit: false)
             .Cast<ConfigurationFileAttribute>()
             .SingleOrDefault();
 

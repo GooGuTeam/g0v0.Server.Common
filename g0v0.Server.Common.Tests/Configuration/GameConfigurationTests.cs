@@ -12,7 +12,7 @@ public class GameConfigurationTests
     [Test]
     public void GameConfiguration_ShouldUseGameConfigurationFile()
     {
-        var attribute = typeof(GameConfiguration)
+        ConfigurationFileAttribute? attribute = typeof(GameConfiguration)
             .GetCustomAttributes(typeof(ConfigurationFileAttribute), inherit: false)
             .Single() as ConfigurationFileAttribute;
 
@@ -30,18 +30,18 @@ public class GameConfigurationTests
 
         Assert.That(
             reloadableProperties,
-            Is.EquivalentTo(new[]
-            {
+            Is.EquivalentTo(
+            [
                 nameof(GameConfiguration.EnableRelax),
                 nameof(GameConfiguration.EnableAutopilot),
                 nameof(GameConfiguration.EnableAllBeatmapLeaderboard),
-            }));
+            ]));
     }
 
     [Test]
     public void DefaultValues_ShouldDisableOptionalGameplayFeatures()
     {
-        var configuration = new GameConfiguration();
+        GameConfiguration configuration = new();
 
         Assert.Multiple(() =>
         {

@@ -7,6 +7,9 @@ using BeatmapModel = g0v0.Server.Common.Database.Models.Beatmap;
 
 namespace g0v0.Server.Common.Database.MySQL.Configurations;
 
+/// <summary>
+/// Configures the <see cref="BeatmapModel"/> entity mapping for the legacy MySQL schema.
+/// </summary>
 public class BeatmapConfig : IEntityTypeConfiguration<BeatmapModel>
 {
     private static readonly Dictionary<int, string> ModeToDatabaseValue = new()
@@ -62,6 +65,7 @@ public class BeatmapConfig : IEntityTypeConfiguration<BeatmapModel>
             ["LOVED"] = BeatmapOnlineStatus.Loved,
         };
 
+    /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<BeatmapModel> builder)
     {
         builder.ToTable("beatmaps");

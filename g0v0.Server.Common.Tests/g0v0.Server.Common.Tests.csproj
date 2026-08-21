@@ -8,11 +8,11 @@
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <NoWarn>SA0001;CS1591</NoWarn>
+        <NoWarn>SA0001;SA1600;SA1602;CS1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
         <PackageReference Include="NUnit" Version="4.5.1"/>
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0"/>

@@ -163,6 +163,10 @@ public class Score
 
     #region Compatible with v1
 
+    // These accessors back the legacy v1 score columns. They are only exercised
+    // by EF Core mapping/materialization (see ScoreConfig), so suppress the
+    // "never used" inspection for the whole region.
+    // ReSharper disable UnusedMember.Local
     private int N300
     {
         get => this.GetRequiredStatistic(HitResult.Great);
@@ -255,5 +259,6 @@ public class Score
         this.Statistics.Remove(result);
     }
 
+    // ReSharper restore UnusedMember.Local
     #endregion
 }

@@ -18,7 +18,7 @@ public class PostgreSqlUserRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
+        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -87,7 +87,7 @@ public class PostgreSqlUserRepositoryTests
     [Test]
     public async Task UpdateAsync_ShouldPersistChanges()
     {
-        var user = CreateUser(id: 24, username: "pg-before");
+        User user = CreateUser(id: 24, username: "pg-before");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 

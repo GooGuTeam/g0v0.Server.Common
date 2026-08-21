@@ -26,7 +26,7 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
     {
         _logger = logger;
 
-        var applicationLifetime = serviceProvider.GetService<IHostApplicationLifetime>();
+        IHostApplicationLifetime? applicationLifetime = serviceProvider.GetService<IHostApplicationLifetime>();
         applicationLifetime?.ApplicationStopping.Register(_stoppingSource.Cancel);
     }
 
@@ -58,7 +58,7 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
         ArgumentNullException.ThrowIfNull(task);
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
 
-        var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(_stoppingSource.Token, cancellationToken);
+        CancellationTokenSource linkedSource = CancellationTokenSource.CreateLinkedTokenSource(_stoppingSource.Token, cancellationToken);
 
         if (linkedSource.IsCancellationRequested)
         {
@@ -66,8 +66,8 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
             return Task.FromCanceled(cancellationToken.IsCancellationRequested ? cancellationToken : _stoppingSource.Token);
         }
 
-        var backgroundTask = Task.Run(() => task(linkedSource.Token), CancellationToken.None);
-        var taskId = backgroundTask.Id;
+        Task backgroundTask = Task.Run(() => task(linkedSource.Token), CancellationToken.None);
+        int taskId = backgroundTask.Id;
 
         _runningTasks.TryAdd(taskId, backgroundTask);
         this.ObserveTaskCompletion(backgroundTask, taskId, linkedSource);
@@ -86,9 +86,9 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
             return;
         }
 
-        _stoppingSource.Cancel();
+        await _stoppingSource.CancelAsync().ConfigureAwait(false);
 
-        var runningTasks = _runningTasks.Values.ToArray();
+        Task[] runningTasks = _runningTasks.Values.ToArray();
 
         if (runningTasks.Length > 0)
         {
@@ -111,7 +111,7 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
         _ = task.ContinueWith(
             static (completedTask, state) =>
             {
-                var (runningTasks, logger, currentTaskId, currentLinkedSource) =
+                (ConcurrentDictionary<int, Task> runningTasks, ILogger<BackgroundTaskRunner> logger, int currentTaskId, CancellationTokenSource currentLinkedSource) =
                     ((ConcurrentDictionary<int, Task>, ILogger<BackgroundTaskRunner>, int, CancellationTokenSource))state!;
 
                 runningTasks.TryRemove(currentTaskId, out _);

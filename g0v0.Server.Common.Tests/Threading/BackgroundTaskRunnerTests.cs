@@ -14,10 +14,10 @@ public class BackgroundTaskRunnerTests
     [Test]
     public async Task RunAsync_WithAction_ShouldExecuteImmediately()
     {
-        await using var runner = this.CreateRunner();
-        var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using BackgroundTaskRunner runner = this.CreateRunner();
+        TaskCompletionSource completionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        Task task = runner.RunAsync(() => completionSource.SetResult());
+        Task task = runner.RunAsync(completionSource.SetResult);
 
         await Task.WhenAny(task, completionSource.Task);
 
@@ -28,9 +28,9 @@ public class BackgroundTaskRunnerTests
     [Test]
     public async Task RunAsync_WithCancellationToken_ShouldPassCancellationToTask()
     {
-        await using var runner = this.CreateRunner();
-        using var cancellationTokenSource = new CancellationTokenSource();
-        var observedCancellation = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        await using BackgroundTaskRunner runner = this.CreateRunner();
+        using CancellationTokenSource cancellationTokenSource = new();
+        TaskCompletionSource observedCancellation = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         Task task = runner.RunAsync(
             async cancellationToken =>
@@ -47,7 +47,7 @@ public class BackgroundTaskRunnerTests
             },
             cancellationTokenSource.Token);
 
-        cancellationTokenSource.Cancel();
+        await cancellationTokenSource.CancelAsync();
 
         await Task.WhenAny(task, observedCancellation.Task);
 
@@ -58,9 +58,9 @@ public class BackgroundTaskRunnerTests
     [Test]
     public async Task DisposeAsync_WithRunningTask_ShouldCancelTrackedTask()
     {
-        var runner = this.CreateRunner();
-        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var cancelled = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        BackgroundTaskRunner runner = this.CreateRunner();
+        TaskCompletionSource started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource cancelled = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         Task task = runner.RunAsync(async cancellationToken =>
         {
@@ -87,13 +87,13 @@ public class BackgroundTaskRunnerTests
     [Test]
     public async Task AddBackgroundTaskRunner_FromServiceCollection_ShouldResolveSameSingletonInstance()
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new();
         services.AddLogging();
         services.AddBackgroundTaskRunner();
 
-        await using var serviceProvider = services.BuildServiceProvider();
-        var interfaceInstance = serviceProvider.GetRequiredService<IBackgroundTaskRunner>();
-        var implementationInstance = serviceProvider.GetRequiredService<BackgroundTaskRunner>();
+        await using ServiceProvider serviceProvider = services.BuildServiceProvider();
+        IBackgroundTaskRunner interfaceInstance = serviceProvider.GetRequiredService<IBackgroundTaskRunner>();
+        BackgroundTaskRunner implementationInstance = serviceProvider.GetRequiredService<BackgroundTaskRunner>();
 
         Assert.That(interfaceInstance, Is.SameAs(implementationInstance));
     }

@@ -38,7 +38,7 @@ public class ConfigurationManagerTests
         // SimpleTestConfig → simple_test_config.json
         WriteConfigFile("simple_test_config.json", new { Name = "hello", Value = 7, ReloadableValue = "x" });
 
-        Assert.DoesNotThrow(() => new ConfigurationManager(_tempDir));
+        Assert.DoesNotThrow(() => _ = new ConfigurationManager(_tempDir));
     }
 
     [Test]
@@ -48,8 +48,8 @@ public class ConfigurationManagerTests
             "simple_test_config.json",
             new { Name = "loaded", Value = 42, ReloadableValue = "initial" });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var config = manager.Get<SimpleTestConfig>();
+        ConfigurationManager manager = new(_tempDir);
+        SimpleTestConfig config = manager.Get<SimpleTestConfig>();
 
         Assert.That(config.Name, Is.EqualTo("loaded"));
         Assert.That(config.Value, Is.EqualTo(42));
@@ -61,8 +61,8 @@ public class ConfigurationManagerTests
     {
         WriteConfigFile("attr_test_config.json", new { Data = "attribute-loaded" });
 
-        var manager = new ConfigurationManager(_tempDir);
-        var config = manager.Get<AttributeTestConfig>();
+        ConfigurationManager manager = new(_tempDir);
+        AttributeTestConfig config = manager.Get<AttributeTestConfig>();
 
         Assert.That(config.Data, Is.EqualTo("attribute-loaded"));
     }
@@ -70,7 +70,7 @@ public class ConfigurationManagerTests
     [Test]
     public void Get_WhenFileDoesNotExist_ShouldThrowFileNotFoundException()
     {
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         Assert.Throws<FileNotFoundException>(() => manager.Get<SimpleTestConfig>());
     }
@@ -78,8 +78,8 @@ public class ConfigurationManagerTests
     [Test]
     public void Get_WhenFileDoesNotExist_ExceptionMessageShouldContainFilePath()
     {
-        var manager = new ConfigurationManager(_tempDir);
-        var ex = Assert.Throws<FileNotFoundException>(() => manager.Get<SimpleTestConfig>());
+        ConfigurationManager manager = new(_tempDir);
+        FileNotFoundException? ex = Assert.Throws<FileNotFoundException>(() => manager.Get<SimpleTestConfig>());
 
         Assert.That(ex!.Message, Does.Contain("simple_test_config.json"));
     }
@@ -89,7 +89,7 @@ public class ConfigurationManagerTests
     {
         File.WriteAllText(Path.Combine(_configDir, "simple_test_config.json"), "not { valid } json {{");
 
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         Assert.Throws<JsonReaderException>(() => manager.Get<SimpleTestConfig>());
     }
@@ -99,7 +99,7 @@ public class ConfigurationManagerTests
     {
         File.WriteAllText(Path.Combine(_configDir, "simple_test_config.json"), "null");
 
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         Assert.Throws<InvalidDataException>(() => manager.Get<SimpleTestConfig>());
     }
@@ -109,8 +109,8 @@ public class ConfigurationManagerTests
     {
         File.WriteAllText(Path.Combine(_configDir, "simple_test_config.json"), "{}");
 
-        var manager = new ConfigurationManager(_tempDir);
-        var config = manager.Get<SimpleTestConfig>();
+        ConfigurationManager manager = new(_tempDir);
+        SimpleTestConfig config = manager.Get<SimpleTestConfig>();
 
         Assert.That(config, Is.Not.Null);
         Assert.That(config.Name, Is.EqualTo(string.Empty));
@@ -127,14 +127,14 @@ public class ConfigurationManagerTests
         WriteConfigFile(
             "simple_test_config.json",
             new { Name = "original", Value = 1, ReloadableValue = "v1" });
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         WriteConfigFile(
             "simple_test_config.json",
             new { Name = "original", Value = 1, ReloadableValue = "v2" });
         manager.Reload<SimpleTestConfig>();
 
-        var config = manager.Get<SimpleTestConfig>();
+        SimpleTestConfig config = manager.Get<SimpleTestConfig>();
         Assert.That(config.ReloadableValue, Is.EqualTo("v2"));
     }
 
@@ -144,10 +144,10 @@ public class ConfigurationManagerTests
         WriteConfigFile(
             "simple_test_config.json",
             new { Name = "original", Value = 1, ReloadableValue = "v1" });
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         // Cache the original values first.
-        var firstLoad = manager.Get<SimpleTestConfig>();
+        SimpleTestConfig firstLoad = manager.Get<SimpleTestConfig>();
         Assert.That(firstLoad.Name, Is.EqualTo("original"));
 
         WriteConfigFile(
@@ -155,7 +155,7 @@ public class ConfigurationManagerTests
             new { Name = "changed", Value = 99, ReloadableValue = "v2" });
         manager.Reload<SimpleTestConfig>();
 
-        var config = manager.Get<SimpleTestConfig>();
+        SimpleTestConfig config = manager.Get<SimpleTestConfig>();
         Assert.That(config.Name, Is.EqualTo("original"));
         Assert.That(config.Value, Is.EqualTo(1));
     }
@@ -166,11 +166,11 @@ public class ConfigurationManagerTests
         WriteConfigFile(
             "simple_test_config.json",
             new { Name = "stable", Value = 5, ReloadableValue = "same" });
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         manager.Reload<SimpleTestConfig>();
 
-        var config = manager.Get<SimpleTestConfig>();
+        SimpleTestConfig config = manager.Get<SimpleTestConfig>();
         Assert.That(config.Name, Is.EqualTo("stable"));
         Assert.That(config.Value, Is.EqualTo(5));
         Assert.That(config.ReloadableValue, Is.EqualTo("same"));
@@ -182,7 +182,7 @@ public class ConfigurationManagerTests
         WriteConfigFile(
             "simple_test_config.json",
             new { Name = "x", Value = 0, ReloadableValue = "x" });
-        var manager = new ConfigurationManager(_tempDir);
+        ConfigurationManager manager = new(_tempDir);
 
         File.Delete(Path.Combine(_configDir, "simple_test_config.json"));
 

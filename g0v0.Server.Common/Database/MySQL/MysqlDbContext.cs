@@ -77,6 +77,6 @@ public class MysqlDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(MysqlDbContext).Assembly,
-            type => type.Namespace == "g0v0.Server.Common.Database.MySQL.Configurations");
+            type => string.Equals(type.Namespace, "g0v0.Server.Common.Database.MySQL.Configurations", StringComparison.Ordinal));
     }
 }

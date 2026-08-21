@@ -41,7 +41,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <param name="options">The options to configure.</param>
     public void Configure(string? name, JwtBearerOptions options)
     {
-        if (name != JwtBearerDefaults.AuthenticationScheme)
+        if (!string.Equals(name, JwtBearerDefaults.AuthenticationScheme, StringComparison.Ordinal))
         {
             return;
         }
@@ -55,8 +55,8 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <param name="options">The options to configure.</param>
     public void Configure(JwtBearerOptions options)
     {
-        var generalConfig = _manager.Get<GeneralConfiguration>();
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(generalConfig.JwtSecretKey));
+        GeneralConfiguration generalConfig = _manager.Get<GeneralConfiguration>();
+        SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(generalConfig.JwtSecretKey));
 
         options.TokenValidationParameters = new TokenValidationParameters
         {

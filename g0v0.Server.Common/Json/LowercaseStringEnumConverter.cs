@@ -13,7 +13,7 @@ internal sealed class LowercaseStringEnumConverter : StringEnumConverter
     /// Initializes a new instance of the <see cref="LowercaseStringEnumConverter"/> class.
     /// </summary>
     public LowercaseStringEnumConverter()
-        : base(new LowercaseNamingStrategy(), false)
+        : base(new LowercaseNamingStrategy(), allowIntegerValues: false)
     {
     }
 }

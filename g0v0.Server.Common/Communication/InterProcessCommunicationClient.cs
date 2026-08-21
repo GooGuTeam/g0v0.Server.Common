@@ -124,7 +124,7 @@ public sealed class InterProcessCommunicationClient
     {
         ValidateHandlerRegistration(name, payloadType, handler);
 
-        if (!_noticeHandlers.TryAdd(name, new TypedHandlerRegistration(payloadType, handler, true)))
+        if (!_noticeHandlers.TryAdd(name, new TypedHandlerRegistration(payloadType: payloadType, handler: handler, includeSourceServer: true)))
         {
             throw new InvalidOperationException($"A notice handler named '{name}' is already registered.");
         }
@@ -201,7 +201,7 @@ public sealed class InterProcessCommunicationClient
     {
         ValidateName(name);
 
-        var message = new IpcMessage(IpcMessageType.Notice, name, Guid.NewGuid(), payload);
+        IpcMessage message = new(IpcMessageType.Notice, name, Guid.NewGuid(), payload);
         return PublishMessageAsync(targetServerIdentifier, message, cancellationToken);
     }
 
@@ -249,7 +249,7 @@ public sealed class InterProcessCommunicationClient
         ValidateName(name);
 
         Guid requestId = Guid.NewGuid();
-        var pendingRequest = new PendingRequest();
+        PendingRequest pendingRequest = new();
 
         if (!_pendingRequests.TryAdd(requestId, pendingRequest))
         {
@@ -257,14 +257,14 @@ public sealed class InterProcessCommunicationClient
         }
 
         // Updated to avoid capturing a variable that might be disposed
-        using var timeoutCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        var token = timeoutCancellationSource.Token;
+        using CancellationTokenSource timeoutCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        CancellationToken token = timeoutCancellationSource.Token;
         timeoutCancellationSource.CancelAfter(timeout ?? TimeSpan.FromSeconds(30));
-        using var cancellationRegistration = token.Register(() => pendingRequest.TrySetCanceled(token));
+        using CancellationTokenRegistration cancellationRegistration = token.Register(() => pendingRequest.TrySetCanceled(token));
 
         try
         {
-            var message = new IpcMessage(IpcMessageType.Request, name, requestId, payload);
+            IpcMessage message = new(IpcMessageType.Request, name, requestId, payload);
             await PublishMessageAsync(targetServerIdentifier, message, timeoutCancellationSource.Token).ConfigureAwait(false);
 
             JToken? responsePayload = await pendingRequest.Task.ConfigureAwait(false);
@@ -299,13 +299,10 @@ public sealed class InterProcessCommunicationClient
 
         if (payload is null || payload.Type == JTokenType.Null)
         {
-            if (targetType.IsValueType && Nullable.GetUnderlyingType(targetType) is null)
-            {
-                throw new JsonSerializationException(
-                    $"Cannot convert a null IPC payload to '{targetType.FullName}'.");
-            }
-
-            return null;
+            return targetType.IsValueType && Nullable.GetUnderlyingType(targetType) is null
+                ? throw new JsonSerializationException(
+                    $"Cannot convert a null IPC payload to '{targetType.FullName}'.")
+                : null;
         }
 
         object? convertedPayload = payload.ToObject(targetType, Serializer);
@@ -362,12 +359,12 @@ public sealed class InterProcessCommunicationClient
         object? payload = ConvertPayload(message.Data as JToken, handlerRegistration.PayloadType);
         if (handlerRegistration.IncludeSourceServer)
         {
-            var sourcedHandler = (Func<string, object?, Task>)handlerRegistration.Handler;
+            Func<string, object?, Task> sourcedHandler = (Func<string, object?, Task>)handlerRegistration.Handler;
             await sourcedHandler(message.SourceServer ?? string.Empty, payload).ConfigureAwait(false);
         }
         else
         {
-            var handler = (Func<object?, Task>)handlerRegistration.Handler;
+            Func<object?, Task> handler = (Func<object?, Task>)handlerRegistration.Handler;
             await handler(payload).ConfigureAwait(false);
         }
     }
@@ -516,13 +513,23 @@ public sealed class InterProcessCommunicationClient
 
         public Task<JToken?> Task => _completionSource.Task;
 
-        public bool TrySetCanceled(CancellationToken cancellationToken)
-            => _completionSource.TrySetCanceled(cancellationToken);
+        public void TrySetCanceled(CancellationToken cancellationToken)
+        {
+            // The bool result is not needed: the pending request may already have
+            // completed (e.g. timed out), and every caller deliberately ignores it.
+            _ = _completionSource.TrySetCanceled(cancellationToken);
+        }
 
-        public bool TrySetException(Exception exception)
-            => _completionSource.TrySetException(exception);
+        public void TrySetException(Exception exception)
+        {
+            // See TrySetCanceled: the result of the race is intentionally ignored.
+            _ = _completionSource.TrySetException(exception);
+        }
 
-        public bool TrySetResult(JToken? payload)
-            => _completionSource.TrySetResult(payload);
+        public void TrySetResult(JToken? payload)
+        {
+            // See TrySetCanceled: the result of the race is intentionally ignored.
+            _ = _completionSource.TrySetResult(payload);
+        }
     }
 }

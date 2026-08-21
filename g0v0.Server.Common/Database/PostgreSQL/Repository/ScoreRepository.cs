@@ -41,12 +41,9 @@ public class ScoreRepository(PostgreSqlDbContext context) : IScoreRepository, IP
     /// <inheritdoc/>
     public async Task<IReadOnlyList<Score>> GetRecentByUserIdAndModeAsync(int userId, int mode, int limit)
     {
-        if (limit <= 0)
-        {
-            return [];
-        }
-
-        return await context.Scores
+        return limit <= 0
+            ? []
+            : (IReadOnlyList<Score>)await context.Scores
             .Where(s => s.UserId == userId && s.Mode == mode)
             .OrderByDescending(s => s.EndedAt)
             .ThenByDescending(s => s.Id)
@@ -58,12 +55,9 @@ public class ScoreRepository(PostgreSqlDbContext context) : IScoreRepository, IP
     /// <inheritdoc/>
     public async Task<IReadOnlyList<Score>> GetBestByUserIdAndModeAsync(int userId, int mode, int limit)
     {
-        if (limit <= 0)
-        {
-            return [];
-        }
-
-        return await context.Scores
+        return limit <= 0
+            ? []
+            : (IReadOnlyList<Score>)await context.Scores
             .Where(s => s.UserId == userId && s.Mode == mode)
             .OrderByDescending(s => s.Pp)
             .ThenByDescending(s => s.Id)
@@ -103,9 +97,10 @@ public class ScoreRepository(PostgreSqlDbContext context) : IScoreRepository, IP
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 
+    /// <inheritdoc/>
     public async Task MarkScoreHasReplay(long scoreId)
     {
-        var score = await context.Scores
+        Score? score = await context.Scores
             .FirstOrDefaultAsync(s => s.Id == scoreId)
             .ConfigureAwait(false);
 

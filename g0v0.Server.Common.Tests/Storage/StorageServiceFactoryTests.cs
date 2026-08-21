@@ -31,7 +31,7 @@ public class StorageServiceFactoryTests
     [Test]
     public void Create_WithLocalStorage_ShouldParseSnakeCaseOptionsAndUsePathProvider()
     {
-        var configuration = new StorageConfiguration
+        StorageConfiguration configuration = new()
         {
             Type = StorageConfiguration.StorageType.Local,
             Options = JObject.Parse("""{ "local_storage_path": "files" }"""),
@@ -39,14 +39,14 @@ public class StorageServiceFactoryTests
 
         StorageService service = StorageServiceFactory.Create(configuration, new TestPathProvider(_tempDir));
 
-        var local = (LocalStorageService)service;
+        LocalStorageService local = (LocalStorageService)service;
         Assert.That(local.StoragePath, Is.EqualTo(Path.GetFullPath(Path.Combine(_tempDir, "files"))));
     }
 
     [Test]
     public void Create_WithLocalStorageWithoutPathProvider_ShouldThrowInvalidOperationException()
     {
-        var configuration = new StorageConfiguration
+        StorageConfiguration configuration = new()
         {
             Type = StorageConfiguration.StorageType.Local,
             Options = JObject.Parse("""{ "local_storage_path": "files" }"""),
@@ -58,7 +58,7 @@ public class StorageServiceFactoryTests
     [Test]
     public async Task Create_WithS3Storage_ShouldParseSnakeCaseOptions()
     {
-        var configuration = new StorageConfiguration
+        StorageConfiguration configuration = new()
         {
             Type = StorageConfiguration.StorageType.S3,
             Options = JObject.Parse(
@@ -75,7 +75,7 @@ public class StorageServiceFactoryTests
 
         await using StorageService service = StorageServiceFactory.Create(configuration);
 
-        var s3 = (S3StorageService)service;
+        S3StorageService s3 = (S3StorageService)service;
         Assert.That(s3.BucketName, Is.EqualTo("bucket"));
         Assert.That(s3.RegionName, Is.EqualTo("us-east-1"));
         Assert.That(s3.PublicUrlBase, Is.EqualTo("https://cdn.example.com"));
@@ -85,7 +85,7 @@ public class StorageServiceFactoryTests
     [Test]
     public async Task Create_WithR2Storage_ShouldParseSnakeCaseOptions()
     {
-        var configuration = new StorageConfiguration
+        StorageConfiguration configuration = new()
         {
             Type = StorageConfiguration.StorageType.R2,
             Options = JObject.Parse(
@@ -102,7 +102,7 @@ public class StorageServiceFactoryTests
 
         await using StorageService service = StorageServiceFactory.Create(configuration);
 
-        var r2 = (CloudflareR2StorageService)service;
+        CloudflareR2StorageService r2 = (CloudflareR2StorageService)service;
         Assert.That(r2.AccountId, Is.EqualTo("account"));
         Assert.That(r2.BucketName, Is.EqualTo("bucket"));
         Assert.That(r2.RegionName, Is.EqualTo("auto"));
@@ -111,13 +111,13 @@ public class StorageServiceFactoryTests
 
     private sealed class TestPathProvider : IPathProvider
     {
-        private readonly string basePath;
+        private readonly string _basePath;
 
         public TestPathProvider(string basePath)
         {
-            this.basePath = basePath;
+            this._basePath = basePath;
         }
 
-        public string GetBasePath() => basePath;
+        public string GetBasePath() => _basePath;
     }
 }

@@ -12,11 +12,11 @@ public class PostgreSqlDbContextFactory
     /// <inheritdoc/>
     public PostgreSqlDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<PostgreSqlDbContext>();
+        DbContextOptionsBuilder<PostgreSqlDbContext> optionsBuilder = new();
 
-        var conn =
+        string? conn =
             args.FirstOrDefault(x => x.StartsWith("--conn=", StringComparison.Ordinal))?.Split('=')[1]
-            ?? args.SkipWhile(x => x != "--conn").Skip(1).FirstOrDefault()
+            ?? args.SkipWhile(x => !string.Equals(x, "--conn", StringComparison.Ordinal)).Skip(1).FirstOrDefault()
             ?? Environment.GetEnvironmentVariable("DB_CONN");
 
         if (string.IsNullOrEmpty(conn))

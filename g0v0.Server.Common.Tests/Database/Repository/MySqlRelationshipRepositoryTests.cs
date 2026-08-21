@@ -17,7 +17,7 @@ public class MySqlRelationshipRepositoryTests
     [SetUp]
     public void SetUp()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
@@ -36,19 +36,19 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task GetByUserIdAsync_WhenRelationshipsExist_ShouldReturnAllForUser()
     {
-        var relationship1 = new Relationship
+        Relationship relationship1 = new()
         {
             UserId = 1,
             TargetId = 2,
             Type = RelationshipType.Follow,
         };
-        var relationship2 = new Relationship
+        Relationship relationship2 = new()
         {
             UserId = 1,
             TargetId = 3,
             Type = RelationshipType.Block,
         };
-        var relationship3 = new Relationship
+        Relationship relationship3 = new()
         {
             UserId = 4,
             TargetId = 1,
@@ -78,19 +78,19 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task GetByTargetIdAsync_WhenRelationshipsExist_ShouldReturnAllForTarget()
     {
-        var relationship1 = new Relationship
+        Relationship relationship1 = new()
         {
             UserId = 1,
             TargetId = 5,
             Type = RelationshipType.Follow,
         };
-        var relationship2 = new Relationship
+        Relationship relationship2 = new()
         {
             UserId = 2,
             TargetId = 5,
             Type = RelationshipType.Follow,
         };
-        var relationship3 = new Relationship
+        Relationship relationship3 = new()
         {
             UserId = 5,
             TargetId = 1,
@@ -120,7 +120,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task GetRelationshipAsync_WhenRelationshipExists_ShouldReturnIt()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -148,7 +148,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task GetRelationshipAsync_WhenOnlyReversedRelationshipExists_ShouldReturnNull()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 2,
             TargetId = 1,
@@ -169,7 +169,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task IsFollowingAsync_WhenFollowRelationshipExists_ShouldReturnTrue()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -186,7 +186,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task IsFollowingAsync_WhenBlockRelationshipExists_ShouldReturnFalse()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -215,7 +215,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task IsBlockedAsync_WhenBlockRelationshipExists_ShouldReturnTrue()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -232,7 +232,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task IsBlockedAsync_WhenFollowRelationshipExists_ShouldReturnFalse()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -261,7 +261,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task CreateAsync_ShouldAddRelationshipToDatabase()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -280,7 +280,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task CreateAsync_ShouldSetId()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -299,7 +299,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task UpdateAsync_ShouldUpdateRelationshipInDatabase()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -325,7 +325,7 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public async Task DeleteAsync_ShouldRemoveRelationshipFromDatabase()
     {
-        var relationship = new Relationship
+        Relationship relationship = new()
         {
             UserId = 1,
             TargetId = 2,
@@ -358,33 +358,33 @@ public class MySqlRelationshipRepositoryTests
     [Test]
     public void MysqlDbContext_ShouldApplyRelationshipConfigurationAutomatically()
     {
-        var options = new DbContextOptionsBuilder<MysqlDbContext>()
+        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
             .UseMySql(
                 "Server=localhost;Database=g0v0_test;User=root;Password=test;",
                 new MySqlServerVersion(new Version(8, 0, 36)))
             .Options;
 
-        using var relationalContext = new MysqlDbContext(options);
+        using MysqlDbContext relationalContext = new(options);
 
-        var entityType = relationalContext.Model.FindEntityType(typeof(Relationship));
+        Microsoft.EntityFrameworkCore.Metadata.IEntityType? entityType = relationalContext.Model.FindEntityType(typeof(Relationship));
 
         Assert.That(entityType, Is.Not.Null);
         Assert.That(entityType!.GetTableName(), Is.EqualTo("relationship"));
 
-        var typeProperty = entityType.FindProperty(nameof(Relationship.Type));
+        Microsoft.EntityFrameworkCore.Metadata.IProperty? typeProperty = entityType.FindProperty(nameof(Relationship.Type));
         Assert.That(typeProperty, Is.Not.Null);
         Assert.That(typeProperty!.GetColumnName(), Is.EqualTo("type"));
         Assert.That(typeProperty.GetColumnType(), Is.EqualTo("enum('FOLLOW','BLOCK')"));
         Assert.That(typeProperty.GetValueConverter(), Is.Not.Null);
 
-        var userForeignKey = entityType.FindNavigation(nameof(Relationship.User))!.ForeignKey;
-        Assert.That(userForeignKey.Properties.Select(p => p.Name), Is.EqualTo(new[] { nameof(Relationship.UserId) }));
+        Microsoft.EntityFrameworkCore.Metadata.IForeignKey userForeignKey = entityType.FindNavigation(nameof(Relationship.User))!.ForeignKey;
+        Assert.That(userForeignKey.Properties.Select(p => p.Name), Is.EqualTo([nameof(Relationship.UserId)]));
         Assert.That(userForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(User)));
         Assert.That(userForeignKey.DeleteBehavior, Is.EqualTo(DeleteBehavior.Restrict));
         Assert.That(userForeignKey.GetConstraintName(), Is.EqualTo("relationship_ibfk_2"));
 
-        var targetForeignKey = entityType.FindNavigation(nameof(Relationship.Target))!.ForeignKey;
-        Assert.That(targetForeignKey.Properties.Select(p => p.Name), Is.EqualTo(new[] { nameof(Relationship.TargetId) }));
+        Microsoft.EntityFrameworkCore.Metadata.IForeignKey targetForeignKey = entityType.FindNavigation(nameof(Relationship.Target))!.ForeignKey;
+        Assert.That(targetForeignKey.Properties.Select(p => p.Name), Is.EqualTo([nameof(Relationship.TargetId)]));
         Assert.That(targetForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(User)));
         Assert.That(targetForeignKey.DeleteBehavior, Is.EqualTo(DeleteBehavior.Restrict));
         Assert.That(targetForeignKey.GetConstraintName(), Is.EqualTo("relationship_ibfk_1"));

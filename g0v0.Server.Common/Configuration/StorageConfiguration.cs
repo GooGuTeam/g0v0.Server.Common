@@ -11,6 +11,9 @@ namespace g0v0.Server.Common.Configuration;
 [ConfigurationFile("storage")]
 public class StorageConfiguration
 {
+    /// <summary>
+    /// Represents the type of storage backend.
+    /// </summary>
     public enum StorageType
     {
         /// <summary>

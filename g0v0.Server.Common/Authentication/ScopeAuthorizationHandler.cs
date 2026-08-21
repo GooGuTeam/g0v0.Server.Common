@@ -23,21 +23,21 @@ public class ScopeAuthorizationHandler(ConfigurationManager config)
         AuthorizationHandlerContext context,
         ScopeAuthorizationRequirement requirement)
     {
-        var generalConfig = config.Get<GeneralConfiguration>();
+        GeneralConfiguration generalConfig = config.Get<GeneralConfiguration>();
 
-        var clientIdClaim = context.User.FindFirst(OAuthClaimTypes.ClientId);
+        System.Security.Claims.Claim? clientIdClaim = context.User.FindFirst(OAuthClaimTypes.ClientId);
         if (clientIdClaim != null)
         {
-            var clientId = clientIdClaim.Value;
-            if (clientId == generalConfig.OsuClientId.ToString() ||
-                clientId == generalConfig.OsuWebClientId.ToString())
+            string clientId = clientIdClaim.Value;
+            if (string.Equals(clientId, generalConfig.OsuClientId.ToString(), StringComparison.Ordinal) ||
+string.Equals(clientId, generalConfig.OsuWebClientId.ToString(), StringComparison.Ordinal))
             {
                 context.Succeed(requirement);
                 return Task.CompletedTask;
             }
         }
 
-        var scopeClaims = context.User.FindAll(OAuthClaimTypes.Scope)
+        HashSet<string> scopeClaims = context.User.FindAll(OAuthClaimTypes.Scope)
             .Select(c => c.Value)
             .ToHashSet(StringComparer.Ordinal);
 

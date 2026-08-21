@@ -12,8 +12,8 @@ public class ReloadableAttributeTests
     [Test]
     public void Attribute_ShouldOnlyTargetProperties()
     {
-        var usageAttr = typeof(ReloadableAttribute)
-            .GetCustomAttributes(typeof(AttributeUsageAttribute), false)
+        AttributeUsageAttribute usageAttr = typeof(ReloadableAttribute)
+            .GetCustomAttributes(attributeType: typeof(AttributeUsageAttribute), inherit: false)
             .Cast<AttributeUsageAttribute>()
             .Single();
 
@@ -23,8 +23,8 @@ public class ReloadableAttributeTests
     [Test]
     public void Attribute_CanBeAppliedToProperty()
     {
-        var property = typeof(SampleClassWithReloadable).GetProperty(nameof(SampleClassWithReloadable.ReloadableProp))!;
-        var attr = property.GetCustomAttributes(typeof(ReloadableAttribute), false)
+        System.Reflection.PropertyInfo property = typeof(SampleClassWithReloadable).GetProperty(nameof(SampleClassWithReloadable.ReloadableProp))!;
+        ReloadableAttribute? attr = property.GetCustomAttributes(attributeType: typeof(ReloadableAttribute), inherit: false)
             .Cast<ReloadableAttribute>()
             .SingleOrDefault();
 
@@ -34,8 +34,8 @@ public class ReloadableAttributeTests
     [Test]
     public void Attribute_IsNotAppliedToNonReloadableProperty()
     {
-        var property = typeof(SampleClassWithReloadable).GetProperty(nameof(SampleClassWithReloadable.NormalProp))!;
-        var attr = property.GetCustomAttributes(typeof(ReloadableAttribute), false)
+        System.Reflection.PropertyInfo property = typeof(SampleClassWithReloadable).GetProperty(nameof(SampleClassWithReloadable.NormalProp))!;
+        ReloadableAttribute? attr = property.GetCustomAttributes(attributeType: typeof(ReloadableAttribute), inherit: false)
             .Cast<ReloadableAttribute>()
             .SingleOrDefault();
 

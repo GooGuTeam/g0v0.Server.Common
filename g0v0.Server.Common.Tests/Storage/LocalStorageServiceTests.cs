@@ -30,9 +30,9 @@ public class LocalStorageServiceTests
     [Test]
     public void Constructor_WithRelativePathAndPathProvider_ShouldResolveUnderBasePath()
     {
-        var settings = new LocalStorageSettings { LocalStoragePath = "data/storage" };
+        LocalStorageSettings settings = new() { LocalStoragePath = "data/storage" };
 
-        var service = new LocalStorageService(settings, new TestPathProvider(_tempDir));
+        LocalStorageService service = new(settings, new TestPathProvider(_tempDir));
 
         Assert.That(service.StoragePath, Is.EqualTo(Path.GetFullPath(Path.Combine(_tempDir, "data/storage"))));
         Assert.That(Directory.Exists(service.StoragePath), Is.True);
@@ -41,8 +41,8 @@ public class LocalStorageServiceTests
     [Test]
     public async Task WriteReadExistsDelete_ShouldRoundTripContentAndCleanEmptyDirectories()
     {
-        var service = new LocalStorageService(Path.Combine(_tempDir, "storage"));
-        byte[] content = { 1, 2, 3 };
+        LocalStorageService service = new(Path.Combine(_tempDir, "storage"));
+        byte[] content = [1, 2, 3];
 
         await service.WriteFileAsync("/avatars/user.bin", content);
 
@@ -58,7 +58,7 @@ public class LocalStorageServiceTests
     [Test]
     public void ReadFileAsync_WhenFileDoesNotExist_ShouldThrowFileNotFoundException()
     {
-        var service = new LocalStorageService(Path.Combine(_tempDir, "storage"));
+        LocalStorageService service = new(Path.Combine(_tempDir, "storage"));
 
         Assert.ThrowsAsync<FileNotFoundException>(async () => await service.ReadFileAsync("missing.bin").ConfigureAwait(false));
     }
@@ -66,17 +66,17 @@ public class LocalStorageServiceTests
     [Test]
     public void WriteFileAsync_WithPathEscape_ShouldThrowArgumentException()
     {
-        var service = new LocalStorageService(Path.Combine(_tempDir, "storage"));
+        LocalStorageService service = new(Path.Combine(_tempDir, "storage"));
 
         Assert.ThrowsAsync<ArgumentException>(
-            async () => await service.WriteFileAsync("../outside.bin", new byte[] { 1 }).ConfigureAwait(false));
+            async () => await service.WriteFileAsync("../outside.bin", [1]).ConfigureAwait(false));
         Assert.That(File.Exists(Path.Combine(_tempDir, "outside.bin")), Is.False);
     }
 
     [Test]
     public async Task GetFileUrlAsync_ShouldReturnLocalFileRoute()
     {
-        var service = new LocalStorageService(Path.Combine(_tempDir, "storage"));
+        LocalStorageService service = new(Path.Combine(_tempDir, "storage"));
 
         string url = await service.GetFileUrlAsync("/dir/file.txt").ConfigureAwait(false);
 
@@ -86,7 +86,7 @@ public class LocalStorageServiceTests
     [Test]
     public void GetFileNameByUrl_ShouldExtractFileRoutePath()
     {
-        var service = new LocalStorageService(Path.Combine(_tempDir, "storage"));
+        LocalStorageService service = new(Path.Combine(_tempDir, "storage"));
 
         Assert.That(service.GetFileNameByUrl("file/dir/file.txt"), Is.EqualTo("dir/file.txt"));
         Assert.That(service.GetFileNameByUrl("http://localhost/file/dir/file.txt"), Is.EqualTo("dir/file.txt"));
@@ -95,13 +95,13 @@ public class LocalStorageServiceTests
 
     private sealed class TestPathProvider : IPathProvider
     {
-        private readonly string basePath;
+        private readonly string _basePath;
 
         public TestPathProvider(string basePath)
         {
-            this.basePath = basePath;
+            this._basePath = basePath;
         }
 
-        public string GetBasePath() => basePath;
+        public string GetBasePath() => _basePath;
     }
 }

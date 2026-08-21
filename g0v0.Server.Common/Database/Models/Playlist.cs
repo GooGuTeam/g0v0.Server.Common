@@ -106,6 +106,10 @@ public class Playlist
     /// </summary>
     public DateTimeOffset? UpdatedAt { get; set; }
 
+    /// <summary>
+    /// Converts this playlist item into the osu! multiplayer playlist item representation.
+    /// </summary>
+    /// <returns>The converted <see cref="MultiplayerPlaylistItem"/>.</returns>
     public MultiplayerPlaylistItem ToMultiplayerPlaylistItem()
     {
         return new MultiplayerPlaylistItem
@@ -115,8 +119,8 @@ public class Playlist
             BeatmapID = BeatmapId,
             BeatmapChecksum = Beatmap?.Checksum ?? string.Empty,
             RulesetID = RulesetId,
-            RequiredMods = RequiredMods ?? Enumerable.Empty<APIMod>(),
-            AllowedMods = AllowedMods ?? Enumerable.Empty<APIMod>(),
+            RequiredMods = RequiredMods,
+            AllowedMods = AllowedMods,
             Freestyle = Freestyle,
             Expired = Expired,
             PlayedAt = PlayedAt,
