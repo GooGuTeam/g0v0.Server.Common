@@ -70,6 +70,29 @@ Dual-backend EF Core: MySQL (legacy v1 schema) and PostgreSQL (v2). Selection is
       backend is selected.
     - If a new repository is not being resolved at runtime, check these two rules first.
 
+### Multiplayer room entities
+
+Multiplayer room state is persisted through three shared models: `Room`, `Playlist` (table `room_playlists` on MySQL,
+`playlists` on PostgreSQL) and `RoomParticipatedUser`. `IRoomRepository` is the single persistence contract used by the
+Realtime server; both backends implement the full set of room/playlist/participant operations, including
+`AnyScoreTokenExistsFor` (guards `RemovePlaylistItem` against deleting items with associated score tokens).
+
+- MySQL mappings live in `Database/MySQL/Configurations/RoomConfig.cs` and `PlaylistConfig.cs`. Only fields EF Core
+  cannot infer are mapped explicitly: the `rooms`/`room_playlists` table names, native MySQL enum columns for
+  `category`/`type`/`queue_mode`/`status`/`win_condition`, `datetime` columns for `DateTimeOffset` values, JSON columns
+  for mod lists (empty lists are serialized as `[]`, never NULL — osu-web's `PlaylistModel` rejects null mods), and the
+  ignored `max_participants`/`tournament_mode` columns which do not exist in the legacy schema. Everything else is left
+  to EF Core conventions — do not duplicate derivable mappings.
+- The MySQL schema is the legacy lazer API schema (see `/home/mingxuangame/code/osu_lazer_api/app/database/` and its
+  migrations). Semantics follow `app/router/lio.py` (LegacyIO): room creation stores `participant_count = 1` without a
+  host participant row; joining deduplicates active participation records (keeping the earliest, refreshing
+  `joined_at`); leaving is idempotent, updates `participant_count`, and ends the room (`ends_at`) when no active
+  participants remain.
+- PostgreSQL uses `Database/PostgreSQL/Configurations/RoomConfig.cs` and `PlaylistConfig.cs` with string-stored enums
+  and `jsonb` mod columns, plus a dedicated EF migration for the three tables.
+- `Room.Id`, `Playlist.RoomId` and `RoomParticipatedUser.RoomId` are `long` on both backends. Do not widen the
+  `users.id`/`user_id` integer columns when adding room relations.
+
 ### Migrations (PostgreSQL only)
 
 Only PostgreSQL has a design-time factory (`PostgreSqlDbContextFactory`). To run EF tools you must provide a connection
