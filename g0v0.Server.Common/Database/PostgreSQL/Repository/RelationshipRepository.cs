@@ -13,17 +13,17 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 public class RelationshipRepository(PostgreSqlDbContext context) : IRelationshipRepository, IPostgreSqlRepository
 {
     /// <inheritdoc/>
-    public async Task<int[]> GetAllFriendIds(long userId)
+    public async Task<int[]> GetAllFriendIds(int userId)
     {
         return await context.Relationships
             .Where(r => r.UserId == userId && r.Type == RelationshipType.Follow)
-            .Select(r => (int)r.TargetId)
+            .Select(r => r.TargetId)
             .ToArrayAsync()
             .ConfigureAwait(false);
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Relationship>> GetByUserIdAsync(long userId)
+    public async Task<IReadOnlyList<Relationship>> GetByUserIdAsync(int userId)
     {
         return await context.Relationships
             .Where(r => r.UserId == userId)
@@ -32,7 +32,7 @@ public class RelationshipRepository(PostgreSqlDbContext context) : IRelationship
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Relationship>> GetByTargetIdAsync(long targetId)
+    public async Task<IReadOnlyList<Relationship>> GetByTargetIdAsync(int targetId)
     {
         return await context.Relationships
             .Where(r => r.TargetId == targetId)
@@ -41,7 +41,7 @@ public class RelationshipRepository(PostgreSqlDbContext context) : IRelationship
     }
 
     /// <inheritdoc />
-    public async Task<Relationship?> GetRelationshipAsync(long userId, long targetId)
+    public async Task<Relationship?> GetRelationshipAsync(int userId, int targetId)
     {
         return await context.Relationships
             .Where(r => r.UserId == userId && r.TargetId == targetId)
@@ -50,7 +50,7 @@ public class RelationshipRepository(PostgreSqlDbContext context) : IRelationship
     }
 
     /// <inheritdoc />
-    public async Task<bool> IsFollowingAsync(long userId, long targetId)
+    public async Task<bool> IsFollowingAsync(int userId, int targetId)
     {
         return await context.Relationships
             .AnyAsync(r => r.UserId == userId && r.TargetId == targetId && r.Type == RelationshipType.Follow)
@@ -58,7 +58,7 @@ public class RelationshipRepository(PostgreSqlDbContext context) : IRelationship
     }
 
     /// <inheritdoc />
-    public async Task<bool> IsBlockedAsync(long userId, long targetId)
+    public async Task<bool> IsBlockedAsync(int userId, int targetId)
     {
         return await context.Relationships
             .AnyAsync(r => r.UserId == userId && r.TargetId == targetId && r.Type == RelationshipType.Block)

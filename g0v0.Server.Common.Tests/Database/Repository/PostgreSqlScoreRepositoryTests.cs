@@ -94,7 +94,7 @@ public class PostgreSqlScoreRepositoryTests
 
     private static ScoreModel CreateScore(
         long id,
-        long userId = 300,
+        int userId = 300,
         int mode = 0,
         bool hasReplay = true,
         DateTimeOffset? endedAt = null) => new()

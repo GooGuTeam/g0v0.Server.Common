@@ -14,21 +14,21 @@ public interface IRelationshipRepository
     /// </summary>
     /// <param name="userId">The user ID to retrieve friend IDs for.</param>
     /// <returns>A array of friend IDs.</returns>
-    Task<int[]> GetAllFriendIds(long userId);
+    Task<int[]> GetAllFriendIds(int userId);
 
     /// <summary>
     /// Gets all relationships where the specified user is the source (e.g., who they follow/block).
     /// </summary>
     /// <param name="userId">The source user ID.</param>
     /// <returns>A list of relationships initiated by the user.</returns>
-    Task<IReadOnlyList<Relationship>> GetByUserIdAsync(long userId);
+    Task<IReadOnlyList<Relationship>> GetByUserIdAsync(int userId);
 
     /// <summary>
     /// Gets all relationships where the specified user is the target (e.g., their followers).
     /// </summary>
     /// <param name="targetId">The target user ID.</param>
     /// <returns>A list of relationships targeting the user.</returns>
-    Task<IReadOnlyList<Relationship>> GetByTargetIdAsync(long targetId);
+    Task<IReadOnlyList<Relationship>> GetByTargetIdAsync(int targetId);
 
     /// <summary>
     /// Gets a specific relationship between two users.
@@ -36,7 +36,7 @@ public interface IRelationshipRepository
     /// <param name="userId">The source user ID.</param>
     /// <param name="targetId">The target user ID.</param>
     /// <returns>The matching relationship if found; otherwise, <see langword="null"/>.</returns>
-    Task<Relationship?> GetRelationshipAsync(long userId, long targetId);
+    Task<Relationship?> GetRelationshipAsync(int userId, int targetId);
 
     /// <summary>
     /// Checks whether the source user is following the target user.
@@ -44,7 +44,7 @@ public interface IRelationshipRepository
     /// <param name="userId">The source user ID.</param>
     /// <param name="targetId">The target user ID.</param>
     /// <returns><see langword="true"/> if a follow relationship exists; otherwise, <see langword="false"/>.</returns>
-    Task<bool> IsFollowingAsync(long userId, long targetId);
+    Task<bool> IsFollowingAsync(int userId, int targetId);
 
     /// <summary>
     /// Checks whether the source user has blocked the target user.
@@ -52,7 +52,7 @@ public interface IRelationshipRepository
     /// <param name="userId">The source user ID.</param>
     /// <param name="targetId">The target user ID.</param>
     /// <returns><see langword="true"/> if a block relationship exists; otherwise, <see langword="false"/>.</returns>
-    Task<bool> IsBlockedAsync(long userId, long targetId);
+    Task<bool> IsBlockedAsync(int userId, int targetId);
 
     /// <summary>
     /// Creates a new relationship record.

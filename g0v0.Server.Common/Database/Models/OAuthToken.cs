@@ -28,7 +28,7 @@ public class OAuthToken
     /// <summary>
     /// Gets or sets the user ID associated with this token. This is a nullable field, as some tokens may not be associated with a user (e.g., client credentials flow).
     /// </summary>
-    public long? UserId { get; set; }
+    public int? UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the OAuth client ID that issued the token.

@@ -14,14 +14,14 @@ public interface IUserRepository
     /// </summary>
     /// <param name="userId">The primary key of the user.</param>
     /// <returns>The matching user if found; otherwise, <see langword="null"/>.</returns>
-    Task<User?> GetByIdAsync(long userId);
+    Task<User?> GetByIdAsync(int userId);
 
     /// <summary>
     /// Gets the username for a user by their unique identifier.
     /// </summary>
     /// <param name="userId">The user ID.</param>
     /// <returns>The username if found; otherwise, <see langword="null"/>.</returns>
-    Task<string?> GetUsernameByIdAsync(long userId);
+    Task<string?> GetUsernameByIdAsync(int userId);
 
     /// <summary>
     /// Gets a user by their unique username.

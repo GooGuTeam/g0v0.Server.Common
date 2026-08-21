@@ -19,7 +19,7 @@ public class User
     /// </summary>
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public long Id { get; set; }
+    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the avatar image URL.

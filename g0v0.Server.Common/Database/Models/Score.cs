@@ -47,7 +47,7 @@ public class Score
     /// <summary>
     /// Gets or sets the submitting user ID.
     /// </summary>
-    public long UserId { get; set; }
+    public int UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the score accuracy.

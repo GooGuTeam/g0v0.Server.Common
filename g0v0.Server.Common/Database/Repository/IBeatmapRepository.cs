@@ -35,7 +35,7 @@ public interface IBeatmapRepository
     /// </summary>
     /// <param name="mapperId">The mapper user ID.</param>
     /// <returns>A list of beatmaps created by the specified mapper.</returns>
-    Task<IReadOnlyList<Beatmap>> GetByMapperIdAsync(long mapperId);
+    Task<IReadOnlyList<Beatmap>> GetByMapperIdAsync(int mapperId);
 
     /// <summary>
     /// Creates a new beatmap record.

@@ -293,7 +293,7 @@ public class MySqlScoreRepositoryTests
     private static ScoreModel CreateScore(
         long id = 100,
         int beatmapId = 200,
-        long userId = 300,
+        int userId = 300,
         int mode = 0,
         string checksum = "0123456789abcdef0123456789abcdef",
         double pp = 250,

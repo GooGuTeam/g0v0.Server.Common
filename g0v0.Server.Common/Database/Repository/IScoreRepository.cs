@@ -28,7 +28,7 @@ public interface IScoreRepository
     /// </summary>
     /// <param name="userId">The user ID.</param>
     /// <returns>A list of scores belonging to the user.</returns>
-    Task<IReadOnlyList<Score>> GetByUserIdAsync(long userId);
+    Task<IReadOnlyList<Score>> GetByUserIdAsync(int userId);
 
     /// <summary>
     /// Gets recent scores for a user and mode, ordered by end time descending.
@@ -37,7 +37,7 @@ public interface IScoreRepository
     /// <param name="mode">The legacy mode integer.</param>
     /// <param name="limit">The maximum number of results to return.</param>
     /// <returns>The most recent scores matching the filter.</returns>
-    Task<IReadOnlyList<Score>> GetRecentByUserIdAndModeAsync(long userId, int mode, int limit);
+    Task<IReadOnlyList<Score>> GetRecentByUserIdAndModeAsync(int userId, int mode, int limit);
 
     /// <summary>
     /// Gets best scores for a user and mode, ordered by PP descending.
@@ -46,7 +46,7 @@ public interface IScoreRepository
     /// <param name="mode">The legacy mode integer.</param>
     /// <param name="limit">The maximum number of results to return.</param>
     /// <returns>The highest-PP scores matching the filter.</returns>
-    Task<IReadOnlyList<Score>> GetBestByUserIdAndModeAsync(long userId, int mode, int limit);
+    Task<IReadOnlyList<Score>> GetBestByUserIdAndModeAsync(int userId, int mode, int limit);
 
     /// <summary>
     /// Gets the score attached to a score upload token.

@@ -25,12 +25,12 @@ public class Relationship
     /// <summary>
     /// Gets or sets the user ID who initiated the relationship.
     /// </summary>
-    public long UserId { get; set; }
+    public int UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the target user ID of the relationship.
     /// </summary>
-    public long TargetId { get; set; }
+    public int TargetId { get; set; }
 
     /// <summary>
     /// Gets or sets the type of the relationship.

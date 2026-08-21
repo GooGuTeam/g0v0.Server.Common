@@ -107,7 +107,7 @@ public class PostgreSqlUserRepositoryTests
         Assert.That(_repository, Is.InstanceOf<IPostgreSqlRepository>());
     }
 
-    private static User CreateUser(long id, string username) => new()
+    private static User CreateUser(int id, string username) => new()
     {
         Id = id,
         Username = username,

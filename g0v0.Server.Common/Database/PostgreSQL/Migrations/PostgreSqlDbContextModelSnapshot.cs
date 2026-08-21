@@ -17,7 +17,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.14")
+                .HasAnnotation("ProductVersion", "8.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -179,8 +179,8 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("token_type");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -209,6 +209,88 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.ToTable("oauth_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.Playlist", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AllowedMods")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("allowed_mods");
+
+                    b.Property<int>("BeatmapId")
+                        .HasColumnType("integer")
+                        .HasColumnName("beatmap_id");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("Expired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("expired");
+
+                    b.Property<bool>("Freestyle")
+                        .HasColumnType("boolean")
+                        .HasColumnName("freestyle");
+
+                    b.Property<int>("OwnerId")
+                        .HasColumnType("integer")
+                        .HasColumnName("owner_id");
+
+                    b.Property<DateTimeOffset?>("PlayedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("played_at");
+
+                    b.Property<int>("PlaylistOrder")
+                        .HasColumnType("integer")
+                        .HasColumnName("playlist_order");
+
+                    b.Property<string>("RequiredMods")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("required_mods");
+
+                    b.Property<long>("RoomId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("RulesetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ruleset_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<int?>("WinCondition")
+                        .HasColumnType("integer")
+                        .HasColumnName("win_condition");
+
+                    b.HasKey("Id")
+                        .HasName("pk_playlists");
+
+                    b.HasIndex("BeatmapId")
+                        .HasDatabaseName("ix_playlists_beatmap_id");
+
+                    b.HasIndex("OwnerId")
+                        .HasDatabaseName("ix_playlists_owner_id");
+
+                    b.HasIndex("RoomId")
+                        .HasDatabaseName("ix_playlists_room_id");
+
+                    b.ToTable("playlists", (string)null);
+                });
+
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.Relationship", b =>
                 {
                     b.Property<int>("Id")
@@ -218,16 +300,16 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<long>("TargetId")
-                        .HasColumnType("bigint")
+                    b.Property<int>("TargetId")
+                        .HasColumnType("integer")
                         .HasColumnName("target_id");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer")
                         .HasColumnName("type");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -240,6 +322,147 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasDatabaseName("ix_relationship_user_id");
 
                     b.ToTable("relationship", (string)null);
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.Room", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("AutoSkip")
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_skip");
+
+                    b.Property<int>("AutoStartDuration")
+                        .HasColumnType("integer")
+                        .HasColumnName("auto_start_duration");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("category");
+
+                    b.Property<int>("ChannelId")
+                        .HasColumnType("integer")
+                        .HasColumnName("channel_id");
+
+                    b.Property<DateTimeOffset?>("EndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ends_at");
+
+                    b.Property<int?>("HostId")
+                        .HasColumnType("integer")
+                        .HasColumnName("host_id");
+
+                    b.Property<int?>("MaxAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("max_attempts");
+
+                    b.Property<byte?>("MaxParticipants")
+                        .HasColumnType("smallint")
+                        .HasColumnName("max_participants");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("ParticipantCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("participant_count");
+
+                    b.Property<string>("Password")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("password");
+
+                    b.Property<string>("QueueMode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("queue_mode");
+
+                    b.Property<DateTimeOffset?>("StartsAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("starts_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("status");
+
+                    b.Property<bool>("TournamentMode")
+                        .HasColumnType("boolean")
+                        .HasColumnName("tournament_mode");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_rooms");
+
+                    b.HasIndex("Category")
+                        .HasDatabaseName("ix_rooms_category");
+
+                    b.HasIndex("HostId")
+                        .HasDatabaseName("ix_rooms_host_id");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("ix_rooms_id");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("ix_rooms_name");
+
+                    b.ToTable("rooms", (string)null);
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.RoomParticipatedUser", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("joined_at");
+
+                    b.Property<DateTimeOffset?>("LeftAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("left_at");
+
+                    b.Property<long>("RoomId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_room_participated_users");
+
+                    b.HasIndex("RoomId")
+                        .HasDatabaseName("ix_room_participated_users_room_id");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_room_participated_users_user_id");
+
+                    b.ToTable("room_participated_users", (string)null);
                 });
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.Score", b =>
@@ -362,8 +585,8 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("type");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -433,8 +656,8 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -457,12 +680,12 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.User", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AvatarUrl")
                         .IsRequired()
@@ -533,6 +756,36 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.Playlist", b =>
+                {
+                    b.HasOne("g0v0.Server.Common.Database.Models.Beatmap", "Beatmap")
+                        .WithMany()
+                        .HasForeignKey("BeatmapId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlists_beatmaps_beatmap_id");
+
+                    b.HasOne("g0v0.Server.Common.Database.Models.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlists_users_owner_id");
+
+                    b.HasOne("g0v0.Server.Common.Database.Models.Room", "Room")
+                        .WithMany("Playlists")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_playlists_rooms_room_id");
+
+                    b.Navigation("Beatmap");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Room");
+                });
+
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.Relationship", b =>
                 {
                     b.HasOne("g0v0.Server.Common.Database.Models.User", "Target")
@@ -550,6 +803,37 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasConstraintName("fk_relationship_users_user_id");
 
                     b.Navigation("Target");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.Room", b =>
+                {
+                    b.HasOne("g0v0.Server.Common.Database.Models.User", "Host")
+                        .WithMany()
+                        .HasForeignKey("HostId")
+                        .HasConstraintName("fk_rooms_users_host_id");
+
+                    b.Navigation("Host");
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.RoomParticipatedUser", b =>
+                {
+                    b.HasOne("g0v0.Server.Common.Database.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_room_participated_users_rooms_room_id");
+
+                    b.HasOne("g0v0.Server.Common.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_room_participated_users_users_user_id");
+
+                    b.Navigation("Room");
 
                     b.Navigation("User");
                 });
@@ -580,6 +864,11 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.Navigation("Score");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.Room", b =>
+                {
+                    b.Navigation("Playlists");
                 });
 #pragma warning restore 612, 618
         }

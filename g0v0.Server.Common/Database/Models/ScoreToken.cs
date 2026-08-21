@@ -34,7 +34,7 @@ public class ScoreToken
     /// <summary>
     /// Gets or sets the user ID that owns this score token.
     /// </summary>
-    public long UserId { get; set; }
+    public int UserId { get; set; }
 
     /// <summary>
     /// Gets or sets the beatmap ID associated with this score token.

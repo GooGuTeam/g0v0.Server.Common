@@ -30,7 +30,7 @@ public class ScoreRepository(MysqlDbContext context) : IScoreRepository, IMySqlR
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Score>> GetByUserIdAsync(long userId)
+    public async Task<IReadOnlyList<Score>> GetByUserIdAsync(int userId)
     {
         return await context.Scores
             .Where(s => s.UserId == userId)
@@ -39,7 +39,7 @@ public class ScoreRepository(MysqlDbContext context) : IScoreRepository, IMySqlR
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Score>> GetRecentByUserIdAndModeAsync(long userId, int mode, int limit)
+    public async Task<IReadOnlyList<Score>> GetRecentByUserIdAndModeAsync(int userId, int mode, int limit)
     {
         if (limit <= 0)
         {
@@ -56,7 +56,7 @@ public class ScoreRepository(MysqlDbContext context) : IScoreRepository, IMySqlR
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Score>> GetBestByUserIdAndModeAsync(long userId, int mode, int limit)
+    public async Task<IReadOnlyList<Score>> GetBestByUserIdAndModeAsync(int userId, int mode, int limit)
     {
         if (limit <= 0)
         {

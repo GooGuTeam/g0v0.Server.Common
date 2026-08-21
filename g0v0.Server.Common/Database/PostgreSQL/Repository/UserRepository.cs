@@ -13,7 +13,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 public class UserRepository(PostgreSqlDbContext context) : IUserRepository, IPostgreSqlRepository
 {
     /// <inheritdoc/>
-    public async Task<User?> GetByIdAsync(long userId)
+    public async Task<User?> GetByIdAsync(int userId)
     {
         return await context.Users
             .FirstOrDefaultAsync(u => u.Id == userId)
@@ -21,7 +21,7 @@ public class UserRepository(PostgreSqlDbContext context) : IUserRepository, IPos
     }
 
     /// <inheritdoc/>
-    public async Task<string?> GetUsernameByIdAsync(long userId)
+    public async Task<string?> GetUsernameByIdAsync(int userId)
     {
         return await context.Users
             .Where(u => u.Id == userId)
