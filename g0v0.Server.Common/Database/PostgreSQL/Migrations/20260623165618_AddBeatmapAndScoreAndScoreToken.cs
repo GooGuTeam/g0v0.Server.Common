@@ -12,6 +12,11 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
     public partial class AddBeatmapAndScoreAndScoreToken : Migration
 #pragma warning restore MA0048
     {
+        private static readonly string[] Columns = ["playlist_item_id", "room_id"];
+        private static readonly string[] ColumnsArray = ["user_id", "playlist_item_id"];
+        private static readonly string[] ColumnsArray0 = ["user_id", "mode", "ended_at", "id"];
+        private static readonly string[] ColumnsArray1 = ["user_id", "mode", "pp", "id"];
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -133,7 +138,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_score_tokens_playlist_item_id_room_id",
                 table: "score_tokens",
-                columns: new[] { "playlist_item_id", "room_id" });
+                columns: Columns);
 
             migrationBuilder.CreateIndex(
                 name: "ix_score_tokens_score_id",
@@ -143,7 +148,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_score_tokens_user_id_playlist_item_id",
                 table: "score_tokens",
-                columns: new[] { "user_id", "playlist_item_id" });
+                columns: ColumnsArray);
 
             migrationBuilder.CreateIndex(
                 name: "ix_scores_beatmap_checksum",
@@ -168,12 +173,12 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_scores_user_id_mode_ended_at_id",
                 table: "scores",
-                columns: new[] { "user_id", "mode", "ended_at", "id" });
+                columns: ColumnsArray0);
 
             migrationBuilder.CreateIndex(
                 name: "ix_scores_user_id_mode_pp_id",
                 table: "scores",
-                columns: new[] { "user_id", "mode", "pp", "id" });
+                columns: ColumnsArray1);
         }
 
         /// <inheritdoc />
