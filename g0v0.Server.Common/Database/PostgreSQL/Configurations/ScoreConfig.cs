@@ -20,22 +20,22 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
         builder.Property(s => s.Statistics)
             .HasColumnType("jsonb")
             .HasConversion(
-                value => ScoreConfigurationHelper.SerializeStatistics(value),
-                value => ScoreConfigurationHelper.DeserializeStatistics(value))
-            .Metadata.SetValueComparer(ScoreConfigurationHelper.StatisticsComparer);
+                value => ConfigurationHelper.SerializeStatistics(value),
+                value => ConfigurationHelper.DeserializeStatistics(value))
+            .Metadata.SetValueComparer(ConfigurationHelper.StatisticsComparer);
 
         builder.Property(s => s.Mods)
             .HasColumnType("jsonb")
             .HasConversion(
-                value => ScoreConfigurationHelper.SerializeMods(value),
-                value => ScoreConfigurationHelper.DeserializeMods(value))
-            .Metadata.SetValueComparer(ScoreConfigurationHelper.ModsComparer);
+                value => ConfigurationHelper.SerializeMods(value),
+                value => ConfigurationHelper.DeserializeMods(value))
+            .Metadata.SetValueComparer(ConfigurationHelper.ModsComparer);
 
         builder.Property(s => s.MaximumStatistics)
             .HasColumnType("jsonb")
             .HasConversion(
-                value => ScoreConfigurationHelper.SerializeStatistics(value),
-                value => ScoreConfigurationHelper.DeserializeStatistics(value))
-            .Metadata.SetValueComparer(ScoreConfigurationHelper.StatisticsComparer);
+                value => ConfigurationHelper.SerializeStatistics(value),
+                value => ConfigurationHelper.DeserializeStatistics(value))
+            .Metadata.SetValueComparer(ConfigurationHelper.StatisticsComparer);
     }
 }

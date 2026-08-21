@@ -10,7 +10,7 @@ using osu.Game.Scoring;
 
 namespace g0v0.Server.Common.Database.Configurations;
 
-internal static class ScoreConfigurationHelper
+internal static class ConfigurationHelper
 {
     private static readonly Dictionary<int, string> ModeToDatabaseValue = new()
     {
@@ -104,9 +104,10 @@ internal static class ScoreConfigurationHelper
 
     public static string? SerializeMods(IList<APIMod>? mods)
     {
-        return mods is { Count: > 0 }
-            ? JsonConvert.SerializeObject(mods, JsonSettings)
-            : null;
+        // Empty lists are serialized as "[]" (never NULL) to match the legacy
+        // lazer API schema, where osu-web's PlaylistModel requires mods to be a
+        // list rather than null.
+        return JsonConvert.SerializeObject(mods ?? new List<APIMod>(), JsonSettings);
     }
 
     public static IList<APIMod> DeserializeMods(string? value)
@@ -137,7 +138,8 @@ internal static class ScoreConfigurationHelper
             return new Dictionary<HitResult, int>();
         }
 
-        var payload = JsonConvert.DeserializeObject<Dictionary<string, int>>(value, JsonSettings) ?? new Dictionary<string, int>(StringComparer.Ordinal);
+        var payload = JsonConvert.DeserializeObject<Dictionary<string, int>>(value, JsonSettings) ??
+                      new Dictionary<string, int>(StringComparer.Ordinal);
         var statistics = new Dictionary<HitResult, int>();
 
         foreach ((string key, int count) in payload)
@@ -151,6 +153,60 @@ internal static class ScoreConfigurationHelper
         }
 
         return statistics;
+    }
+
+    public static DateTime? ConvertNullableDateTimeOffsetToDateTime(DateTimeOffset? value)
+    {
+        return value.HasValue ? value.Value.UtcDateTime : null;
+    }
+
+    public static DateTimeOffset? ConvertNullableDateTimeToDateTimeOffset(DateTime? value)
+    {
+        return value.HasValue
+            ? new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc))
+            : null;
+    }
+
+    /// <summary>
+    /// Converts an enum value to its legacy MySQL native-enum representation
+    /// (PascalCase to UPPER_SNAKE_CASE, e.g. <c>HostOnly</c> to <c>HOST_ONLY</c>).
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type.</typeparam>
+    /// <param name="value">The enum value.</param>
+    /// <returns>The legacy database representation.</returns>
+    public static string ConvertEnumToDatabaseValue<TEnum>(TEnum value)
+        where TEnum : struct, Enum
+    {
+        string name = value.ToString();
+
+        Span<char> buffer = stackalloc char[(name.Length * 2) + 1];
+        int writeIndex = 0;
+
+        for (int i = 0; i < name.Length; i++)
+        {
+            char c = name[i];
+
+            if (i > 0 && char.IsUpper(c) && !char.IsUpper(name[i - 1]))
+            {
+                buffer[writeIndex++] = '_';
+            }
+
+            buffer[writeIndex++] = char.ToUpperInvariant(c);
+        }
+
+        return new string(buffer[..writeIndex]);
+    }
+
+    /// <summary>
+    /// Converts a legacy MySQL native-enum value back to its enum representation.
+    /// </summary>
+    /// <typeparam name="TEnum">The enum type.</typeparam>
+    /// <param name="value">The legacy database value.</param>
+    /// <returns>The parsed enum value.</returns>
+    public static TEnum ConvertDatabaseValueToEnum<TEnum>(string value)
+        where TEnum : struct, Enum
+    {
+        return Enum.Parse<TEnum>(value.Replace("_", string.Empty), ignoreCase: true);
     }
 
     private static bool TryParseHitResult(string key, out HitResult result)

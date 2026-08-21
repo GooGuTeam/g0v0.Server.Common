@@ -31,16 +31,16 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
             .HasColumnName("mods")
             .HasColumnType("json")
             .HasConversion(
-                value => ScoreConfigurationHelper.SerializeMods(value),
-                value => ScoreConfigurationHelper.DeserializeMods(value))
-            .Metadata.SetValueComparer(ScoreConfigurationHelper.ModsComparer);
+                value => ConfigurationHelper.SerializeMods(value),
+                value => ConfigurationHelper.DeserializeMods(value))
+            .Metadata.SetValueComparer(ConfigurationHelper.ModsComparer);
 
         builder.Property(s => s.Rank)
             .HasColumnName("rank")
             .HasColumnType("enum('X','XH','S','SH','A','B','C','D','F')")
             .HasConversion(
-                value => ScoreConfigurationHelper.ConvertRankToDatabaseValue(value),
-                value => ScoreConfigurationHelper.ConvertDatabaseValueToRank(value))
+                value => ConfigurationHelper.ConvertRankToDatabaseValue(value),
+                value => ConfigurationHelper.ConvertDatabaseValueToRank(value))
             .IsRequired();
 
         builder.Property(s => s.StartedAt)
@@ -103,17 +103,17 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
             .HasColumnType(
                 "enum('OSU','TAIKO','FRUITS','MANIA','OSURX','OSUAP','TAIKORX','FRUITSRX','SENTAKKI','TAU','RUSH','HISHIGATA','SOYOKAZE')")
             .HasConversion(
-                value => ScoreConfigurationHelper.ConvertModeToDatabaseValue(value),
-                value => ScoreConfigurationHelper.ConvertDatabaseValueToMode(value))
+                value => ConfigurationHelper.ConvertModeToDatabaseValue(value),
+                value => ConfigurationHelper.ConvertDatabaseValueToMode(value))
             .IsRequired();
 
         builder.Property(s => s.MaximumStatistics)
             .HasColumnName("maximum_statistics")
             .HasColumnType("json")
             .HasConversion(
-                value => ScoreConfigurationHelper.SerializeStatistics(value),
-                value => ScoreConfigurationHelper.DeserializeStatistics(value))
-            .Metadata.SetValueComparer(ScoreConfigurationHelper.StatisticsComparer);
+                value => ConfigurationHelper.SerializeStatistics(value),
+                value => ConfigurationHelper.DeserializeStatistics(value))
+            .Metadata.SetValueComparer(ConfigurationHelper.StatisticsComparer);
 
         builder.Property(s => s.BeatmapChecksum).HasColumnName("map_md5");
 
