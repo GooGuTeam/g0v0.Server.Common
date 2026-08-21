@@ -49,6 +49,21 @@ public class MysqlDbContext : DbContext
     /// </summary>
     public DbSet<ScoreToken> ScoreTokens { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the multiplayer rooms table set.
+    /// </summary>
+    public DbSet<Room> Rooms { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the room playlist items table set.
+    /// </summary>
+    public DbSet<Playlist> Playlists { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the room participation history table set.
+    /// </summary>
+    public DbSet<RoomParticipatedUser> RoomParticipatedUsers { get; set; } = null!;
+
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
