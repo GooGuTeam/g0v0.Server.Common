@@ -40,6 +40,11 @@ public class PostgreSqlDbContext : DbContext
     public DbSet<Beatmap> Beatmaps { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the beatmap sets table set.
+    /// </summary>
+    public DbSet<BeatmapSet> BeatmapSets { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the scores table set.
     /// </summary>
     public DbSet<Score> Scores { get; set; } = null!;

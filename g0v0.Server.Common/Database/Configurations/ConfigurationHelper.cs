@@ -3,6 +3,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using osu.Game.Beatmaps;
 using osu.Game.Extensions;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Scoring;
@@ -41,6 +42,29 @@ internal static class ConfigurationHelper
         ["HISHIGATA"] = 13,
         ["SOYOKAZE"] = 14,
     };
+
+    private static readonly Dictionary<BeatmapOnlineStatus, string> StatusToDatabaseValue = new()
+    {
+        [BeatmapOnlineStatus.Graveyard] = "GRAVEYARD",
+        [BeatmapOnlineStatus.WIP] = "WIP",
+        [BeatmapOnlineStatus.Pending] = "PENDING",
+        [BeatmapOnlineStatus.Ranked] = "RANKED",
+        [BeatmapOnlineStatus.Approved] = "APPROVED",
+        [BeatmapOnlineStatus.Qualified] = "QUALIFIED",
+        [BeatmapOnlineStatus.Loved] = "LOVED",
+    };
+
+    private static readonly Dictionary<string, BeatmapOnlineStatus> DatabaseValueToStatus =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["GRAVEYARD"] = BeatmapOnlineStatus.Graveyard,
+            ["WIP"] = BeatmapOnlineStatus.WIP,
+            ["PENDING"] = BeatmapOnlineStatus.Pending,
+            ["RANKED"] = BeatmapOnlineStatus.Ranked,
+            ["APPROVED"] = BeatmapOnlineStatus.Approved,
+            ["QUALIFIED"] = BeatmapOnlineStatus.Qualified,
+            ["LOVED"] = BeatmapOnlineStatus.Loved,
+        };
 
     private static readonly HashSet<ScoreRank> SupportedRanks =
     [
@@ -86,6 +110,20 @@ internal static class ConfigurationHelper
         return DatabaseValueToMode.TryGetValue(value, out int mode)
             ? mode
             : throw new InvalidOperationException($"Unsupported legacy score mode '{value}'.");
+    }
+
+    public static string ConvertBeatmapStatusToDatabaseValue(BeatmapOnlineStatus value)
+    {
+        return StatusToDatabaseValue.TryGetValue(value, out string? databaseValue)
+            ? databaseValue
+            : throw new InvalidOperationException($"Unsupported beatmap status '{value}'.");
+    }
+
+    public static BeatmapOnlineStatus ConvertDatabaseValueToBeatmapStatus(string value)
+    {
+        return DatabaseValueToStatus.TryGetValue(value, out BeatmapOnlineStatus status)
+            ? status
+            : throw new InvalidOperationException($"Unsupported beatmap status '{value}'.");
     }
 
     public static string ConvertRankToDatabaseValue(ScoreRank value)

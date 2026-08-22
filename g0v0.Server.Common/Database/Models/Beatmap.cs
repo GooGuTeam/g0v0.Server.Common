@@ -22,7 +22,7 @@ public class Beatmap
     /// <summary>
     /// Gets or sets the beatmap set ID.
     /// </summary>
-    public long BeatmapSetId { get; set; }
+    public int BeatmapSetId { get; set; }
 
     /// <summary>
     /// Gets or sets the public beatmap URL.
@@ -131,4 +131,10 @@ public class Beatmap
     /// Gets or sets the beatmap file format version used for legacy replay encoding.
     /// </summary>
     public int BeatmapVersion { get; set; } = 14;
+
+    /// <summary>
+    /// Gets or sets the beatmap set this beatmap belongs to.
+    /// </summary>
+    [ForeignKey(nameof(BeatmapSetId))]
+    public BeatmapSet? BeatmapSet { get; set; }
 }

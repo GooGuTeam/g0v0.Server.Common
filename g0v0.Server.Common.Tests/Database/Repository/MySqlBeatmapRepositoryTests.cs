@@ -187,7 +187,7 @@ public class MySqlBeatmapRepositoryTests
 
     private static BeatmapModel CreateBeatmap(
         int id = 123,
-        long beatmapSetId = 456,
+        int beatmapSetId = 456,
         string? checksum = "checksum_1",
         string version = "Insane",
         int mapperId = 789)
