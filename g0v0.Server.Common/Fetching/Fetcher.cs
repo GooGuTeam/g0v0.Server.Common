@@ -43,7 +43,7 @@ public class Fetcher(
     private bool _disposed;
 
     private string? _accessToken;
-    private DateTimeOffset _accessTokenExpiry;
+    private long _accessTokenExpiryUnixSeconds;
 
     /// <inheritdoc/>
     public async Task<Beatmap> FetchBeatmapAsync(int beatmapId, CancellationToken cancellationToken = default)
@@ -275,7 +275,7 @@ public class Fetcher(
 
     private async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(_accessToken) && _accessTokenExpiry > DateTimeOffset.UtcNow.AddMinutes(1))
+        if (!string.IsNullOrEmpty(_accessToken) && _accessTokenExpiryUnixSeconds > DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60)
         {
             return _accessToken!;
         }
@@ -283,7 +283,7 @@ public class Fetcher(
         await _tokenLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            if (!string.IsNullOrEmpty(_accessToken) && _accessTokenExpiry > DateTimeOffset.UtcNow.AddMinutes(1))
+            if (!string.IsNullOrEmpty(_accessToken) && _accessTokenExpiryUnixSeconds > DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60)
             {
                 return _accessToken!;
             }
@@ -296,11 +296,11 @@ public class Fetcher(
             string? cachedExpiry = _tokenCache.TryGetValue(expireAtKey, out string? expiryValue) ? expiryValue : await cache.GetAsync(expireAtKey).ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(cachedToken) && !string.IsNullOrEmpty(cachedExpiry)
-                && DateTimeOffset.TryParse(cachedExpiry, out DateTimeOffset parsedExpiry)
-                && parsedExpiry > DateTimeOffset.UtcNow.AddMinutes(1))
+                && long.TryParse(cachedExpiry, out long parsedExpiry)
+                && parsedExpiry > DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60)
             {
                 _accessToken = cachedToken;
-                _accessTokenExpiry = parsedExpiry;
+                _accessTokenExpiryUnixSeconds = parsedExpiry;
                 _tokenCache[accessTokenKey] = cachedToken;
                 _tokenCache[expireAtKey] = cachedExpiry;
                 return _accessToken!;
@@ -390,14 +390,14 @@ public class Fetcher(
 
     private async Task CacheTokenAsync(OsuTokenResponse token)
     {
-        DateTimeOffset tokenExpiry = DateTimeOffset.UtcNow.AddSeconds(Math.Max(1, token.ExpiresIn));
+        long tokenExpiryUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + Math.Max(1, token.ExpiresIn);
         string accessTokenKey = $"fetcher:access_token:{_config.FetcherClientId}";
         string expireAtKey = $"fetcher:expire_at:{_config.FetcherClientId}";
         string refreshTokenKey = $"fetcher:refresh_token:{_config.FetcherClientId}";
-        TimeSpan ttl = tokenExpiry - DateTimeOffset.UtcNow;
+        TimeSpan ttl = TimeSpan.FromSeconds(Math.Max(1, token.ExpiresIn));
 
         await cache.SetAsync(accessTokenKey, token.AccessToken!, ttl).ConfigureAwait(false);
-        await cache.SetAsync(expireAtKey, tokenExpiry.ToString("O"), ttl).ConfigureAwait(false);
+        await cache.SetAsync(expireAtKey, tokenExpiryUnixSeconds.ToString(), ttl).ConfigureAwait(false);
 
         if (!string.IsNullOrEmpty(token.RefreshToken))
         {
@@ -406,9 +406,9 @@ public class Fetcher(
         }
 
         _accessToken = token.AccessToken;
-        _accessTokenExpiry = tokenExpiry;
+        _accessTokenExpiryUnixSeconds = tokenExpiryUnixSeconds;
         _tokenCache[accessTokenKey] = token.AccessToken;
-        _tokenCache[expireAtKey] = tokenExpiry.ToString("O");
+        _tokenCache[expireAtKey] = tokenExpiryUnixSeconds.ToString();
     }
 
     private async Task InvalidateTokenAsync()
@@ -418,7 +418,7 @@ public class Fetcher(
         string refreshTokenKey = $"fetcher:refresh_token:{_config.FetcherClientId}";
 
         _accessToken = null;
-        _accessTokenExpiry = default;
+        _accessTokenExpiryUnixSeconds = 0;
         _tokenCache.Remove(accessTokenKey);
         _tokenCache.Remove(expireAtKey);
         _tokenCache.Remove(refreshTokenKey);
