@@ -7,12 +7,6 @@ namespace g0v0.Server.Common.Storage;
 /// </summary>
 public class CloudflareR2StorageService : S3StorageService
 {
-    /// <inheritdoc/>
-    protected override bool DisablePayloadSigning => true;
-
-    /// <inheritdoc/>
-    protected override bool DisableDefaultChecksumValidation => true;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="CloudflareR2StorageService"/> class.
     /// </summary>
@@ -56,6 +50,12 @@ public class CloudflareR2StorageService : S3StorageService
     /// Gets the Cloudflare account ID.
     /// </summary>
     public string AccountId { get; }
+
+    /// <inheritdoc/>
+    protected override bool DisablePayloadSigning => true;
+
+    /// <inheritdoc/>
+    protected override bool DisableDefaultChecksumValidation => true;
 
     /// <inheritdoc />
     public override string? GetFileNameByUrl(string url)

@@ -17,16 +17,6 @@ public class S3StorageService : StorageService
     private bool _disposed;
 
     /// <summary>
-    /// Gets a value indicating whether to disable SigV4 payload signing.
-    /// </summary>
-    protected virtual bool DisablePayloadSigning => false;
-
-    /// <summary>
-    /// Gets a value indicating whether to disable checksum validation for S3 objects.
-    /// </summary>
-    protected virtual bool DisableDefaultChecksumValidation => false;
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="S3StorageService"/> class.
     /// </summary>
     /// <param name="settings">The AWS S3 storage settings.</param>
@@ -106,6 +96,16 @@ public class S3StorageService : StorageService
     /// Gets the custom S3 endpoint URL, or <see langword="null"/> for AWS S3.
     /// </summary>
     public string? EndpointUrl { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether to disable SigV4 payload signing.
+    /// </summary>
+    protected virtual bool DisablePayloadSigning => false;
+
+    /// <summary>
+    /// Gets a value indicating whether to disable checksum validation for S3 objects.
+    /// </summary>
+    protected virtual bool DisableDefaultChecksumValidation => false;
 
     /// <inheritdoc />
     public override async Task WriteFileAsync(
