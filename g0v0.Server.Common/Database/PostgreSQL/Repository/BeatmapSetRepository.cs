@@ -2,6 +2,7 @@
 
 using g0v0.Server.Common.Database.Models;
 using g0v0.Server.Common.Database.Repository;
+using g0v0.Server.Common.Fetching;
 using Microsoft.EntityFrameworkCore;
 
 namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
@@ -27,6 +28,13 @@ public class BeatmapSetRepository(PostgreSqlDbContext context) : IBeatmapSetRepo
             .Include(b => b.Beatmaps)
             .FirstOrDefaultAsync(b => b.Id == beatmapSetId)
             .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<BeatmapSet> GetOrFetchByIdAsync(int beatmapSetId, IFetcher fetcher, CancellationToken cancellationToken = default)
+    {
+        BeatmapSet? beatmapSet = await GetByIdWithBeatmapsAsync(beatmapSetId).ConfigureAwait(false);
+        return beatmapSet ?? await fetcher.FetchBeatmapSetAsync(beatmapSetId, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

@@ -60,6 +60,39 @@ public class PostgreSqlBeatmapRepositoryTests
     }
 
     [Test]
+    public async Task GetOrFetchByIdAsync_WhenBeatmapExists_ShouldNotFetch()
+    {
+        BeatmapModel beatmap = CreateBeatmap(id: 321);
+        _context.Beatmaps.Add(beatmap);
+        await _context.SaveChangesAsync();
+
+        FakeFetcher fetcher = new();
+        BeatmapModel result = await _repository.GetOrFetchByIdAsync(321, fetcher);
+
+        Assert.That(result.Id, Is.EqualTo(321));
+        Assert.That(fetcher.BeatmapFetchCount, Is.Zero);
+    }
+
+    [Test]
+    public async Task GetOrFetchByIdAsync_WhenBeatmapMissing_ShouldFetchAndReturn()
+    {
+        FakeFetcher fetcher = new(beatmapFactory: id => CreateBeatmap(id: id));
+        BeatmapModel result = await _repository.GetOrFetchByIdAsync(321, fetcher);
+
+        Assert.That(result.Id, Is.EqualTo(321));
+        Assert.That(fetcher.BeatmapFetchCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void GetOrFetchByIdAsync_WhenFetcherThrows_ShouldPropagate()
+    {
+        FakeFetcher fetcher = new(exception: new InvalidOperationException("boom"));
+
+        Assert.ThrowsAsync<InvalidOperationException>(() => _repository.GetOrFetchByIdAsync(321, fetcher));
+        Assert.That(_context.Beatmaps.Any(b => b.Id == 321), Is.False);
+    }
+
+    [Test]
     public async Task CreateUpdateDeleteAsync_ShouldPersistBeatmapChanges()
     {
         BeatmapModel beatmap = CreateBeatmap(id: 10, version: "Hard");

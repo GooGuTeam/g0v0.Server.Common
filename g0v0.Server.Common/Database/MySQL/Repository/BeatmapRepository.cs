@@ -2,6 +2,7 @@
 
 using g0v0.Server.Common.Database.Models;
 using g0v0.Server.Common.Database.Repository;
+using g0v0.Server.Common.Fetching;
 using Microsoft.EntityFrameworkCore;
 
 namespace g0v0.Server.Common.Database.MySQL.Repository;
@@ -44,6 +45,20 @@ public class BeatmapRepository(MysqlDbContext context) : IBeatmapRepository, IMy
             .Where(b => b.MapperId == mapperId)
             .ToListAsync()
             .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Beatmap> GetOrFetchByIdAsync(int beatmapId, IFetcher fetcher, CancellationToken cancellationToken = default)
+    {
+        Beatmap? beatmap = await GetByIdAsync(beatmapId).ConfigureAwait(false);
+        return beatmap ?? await fetcher.FetchBeatmapAsync(beatmapId, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Beatmap> GetOrFetchByChecksumAsync(string checksum, IFetcher fetcher, CancellationToken cancellationToken = default)
+    {
+        Beatmap? beatmap = await GetByChecksumAsync(checksum).ConfigureAwait(false);
+        return beatmap ?? await fetcher.FetchBeatmapAsync(checksum, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

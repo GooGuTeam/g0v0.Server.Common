@@ -107,6 +107,53 @@ public class MySqlBeatmapSetRepositoryTests
     }
 
     [Test]
+    public async Task GetOrFetchByIdAsync_WhenSetExists_ShouldNotFetch()
+    {
+        _context.BeatmapSets.Add(CreateSet(id: 55));
+        await _context.SaveChangesAsync();
+
+        FakeFetcher fetcher = new();
+        BeatmapSet result = await _repository.GetOrFetchByIdAsync(55, fetcher);
+
+        Assert.That(result.Id, Is.EqualTo(55));
+        Assert.That(fetcher.SetFetchCount, Is.Zero);
+    }
+
+    [Test]
+    public async Task GetOrFetchByIdAsync_WhenSetMissing_ShouldFetchAndReturn()
+    {
+        FakeFetcher fetcher = new(setFactory: id => CreateSet(id: id));
+        BeatmapSet result = await _repository.GetOrFetchByIdAsync(55, fetcher);
+
+        Assert.That(result.Id, Is.EqualTo(55));
+        Assert.That(fetcher.SetFetchCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void GetOrFetchByIdAsync_WhenFetcherThrows_ShouldPropagate()
+    {
+        FakeFetcher fetcher = new(exception: new InvalidOperationException("boom"));
+
+        Assert.ThrowsAsync<InvalidOperationException>(() => _repository.GetOrFetchByIdAsync(55, fetcher));
+        Assert.That(_context.BeatmapSets.Any(s => s.Id == 55), Is.False);
+    }
+
+    [Test]
+    public async Task GetOrFetchByIdAsync_ConcurrentMisses_ShouldFetchForEachMiss()
+    {
+        FakeFetcher fetcher = new(setFactory: id => CreateSet(id: id));
+
+        Task<BeatmapSet>[] tasks = Enumerable.Range(0, 5)
+            .Select(_ => _repository.GetOrFetchByIdAsync(55, fetcher))
+            .ToArray();
+
+        BeatmapSet[] results = await Task.WhenAll(tasks);
+
+        Assert.That(results, Has.All.Matches<BeatmapSet>(s => s.Id == 55));
+        Assert.That(fetcher.SetFetchCount, Is.EqualTo(5));
+    }
+
+    [Test]
     public async Task DeleteAsync_ShouldRemoveSet()
     {
         BeatmapSet set = CreateSet(id: 55);

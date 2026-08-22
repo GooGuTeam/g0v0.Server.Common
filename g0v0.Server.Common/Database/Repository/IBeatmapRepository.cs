@@ -1,6 +1,7 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
+using g0v0.Server.Common.Fetching;
 
 namespace g0v0.Server.Common.Database.Repository;
 
@@ -36,6 +37,24 @@ public interface IBeatmapRepository
     /// <param name="mapperId">The mapper user ID.</param>
     /// <returns>A list of beatmaps created by the specified mapper.</returns>
     Task<IReadOnlyList<Beatmap>> GetByMapperIdAsync(int mapperId);
+
+    /// <summary>
+    /// Gets a beatmap by ID, fetching and persisting it from the osu! API when it is not in the database.
+    /// </summary>
+    /// <param name="beatmapId">The beatmap ID.</param>
+    /// <param name="fetcher">The fetcher used to load the beatmap on a cache miss.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The matching beatmap.</returns>
+    Task<Beatmap> GetOrFetchByIdAsync(int beatmapId, IFetcher fetcher, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a beatmap by checksum, fetching and persisting it from the osu! API when it is not in the database.
+    /// </summary>
+    /// <param name="checksum">The beatmap checksum.</param>
+    /// <param name="fetcher">The fetcher used to load the beatmap on a cache miss.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The matching beatmap.</returns>
+    Task<Beatmap> GetOrFetchByChecksumAsync(string checksum, IFetcher fetcher, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new beatmap record.

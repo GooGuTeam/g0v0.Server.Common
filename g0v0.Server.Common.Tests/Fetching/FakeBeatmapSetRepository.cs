@@ -24,6 +24,18 @@ internal sealed class FakeBeatmapSetRepository : IBeatmapSetRepository
         return GetByIdAsync(beatmapSetId);
     }
 
+    public async Task<BeatmapSet> GetOrFetchByIdAsync(int beatmapSetId, g0v0.Server.Common.Fetching.IFetcher fetcher, CancellationToken cancellationToken = default)
+    {
+        BeatmapSet? existing = await GetByIdWithBeatmapsAsync(beatmapSetId).ConfigureAwait(false);
+        if (existing != null)
+        {
+            return existing;
+        }
+
+        BeatmapSet fetched = await fetcher.FetchBeatmapSetAsync(beatmapSetId, cancellationToken).ConfigureAwait(false);
+        return await UpsertWithBeatmapsAsync(fetched).ConfigureAwait(false);
+    }
+
     public Task<BeatmapSet> UpsertWithBeatmapsAsync(BeatmapSet beatmapSet)
     {
         _sets[beatmapSet.Id] = beatmapSet;
