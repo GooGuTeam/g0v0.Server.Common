@@ -110,4 +110,23 @@ public class GeneralConfiguration
     public string OsuWebClientSecret { get; set; } = "your_osu_web_client_secret_here";
 
     #endregion
+
+    #region Fetcher
+
+    /// <summary>
+    /// Gets or sets the osu! API client ID used by the Fetcher service.
+    /// </summary>
+    public int FetcherClientId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the osu! API client secret used by the Fetcher service.
+    /// </summary>
+    public string FetcherClientSecret { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the cache duration in hours for raw beatmap files.
+    /// </summary>
+    public int FetcherBeatmapRawCacheExpireHours { get; set; } = 24;
+
+    #endregion
 }

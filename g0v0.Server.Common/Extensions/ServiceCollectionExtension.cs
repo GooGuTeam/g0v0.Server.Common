@@ -2,10 +2,13 @@
 
 using System.Reflection;
 using g0v0.Server.Common.Authentication;
+using g0v0.Server.Common.Caching;
 using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.MySQL.Repository;
 using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using g0v0.Server.Common.Fetching;
+using g0v0.Server.Common.Http;
 using g0v0.Server.Common.Storage;
 using g0v0.Server.Common.Threading;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -117,6 +120,42 @@ public static class ServiceCollectionExtension
     {
         services.AddSingleton<BackgroundTaskRunner>();
         services.AddSingleton<IBackgroundTaskRunner>(serviceProvider => serviceProvider.GetRequiredService<BackgroundTaskRunner>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the shared string cache used across g0v0 server services.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Requires <c>AddRedis</c> to be registered beforehand so an <see cref="IConnectionMultiplexer"/> is available.
+    /// </remarks>
+    public static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        services.AddSingleton<IStringCache, RedisStringCache>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the osu! Fetcher service and its shared HTTP dependency.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Requires <see cref="ConfigurationManager"/>, <c>AddRepositories</c>, <c>AddRedis</c> and <c>AddCache</c> to be registered beforehand.
+    /// </remarks>
+    public static IServiceCollection AddFetcher(this IServiceCollection services)
+    {
+        services.AddHttpClient<IHttpService, HttpService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        services.AddScoped<Fetcher>();
+        services.AddScoped<IFetcher>(serviceProvider => serviceProvider.GetRequiredService<Fetcher>());
 
         return services;
     }

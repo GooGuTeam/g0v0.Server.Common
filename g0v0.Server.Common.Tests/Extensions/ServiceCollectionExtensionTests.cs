@@ -1,8 +1,11 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Caching;
 using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Repository;
 using g0v0.Server.Common.Extensions;
+using g0v0.Server.Common.Fetching;
+using g0v0.Server.Common.Http;
 using g0v0.Server.Common.Threading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -152,6 +155,36 @@ public class ServiceCollectionExtensionTests
 
         Assert.That(ipcClientDescriptor, Is.Not.Null);
         Assert.That(ipcClientDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+    }
+
+    [Test]
+    public void AddCache_ShouldRegisterStringCacheAsSingleton()
+    {
+        ServiceCollection services = new();
+
+        IServiceCollection result = services.AddCache();
+
+        ServiceDescriptor? cacheDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IStringCache));
+
+        Assert.That(result, Is.SameAs(services));
+        Assert.That(cacheDescriptor, Is.Not.Null);
+        Assert.That(cacheDescriptor!.ImplementationType, Is.EqualTo(typeof(RedisStringCache)));
+        Assert.That(cacheDescriptor.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+    }
+
+    [Test]
+    public void AddFetcher_ShouldRegisterFetcherServices()
+    {
+        ServiceCollection services = new();
+
+        services.AddFetcher();
+
+        ServiceDescriptor? httpDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IHttpService));
+        ServiceDescriptor? fetcherDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IFetcher));
+
+        Assert.That(httpDescriptor, Is.Not.Null);
+        Assert.That(fetcherDescriptor, Is.Not.Null);
+        Assert.That(fetcherDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Scoped));
     }
 
     [Test]

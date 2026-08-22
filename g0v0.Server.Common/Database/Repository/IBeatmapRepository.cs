@@ -28,7 +28,7 @@ public interface IBeatmapRepository
     /// </summary>
     /// <param name="beatmapSetId">The beatmap set ID.</param>
     /// <returns>A list of beatmaps belonging to the specified beatmap set.</returns>
-    Task<IReadOnlyList<Beatmap>> GetByBeatmapSetIdAsync(long beatmapSetId);
+    Task<IReadOnlyList<Beatmap>> GetByBeatmapSetIdAsync(int beatmapSetId);
 
     /// <summary>
     /// Gets all beatmaps mapped by a specific user.

@@ -29,7 +29,7 @@ public class BeatmapRepository(MysqlDbContext context) : IBeatmapRepository, IMy
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<Beatmap>> GetByBeatmapSetIdAsync(long beatmapSetId)
+    public async Task<IReadOnlyList<Beatmap>> GetByBeatmapSetIdAsync(int beatmapSetId)
     {
         return await context.Beatmaps
             .Where(b => b.BeatmapSetId == beatmapSetId)

@@ -39,6 +39,14 @@ public class GeneralConfigurationTests
     }
 
     [Test]
+    public void FetcherDefaults_ShouldBeSane()
+    {
+        Assert.That(_config.FetcherClientId, Is.EqualTo(0));
+        Assert.That(_config.FetcherClientSecret, Is.EqualTo(string.Empty));
+        Assert.That(_config.FetcherBeatmapRawCacheExpireHours, Is.EqualTo(24));
+    }
+
+    [Test]
     public void MySqlHost_WhenSet_ShouldUpdateConnectionString()
     {
         _config.MySqlHost = "192.168.1.100";
