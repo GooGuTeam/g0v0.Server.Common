@@ -7,6 +7,12 @@ namespace g0v0.Server.Common.Storage;
 /// </summary>
 public class CloudflareR2StorageService : S3StorageService
 {
+    /// <inheritdoc/>
+    protected override bool DisablePayloadSigning => true;
+
+    /// <inheritdoc/>
+    protected override bool DisableDefaultChecksumValidation => true;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CloudflareR2StorageService"/> class.
     /// </summary>
