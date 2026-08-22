@@ -59,11 +59,23 @@ public static class ServiceCollectionExtension
     }
 
     /// <summary>
-    /// Registers the Redis connection multiplexer, IPC transport, and inter-process communication client.
+    /// Registers the Redis connection multiplexer, IPC transport, and inter-process communication client for a known server.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="serverIdentify">The server identifier used for IPC channel naming.</param>
     /// <returns>The updated service collection.</returns>
+    public static IServiceCollection AddRedis(this IServiceCollection services, ServerIdentify serverIdentify)
+        => services.AddRedis(InterProcessCommunicationClient.GetServerIdentifier(serverIdentify));
+
+    /// <summary>
+    /// Registers the Redis connection multiplexer, IPC transport, and inter-process communication client for a raw server identifier.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="serverIdentify">The server identifier used for IPC channel naming.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
+    /// </remarks>
     public static IServiceCollection AddRedis(this IServiceCollection services, string serverIdentify)
     {
         services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(serviceProvider =>

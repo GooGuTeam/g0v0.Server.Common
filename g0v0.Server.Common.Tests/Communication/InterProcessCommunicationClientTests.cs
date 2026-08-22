@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using g0v0.Server.Common.Communication;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace g0v0.Server.Common.Tests.Communication;
@@ -9,6 +10,46 @@ namespace g0v0.Server.Common.Tests.Communication;
 [TestFixture]
 public class InterProcessCommunicationClientTests
 {
+    [Test]
+    public void GetServerIdentifier_WithKnownServerIdentifiers_ShouldConvertEnumNamesToSnakeCase()
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(InterProcessCommunicationClient.GetServerIdentifier(ServerIdentify.Lazer), Is.EqualTo("lazer"));
+            Assert.That(InterProcessCommunicationClient.GetServerIdentifier(ServerIdentify.Realtime), Is.EqualTo("realtime"));
+        });
+    }
+
+    [Test]
+    [Ignore("We don't have server with more than one word name.")]
+    public void GetChannelName_WithServerIdentify_ShouldUseSnakeCaseIdentifier()
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(InterProcessCommunicationClient.GetChannelName(ServerIdentify.Lazer), Is.EqualTo("g0v0:ipc:lazer"));
+        });
+    }
+
+    [Test]
+    public void GetChannelName_WithRawServerIdentifier_ShouldKeepIdentifierUnchanged()
+    {
+        Assert.That(InterProcessCommunicationClient.GetChannelName("MixedCaseServer"), Is.EqualTo("g0v0:ipc:MixedCaseServer"));
+    }
+
+    [Test]
+    [Ignore("We don't have server with more than one word name.")]
+    public void Constructor_WithServerIdentify_ShouldSubscribeToSnakeCaseChannel()
+    {
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient client = new(transport, ServerIdentify.Lazer);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(client.ServerIdentifier, Is.EqualTo("lazer"));
+            Assert.That(transport.SubscribedChannels, Does.Contain("g0v0:ipc:lazer"));
+        });
+    }
+
     [Test]
     public async Task SendNoticeAsync_WithExplicitPayloadType_ShouldConvertPayloadBeforeInvokingHandler()
     {
@@ -31,11 +72,41 @@ public class InterProcessCommunicationClientTests
     }
 
     [Test]
+    public async Task SendNoticeAsync_WithServerIdentifyTarget_ShouldPublishToSnakeCaseChannel()
+    {
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient sender = new(transport, ServerIdentify.Lazer);
+        InterProcessCommunicationClient receiver = new(transport, ServerIdentify.Realtime);
+        TaskCompletionSource<AddRequest> receivedPayload = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        receiver.RegisterNoticeHandler<AddRequest>("math.notice", payload =>
+        {
+            receivedPayload.TrySetResult(payload!);
+            return Task.CompletedTask;
+        });
+
+        await sender.SendNoticeAsync(ServerIdentify.Realtime, "math.notice", new { left = 8, right = 13 });
+
+        AddRequest request = await receivedPayload.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        PublishedMessage publishedMessage = transport.PublishedMessages.Single();
+        JObject payload = JObject.Parse(publishedMessage.Payload);
+        Assert.Multiple(() =>
+        {
+            Assert.That(request.Left, Is.EqualTo(8));
+            Assert.That(request.Right, Is.EqualTo(13));
+            Assert.That(publishedMessage.Channel, Is.EqualTo("g0v0:ipc:realtime"));
+            Assert.That(payload.Value<string>("type"), Is.EqualTo("notice"));
+            Assert.That(payload.Value<string>("name"), Is.EqualTo("math.notice"));
+            Assert.That(payload.Value<string>("source_server"), Is.EqualTo("lazer"));
+        });
+    }
+
+    [Test]
     public async Task SendNoticeAsync_WithTypedSourceHandler_ShouldPassSourceServerAndConvertPayload()
     {
         InMemoryInterProcessCommunicationTransport transport = new();
-        InterProcessCommunicationClient sender = new(transport, "lazer");
-        InterProcessCommunicationClient receiver = new(transport, "realtime");
+        InterProcessCommunicationClient sender = new(transport, ServerIdentify.Lazer);
+        InterProcessCommunicationClient receiver = new(transport, ServerIdentify.Realtime);
         TaskCompletionSource<(string Source, AddRequest Payload)> receivedNotice = new(
             TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -45,7 +116,7 @@ public class InterProcessCommunicationClientTests
             return Task.CompletedTask;
         });
 
-        await sender.SendNoticeAsync("realtime", "math.notice", new { left = 8, right = 13 });
+        await sender.SendNoticeAsync(ServerIdentify.Realtime, "math.notice", new { left = 8, right = 13 });
 
         (string Source, AddRequest Payload) notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
         Assert.Multiple(() =>
@@ -57,28 +128,21 @@ public class InterProcessCommunicationClientTests
     }
 
     [Test]
-    public async Task SendNoticeAsync_WithExplicitSourceHandler_ShouldPassSourceServerAndConvertPayload()
+    public async Task SendNoticeAsync_WithRawIdentifiers_ShouldKeepIdentifiersUnchanged()
     {
         InMemoryInterProcessCommunicationTransport transport = new();
-        InterProcessCommunicationClient sender = new(transport, "gateway");
-        InterProcessCommunicationClient receiver = new(transport, "realtime");
-        TaskCompletionSource<(string Source, AddRequest Payload)> receivedNotice = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
+        InterProcessCommunicationClient sender = new(transport, "GatewayServer");
 
-        receiver.RegisterNoticeHandler<AddRequest>("math.notice", (source, payload) =>
-        {
-            receivedNotice.TrySetResult((source, payload!));
-            return Task.CompletedTask;
-        });
+        await sender.SendNoticeAsync("RealtimeServer", "math.notice", new { left = 21, right = 34 });
 
-        await sender.SendNoticeAsync("realtime", "math.notice", new { left = 21, right = 34 });
-
-        (string Source, AddRequest Payload) notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
+        PublishedMessage publishedMessage = transport.PublishedMessages.Single();
+        JObject payload = JObject.Parse(publishedMessage.Payload);
         Assert.Multiple(() =>
         {
-            Assert.That(notice.Source, Is.EqualTo("gateway"));
-            Assert.That(notice.Payload.Left, Is.EqualTo(21));
-            Assert.That(notice.Payload.Right, Is.EqualTo(34));
+            Assert.That(sender.ServerIdentifier, Is.EqualTo("GatewayServer"));
+            Assert.That(transport.SubscribedChannels, Does.Contain("g0v0:ipc:GatewayServer"));
+            Assert.That(publishedMessage.Channel, Is.EqualTo("g0v0:ipc:RealtimeServer"));
+            Assert.That(payload.Value<string>("source_server"), Is.EqualTo("GatewayServer"));
         });
     }
 
@@ -105,6 +169,41 @@ public class InterProcessCommunicationClientTests
     }
 
     [Test]
+    public async Task RequestAsync_WithServerIdentifyTarget_ShouldUseSnakeCaseChannelsAndRoundTrip()
+    {
+        InMemoryInterProcessCommunicationTransport transport = new();
+        InterProcessCommunicationClient requester = new(transport, ServerIdentify.Lazer);
+        InterProcessCommunicationClient responder = new(transport, ServerIdentify.Realtime);
+
+        responder.RegisterResponder<AddRequest, AddResponse>("math.sum", payload =>
+        {
+            AddRequest request = payload!;
+            return Task.FromResult<AddResponse?>(new AddResponse { Total = request.Left + request.Right });
+        });
+
+        AddResponse? response = await requester.RequestAsync<AddResponse>(
+            ServerIdentify.Realtime,
+            "math.sum",
+            new { left = 13, right = 21 });
+
+        PublishedMessage[] publishedMessages = transport.PublishedMessages.ToArray();
+        JObject requestPayload = JObject.Parse(publishedMessages[0].Payload);
+        JObject responsePayload = JObject.Parse(publishedMessages[1].Payload);
+        Assert.Multiple(() =>
+        {
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response!.Total, Is.EqualTo(34));
+            Assert.That(publishedMessages[0].Channel, Is.EqualTo("g0v0:ipc:realtime"));
+            Assert.That(publishedMessages[1].Channel, Is.EqualTo("g0v0:ipc:lazer"));
+            Assert.That(requestPayload.Value<string>("type"), Is.EqualTo("request"));
+            Assert.That(requestPayload.Value<string>("name"), Is.EqualTo("math.sum"));
+            Assert.That(requestPayload.Value<string>("source_server"), Is.EqualTo("lazer"));
+            Assert.That(responsePayload.Value<string>("type"), Is.EqualTo("response"));
+            Assert.That(responsePayload.Value<string>("source_server"), Is.EqualTo("realtime"));
+        });
+    }
+
+    [Test]
     public void RequestAsync_WhenResponderThrows_ShouldSurfaceRemoteException()
     {
         InMemoryInterProcessCommunicationTransport transport = new();
@@ -124,19 +223,19 @@ public class InterProcessCommunicationClientTests
 
     private sealed class InMemoryInterProcessCommunicationTransport : IInterProcessCommunicationTransport
     {
+        private readonly ConcurrentQueue<PublishedMessage> _publishedMessages = new();
         private readonly ConcurrentDictionary<string, ConcurrentBag<Func<string, Task>>> _subscriptions =
             new(StringComparer.Ordinal);
 
+        public string[] SubscribedChannels => _subscriptions.Keys.ToArray();
+
+        public PublishedMessage[] PublishedMessages => _publishedMessages.ToArray();
+
         public Task PublishAsync(string channel, string payload)
         {
-            if (!_subscriptions.TryGetValue(channel, out ConcurrentBag<Func<string, Task>>? handlers))
-            {
-                return Task.CompletedTask;
-            }
-
-            foreach (Func<string, Task> handler in handlers)
-            {
-                _ = Task.Run(async () =>
+            _publishedMessages.Enqueue(new PublishedMessage(channel, payload));
+            return _subscriptions.TryGetValue(channel, out ConcurrentBag<Func<string, Task>>? handlers)
+                ? Task.WhenAll(handlers.Select(handler => Task.Run(async () =>
                 {
                     try
                     {
@@ -146,10 +245,8 @@ public class InterProcessCommunicationClientTests
                     {
                         // The client under test is responsible for surfacing request errors.
                     }
-                });
-            }
-
-            return Task.CompletedTask;
+                })))
+                : Task.CompletedTask;
         }
 
         public void Subscribe(string channel, Func<string, Task> handler)
@@ -160,6 +257,8 @@ public class InterProcessCommunicationClientTests
             handlers.Add(handler);
         }
     }
+
+    private sealed record PublishedMessage(string Channel, string Payload);
 
     private sealed class AddRequest
     {

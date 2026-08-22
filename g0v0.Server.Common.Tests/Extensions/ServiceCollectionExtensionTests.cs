@@ -135,26 +135,23 @@ public class ServiceCollectionExtensionTests
     }
 
     [Test]
-    public void AddRedis_ShouldRegisterIpcDependenciesAsSingletons()
+    public void AddRedis_WithRawServerIdentifier_ShouldRegisterIpcDependenciesAsSingletons()
     {
         ServiceCollection services = new();
 
         services.AddRedis("realtime");
 
-        ServiceDescriptor? redisDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IConnectionMultiplexer));
-        ServiceDescriptor? transportDescriptor = services.FirstOrDefault(
-            d => d.ServiceType == typeof(IInterProcessCommunicationTransport));
-        ServiceDescriptor? ipcClientDescriptor = services.FirstOrDefault(
-            d => d.ServiceType == typeof(InterProcessCommunicationClient));
+        AssertRedisIpcDescriptors(services);
+    }
 
-        Assert.That(redisDescriptor, Is.Not.Null);
-        Assert.That(redisDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+    [Test]
+    public void AddRedis_WithServerIdentify_ShouldRegisterIpcDependenciesAsSingletons()
+    {
+        ServiceCollection services = new();
 
-        Assert.That(transportDescriptor, Is.Not.Null);
-        Assert.That(transportDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+        services.AddRedis(ServerIdentify.Realtime);
 
-        Assert.That(ipcClientDescriptor, Is.Not.Null);
-        Assert.That(ipcClientDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+        AssertRedisIpcDescriptors(services);
     }
 
     [Test]
@@ -233,5 +230,23 @@ public class ServiceCollectionExtensionTests
         Assert.That(handlerDescriptor.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
 
         Assert.That(optionsDescriptor, Is.Not.Null);
+    }
+
+    private static void AssertRedisIpcDescriptors(ServiceCollection services)
+    {
+        ServiceDescriptor? redisDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IConnectionMultiplexer));
+        ServiceDescriptor? transportDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(IInterProcessCommunicationTransport));
+        ServiceDescriptor? ipcClientDescriptor = services.FirstOrDefault(
+            d => d.ServiceType == typeof(InterProcessCommunicationClient));
+
+        Assert.That(redisDescriptor, Is.Not.Null);
+        Assert.That(redisDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+
+        Assert.That(transportDescriptor, Is.Not.Null);
+        Assert.That(transportDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
+
+        Assert.That(ipcClientDescriptor, Is.Not.Null);
+        Assert.That(ipcClientDescriptor!.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
     }
 }

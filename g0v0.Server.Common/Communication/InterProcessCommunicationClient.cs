@@ -3,6 +3,7 @@
 using System.Collections.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace g0v0.Server.Common.Communication;
 
@@ -21,16 +22,31 @@ public sealed class InterProcessCommunicationClient
         NullValueHandling = NullValueHandling.Include,
     });
 
+    private static readonly SnakeCaseNamingStrategy ServerIdentifierNamingStrategy = new();
+
     private readonly ConcurrentDictionary<string, TypedHandlerRegistration> _noticeHandlers = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, TypedResponderRegistration> _responders = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<Guid, PendingRequest> _pendingRequests = new();
     private readonly IInterProcessCommunicationTransport _transport;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="InterProcessCommunicationClient"/> class.
+    /// Initializes a new instance of the <see cref="InterProcessCommunicationClient"/> class for a known server.
     /// </summary>
     /// <param name="transport">The message transport implementation.</param>
     /// <param name="serverIdentifier">The current server identifier.</param>
+    public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, ServerIdentify serverIdentifier)
+        : this(transport, GetServerIdentifier(serverIdentifier))
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InterProcessCommunicationClient"/> class with a raw server identifier.
+    /// </summary>
+    /// <param name="transport">The message transport implementation.</param>
+    /// <param name="serverIdentifier">The current server identifier.</param>
+    /// <remarks>
+    /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
+    /// </remarks>
     public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, string serverIdentifier)
     {
         ArgumentNullException.ThrowIfNull(transport);
@@ -48,10 +64,33 @@ public sealed class InterProcessCommunicationClient
     public string ServerIdentifier { get; }
 
     /// <summary>
-    /// Builds the Redis pub/sub channel name for a server identifier.
+    /// Converts a known server identifier enum value to the Redis IPC wire identifier.
+    /// </summary>
+    /// <param name="serverIdentifier">The known server identifier.</param>
+    /// <returns>The snake_case wire identifier.</returns>
+    public static string GetServerIdentifier(ServerIdentify serverIdentifier)
+    {
+        return Enum.IsDefined(serverIdentifier)
+            ? ServerIdentifierNamingStrategy.GetPropertyName(serverIdentifier.ToString(), hasSpecifiedName: false)
+            : throw new ArgumentOutOfRangeException(nameof(serverIdentifier), serverIdentifier, "Unknown server identifier.");
+    }
+
+    /// <summary>
+    /// Builds the Redis pub/sub channel name for a known server identifier.
     /// </summary>
     /// <param name="serverIdentifier">The target server identifier.</param>
     /// <returns>The Redis channel name.</returns>
+    public static string GetChannelName(ServerIdentify serverIdentifier)
+        => GetChannelName(GetServerIdentifier(serverIdentifier));
+
+    /// <summary>
+    /// Builds the Redis pub/sub channel name for a raw server identifier.
+    /// </summary>
+    /// <param name="serverIdentifier">The target server identifier.</param>
+    /// <returns>The Redis channel name.</returns>
+    /// <remarks>
+    /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
+    /// </remarks>
     public static string GetChannelName(string serverIdentifier)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(serverIdentifier);
@@ -186,13 +225,31 @@ public sealed class InterProcessCommunicationClient
             Task.FromResult<object?>(responder(CastPayload<TRequest>(payload))));
 
     /// <summary>
-    /// Sends a one-way notice to another server.
+    /// Sends a one-way notice to a known server.
     /// </summary>
     /// <param name="targetServerIdentifier">The target server identifier.</param>
     /// <param name="name">The notice name.</param>
     /// <param name="payload">The payload to serialize.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that completes once the notice has been published.</returns>
+    public Task SendNoticeAsync(
+        ServerIdentify targetServerIdentifier,
+        string name,
+        object? payload = null,
+        CancellationToken cancellationToken = default)
+        => SendNoticeAsync(GetServerIdentifier(targetServerIdentifier), name, payload, cancellationToken);
+
+    /// <summary>
+    /// Sends a one-way notice to another server using a raw server identifier.
+    /// </summary>
+    /// <param name="targetServerIdentifier">The target server identifier.</param>
+    /// <param name="name">The notice name.</param>
+    /// <param name="payload">The payload to serialize.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that completes once the notice has been published.</returns>
+    /// <remarks>
+    /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
+    /// </remarks>
     public Task SendNoticeAsync(
         string targetServerIdentifier,
         string name,
@@ -206,7 +263,7 @@ public sealed class InterProcessCommunicationClient
     }
 
     /// <summary>
-    /// Sends a request and converts the response to the specified type.
+    /// Sends a request to a known server and converts the response to the specified type.
     /// </summary>
     /// <typeparam name="TResponse">The expected response payload type.</typeparam>
     /// <param name="targetServerIdentifier">The target server identifier.</param>
@@ -215,6 +272,27 @@ public sealed class InterProcessCommunicationClient
     /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The deserialized response payload.</returns>
+    public Task<TResponse?> RequestAsync<TResponse>(
+        ServerIdentify targetServerIdentifier,
+        string name,
+        object? payload = null,
+        TimeSpan? timeout = null,
+        CancellationToken cancellationToken = default)
+        => RequestAsync<TResponse>(GetServerIdentifier(targetServerIdentifier), name, payload, timeout, cancellationToken);
+
+    /// <summary>
+    /// Sends a request and converts the response to the specified type using a raw server identifier.
+    /// </summary>
+    /// <typeparam name="TResponse">The expected response payload type.</typeparam>
+    /// <param name="targetServerIdentifier">The target server identifier.</param>
+    /// <param name="name">The request name.</param>
+    /// <param name="payload">The request payload.</param>
+    /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The deserialized response payload.</returns>
+    /// <remarks>
+    /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
+    /// </remarks>
     public async Task<TResponse?> RequestAsync<TResponse>(
         string targetServerIdentifier,
         string name,
@@ -228,7 +306,7 @@ public sealed class InterProcessCommunicationClient
     }
 
     /// <summary>
-    /// Sends a request and converts the response to the specified type.
+    /// Sends a request to a known server and converts the response to the specified type.
     /// </summary>
     /// <param name="targetServerIdentifier">The target server identifier.</param>
     /// <param name="name">The request name.</param>
@@ -237,6 +315,28 @@ public sealed class InterProcessCommunicationClient
     /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The deserialized response payload.</returns>
+    public Task<object?> RequestAsync(
+        ServerIdentify targetServerIdentifier,
+        string name,
+        Type responseType,
+        object? payload = null,
+        TimeSpan? timeout = null,
+        CancellationToken cancellationToken = default)
+        => RequestAsync(GetServerIdentifier(targetServerIdentifier), name, responseType, payload, timeout, cancellationToken);
+
+    /// <summary>
+    /// Sends a request and converts the response to the specified type using a raw server identifier.
+    /// </summary>
+    /// <param name="targetServerIdentifier">The target server identifier.</param>
+    /// <param name="name">The request name.</param>
+    /// <param name="responseType">The expected response payload type.</param>
+    /// <param name="payload">The request payload.</param>
+    /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The deserialized response payload.</returns>
+    /// <remarks>
+    /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
+    /// </remarks>
     public async Task<object?> RequestAsync(
         string targetServerIdentifier,
         string name,
