@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using g0v0.Server.Common.Configuration;
+using Microsoft.Extensions.Logging;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Catch;
 using osu.Game.Rulesets.Mania;
@@ -22,6 +23,8 @@ public class RulesetManager
 
     private readonly Dictionary<string, Ruleset> _rulesets = new(StringComparer.Ordinal);
     private readonly Dictionary<int, Ruleset> _rulesetsById = [];
+
+    private readonly ILogger<RulesetManager>? _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RulesetManager"/> class.
@@ -48,6 +51,19 @@ public class RulesetManager
         : this(
             Path.Combine(pathProvider.GetBasePath(), RulesetPath), includeOfficial)
     {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RulesetManager"/> class using an <see cref="IPathProvider"/>
+    /// to resolve the rulesets directory path.
+    /// </summary>
+    /// <param name="pathProvider">The path provider used to resolve the base path. The rulesets directory is expected at <c>{basePath}/rulesets</c>.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="includeOfficial">Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.</param>
+    public RulesetManager(IPathProvider pathProvider, ILogger<RulesetManager> logger, bool includeOfficial = true)
+        : this(pathProvider, includeOfficial)
+    {
+        _logger = logger;
     }
 
     /// <summary>
@@ -87,14 +103,14 @@ public class RulesetManager
 
     /// <summary>
     /// Registers a ruleset by its short name and, if it implements <see cref="ILegacyRuleset"/>, by its legacy ID.
-    /// Duplicate entries are silently skipped with a warning written to <see cref="Console.Error"/>.
     /// </summary>
     /// <param name="ruleset">The ruleset instance to register.</param>
     private void AddRuleset(Ruleset ruleset)
     {
         if (!_rulesets.TryAdd(ruleset.ShortName, ruleset))
         {
-            Console.Error.WriteLine($"Ruleset with short name {ruleset.ShortName} already exists, skipping.");
+            _logger?.LogWarning("Ruleset with short name {RulesetShortName} already exists, skipping.", ruleset.ShortName);
+
             return;
         }
 
@@ -105,7 +121,7 @@ public class RulesetManager
 
         if (!_rulesetsById.TryAdd(legacyRuleset.LegacyID, ruleset))
         {
-            Console.Error.WriteLine($"Ruleset with ID {legacyRuleset.LegacyID} already exists, skipping.");
+            _logger?.LogWarning("Ruleset with ID {RulesetID} already exists, skipping.", legacyRuleset.LegacyID);
         }
     }
 
@@ -152,12 +168,12 @@ public class RulesetManager
                 }
 
                 Ruleset instance = (Ruleset)Activator.CreateInstance(rulesetType)!;
-                Console.Error.WriteLine($"Loading ruleset {ruleset}");
+                _logger?.LogInformation("Loading ruleset {Ruleset}", ruleset);
                 AddRuleset(instance);
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Failed to load ruleset from {ruleset}: {ex}");
+                _logger?.LogError(ex, "Failed to load ruleset from {Ruleset}", ruleset);
             }
         }
     }
