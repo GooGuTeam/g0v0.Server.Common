@@ -1,15 +1,15 @@
 # AGENTS.md
 
-Shared library for the g0v0 server v2 series. .NET 8 class library plus an NUnit test project.
+Shared library for the g0v0 server v2 series. .NET 10 class library plus an NUnit test project.
 
 ## Layout
 
-- `g0v0.Server.Common/` — library (`net8.0`, depends on `Microsoft.AspNetCore.App`).
+- `g0v0.Server.Common/` — library (`net10.0`, depends on `Microsoft.AspNetCore.App`).
 - `g0v0.Server.Common.Tests/` — NUnit 4 tests; mirrors the library's folder layout.
 - `g0v0.Server.Common.sln` — both projects.
 - `Directory.Build.props` — applies analyzers, `EnforceCodeStyleInBuild`, and `GenerateDocumentationFile` to every
   project; do not duplicate those flags in `.csproj`.
-- `global.json` pins SDK `8.0.0` with `rollForward: latestMinor`.
+- `global.json` pins SDK `10.0.0` with `rollForward: latestMinor`.
 
 ## Commands
 
