@@ -129,4 +129,13 @@ public class GeneralConfig
     public int FetcherBeatmapRawCacheExpireHours { get; set; } = 24;
 
     #endregion
+
+    #region Server
+
+    /// <summary>
+    /// Gets or sets the server public url.
+    /// </summary>
+    public string ServerUrl { get; set; } = "http://localhost:8000";
+
+    #endregion
 }

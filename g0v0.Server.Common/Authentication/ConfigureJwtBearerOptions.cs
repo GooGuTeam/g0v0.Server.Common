@@ -2,6 +2,7 @@
 
 using System.Text;
 using g0v0.Server.Common.Configuration;
+using g0v0.Server.Common.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -64,8 +65,8 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
             IssuerSigningKey = key,
             ValidateAudience = !string.IsNullOrEmpty(generalConfig.JwtAudience),
             ValidAudience = generalConfig.JwtAudience,
-            ValidateIssuer = !string.IsNullOrEmpty(generalConfig.JwtIssuer),
-            ValidIssuer = generalConfig.JwtIssuer,
+            ValidateIssuer = true,
+            ValidIssuer = generalConfig.JwtIssuer ?? generalConfig.ServerUrl.AddSuffix("/"),
             ValidateLifetime = true,
             NameClaimType = OAuthClaimTypes.Subject,
         };
