@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using g0v0.Server.Common.Database.PostgreSQL;
@@ -11,9 +12,11 @@ using g0v0.Server.Common.Database.PostgreSQL;
 namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgreSqlDbContext))]
-    partial class PostgreSqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260923134230_AddChatMembership")]
+    partial class AddChatMembership
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -392,11 +395,6 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
                         .HasColumnName("type");
-
-                    b.Property<string>("Uuid")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
-                        .HasColumnName("uuid");
 
                     b.HasKey("MessageId")
                         .HasName("pk_chat_messages");

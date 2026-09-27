@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using g0v0.Server.Common.Database.PostgreSQL;
@@ -11,13 +12,15 @@ using g0v0.Server.Common.Database.PostgreSQL;
 namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgreSqlDbContext))]
-    partial class PostgreSqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260824152356_AddChatEntities")]
+    partial class AddChatEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.20")
+                .HasAnnotation("ProductVersion", "8.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -325,14 +328,6 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("description");
 
-                    b.Property<int?>("LastMessageId")
-                        .HasColumnType("integer")
-                        .HasColumnName("last_message_id");
-
-                    b.Property<bool>("Moderated")
-                        .HasColumnType("boolean")
-                        .HasColumnName("moderated");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -393,11 +388,6 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("type");
 
-                    b.Property<string>("Uuid")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
-                        .HasColumnName("uuid");
-
                     b.HasKey("MessageId")
                         .HasName("pk_chat_messages");
 
@@ -411,36 +401,6 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasDatabaseName("ix_chat_messages_timestamp");
 
                     b.ToTable("chat_messages", (string)null);
-                });
-
-            modelBuilder.Entity("g0v0.Server.Common.Database.Models.ChatUserChannel", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.Property<int>("ChannelId")
-                        .HasColumnType("integer")
-                        .HasColumnName("channel_id");
-
-                    b.Property<bool>("Hidden")
-                        .HasColumnType("boolean")
-                        .HasColumnName("hidden");
-
-                    b.Property<int?>("LastReadId")
-                        .HasColumnType("integer")
-                        .HasColumnName("last_read_id");
-
-                    b.HasKey("UserId", "ChannelId")
-                        .HasName("pk_chat_user_channels");
-
-                    b.HasIndex("ChannelId")
-                        .HasDatabaseName("ix_chat_user_channels_channel_id");
-
-                    b.HasIndex("Hidden")
-                        .HasDatabaseName("ix_chat_user_channels_hidden");
-
-                    b.ToTable("chat_user_channels", (string)null);
                 });
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.OAuthToken", b =>

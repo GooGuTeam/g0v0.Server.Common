@@ -147,6 +147,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddCache(this IServiceCollection services)
     {
         services.AddSingleton<IStringCache, RedisStringCache>();
+        services.AddSingleton<IRankedCache, RedisRankedCache>();
 
         return services;
     }

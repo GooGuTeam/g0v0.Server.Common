@@ -12,11 +12,11 @@
         <PackageReference Include="EFCore.NamingConventions" Version="9.0.0"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.20"/>
-        <PackageReference Include="g0v0.osu.Game" Version="2026.713.0"/>
-        <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2026.702.1"/>
-        <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2026.702.1"/>
-        <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2026.702.1"/>
-        <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2026.702.1"/>
+        <PackageReference Include="g0v0.osu.Game" Version="2026.923.0"/>
+        <PackageReference Include="ppy.osu.Game.Rulesets.Osu" Version="2026.916.0"/>
+        <PackageReference Include="ppy.osu.Game.Rulesets.Taiko" Version="2026.916.0"/>
+        <PackageReference Include="ppy.osu.Game.Rulesets.Catch" Version="2026.916.0"/>
+        <PackageReference Include="ppy.osu.Game.Rulesets.Mania" Version="2026.916.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.20">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>

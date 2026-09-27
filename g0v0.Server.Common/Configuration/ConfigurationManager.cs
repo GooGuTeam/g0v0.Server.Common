@@ -55,6 +55,16 @@ public class ConfigurationManager(string basePath)
     }
 
     /// <summary>
+    /// Gets a configuration of the specified type, or <see langword="null"/> when its file does not exist.
+    /// </summary>
+    /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
+    /// <returns>The configuration instance, or <see langword="null"/> when the file is absent.</returns>
+    public T? TryGet<T>()
+    {
+        return File.Exists(GetFilePath<T>(basePath)) ? Get<T>() : default;
+    }
+
+    /// <summary>
     /// Reload the configuration from the file. Only properties marked with <see cref="ReloadableAttribute"/> will be updated.
     /// </summary>
     /// <typeparam name="T">The type of configuration to reload.</typeparam>

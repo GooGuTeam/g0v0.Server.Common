@@ -14,8 +14,9 @@ public class PostgreSqlDbContextFactory
     {
         DbContextOptionsBuilder<PostgreSqlDbContext> optionsBuilder = new();
 
+        // Split on the first '=' only: connection strings contain '=' themselves.
         string? conn =
-            args.FirstOrDefault(x => x.StartsWith("--conn=", StringComparison.Ordinal))?.Split('=')[1]
+            args.FirstOrDefault(x => x.StartsWith("--conn=", StringComparison.Ordinal))?["--conn=".Length..]
             ?? args.SkipWhile(x => !string.Equals(x, "--conn", StringComparison.Ordinal)).Skip(1).FirstOrDefault()
             ?? Environment.GetEnvironmentVariable("DB_CONN");
 

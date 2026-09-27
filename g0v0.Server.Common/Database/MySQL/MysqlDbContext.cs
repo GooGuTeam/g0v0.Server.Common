@@ -69,6 +69,26 @@ public class MysqlDbContext : DbContext
     /// </summary>
     public DbSet<RoomParticipatedUser> RoomParticipatedUsers { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the chat channels table set.
+    /// </summary>
+    public DbSet<ChatChannel> ChatChannels { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the chat messages table set.
+    /// </summary>
+    public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the chat silence users table set.
+    /// </summary>
+    public DbSet<SilenceUser> ChatSilenceUsers { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the chat channel membership table set.
+    /// </summary>
+    public DbSet<ChatUserChannel> ChatUserChannels { get; set; } = null!;
+
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
