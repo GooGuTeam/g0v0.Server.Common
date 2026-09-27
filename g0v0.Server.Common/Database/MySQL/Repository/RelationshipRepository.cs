@@ -73,9 +73,23 @@ public class RelationshipRepository(MysqlDbContext context) : IRelationshipRepos
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// The legacy table is keyed by (<see cref="Relationship.UserId"/>,
+    /// <see cref="Relationship.TargetId"/>, <see cref="Relationship.Type"/>), so a
+    /// type change cannot be updated in place: the stored rows of the pair are
+    /// replaced with the requested state instead. Pass an untracked instance
+    /// holding the desired state.
+    /// </remarks>
     public async Task UpdateAsync(Relationship relationship)
     {
-        context.Relationships.Update(relationship);
+        List<Relationship> existing = await context.Relationships
+            .Where(r => r.UserId == relationship.UserId && r.TargetId == relationship.TargetId)
+            .ToListAsync()
+            .ConfigureAwait(false);
+        context.Relationships.RemoveRange(existing);
+        await context.SaveChangesAsync().ConfigureAwait(false);
+
+        await context.Relationships.AddAsync(relationship).ConfigureAwait(false);
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
 

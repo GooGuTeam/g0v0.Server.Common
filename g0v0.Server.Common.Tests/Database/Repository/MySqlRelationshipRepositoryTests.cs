@@ -278,7 +278,7 @@ public class MySqlRelationshipRepositoryTests
     }
 
     [Test]
-    public async Task CreateAsync_ShouldSetId()
+    public async Task CreateAsync_ShouldPersistCompositeKeyWithoutSurrogateId()
     {
         Relationship relationship = new()
         {
@@ -289,7 +289,15 @@ public class MySqlRelationshipRepositoryTests
 
         await _repository.CreateAsync(relationship);
 
-        Assert.That(relationship.Id, Is.Not.EqualTo(0));
+        // The legacy MySQL table has no id column, so the model keeps the
+        // clr default and the row is identified by the composite key.
+        Assert.That(relationship.Id, Is.EqualTo(0));
+
+        Relationship? saved = await _context.Relationships
+            .Where(r => r.UserId == 1 && r.TargetId == 2)
+            .FirstOrDefaultAsync();
+        Assert.That(saved, Is.Not.Null);
+        Assert.That(saved!.Type, Is.EqualTo(RelationshipType.Follow));
     }
 
     #endregion
@@ -297,7 +305,7 @@ public class MySqlRelationshipRepositoryTests
     #region UpdateAsync
 
     [Test]
-    public async Task UpdateAsync_ShouldUpdateRelationshipInDatabase()
+    public async Task UpdateAsync_ShouldReplaceRelationshipInDatabase()
     {
         Relationship relationship = new()
         {
@@ -308,8 +316,15 @@ public class MySqlRelationshipRepositoryTests
         _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
-        relationship.Type = RelationshipType.Block;
-        await _repository.UpdateAsync(relationship);
+        // The legacy table is keyed by (user_id, target_id, type): changing the
+        // type replaces the stored row instead of updating it in place.
+        Relationship changed = new()
+        {
+            UserId = 1,
+            TargetId = 2,
+            Type = RelationshipType.Block,
+        };
+        await _repository.UpdateAsync(changed);
 
         Relationship? updated = await _context.Relationships
             .Where(r => r.UserId == 1 && r.TargetId == 2)

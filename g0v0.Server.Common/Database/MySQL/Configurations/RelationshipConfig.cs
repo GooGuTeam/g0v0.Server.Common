@@ -9,6 +9,10 @@ namespace g0v0.Server.Common.Database.MySQL.Configurations;
 /// <summary>
 /// Configures the <see cref="Relationship"/> entity mapping for the legacy MySQL schema.
 /// </summary>
+/// <remarks>
+/// The legacy <c>relationship</c> table has no surrogate <c>id</c> column; rows are keyed by
+/// the composite (<c>user_id</c>, <c>target_id</c>, <c>type</c>).
+/// </remarks>
 public class RelationshipConfig : IEntityTypeConfiguration<Relationship>
 {
     /// <inheritdoc/>
@@ -16,11 +20,9 @@ public class RelationshipConfig : IEntityTypeConfiguration<Relationship>
     {
         builder.ToTable("relationship");
 
-        builder.HasKey(r => r.Id);
+        builder.Ignore(r => r.Id);
 
-        builder.Property(r => r.Id)
-            .HasColumnName("id")
-            .ValueGeneratedOnAdd();
+        builder.HasKey(r => new { r.UserId, r.TargetId, r.Type });
 
         builder.Property(r => r.UserId)
             .HasColumnName("user_id")
