@@ -191,6 +191,15 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
     }
 
     /// <inheritdoc/>
+    public async Task UpdateRoomChannelId(long roomId, int channelId)
+    {
+        Room? dbRoom = await GetRoomForUpdate(roomId) ?? throw new InvalidOperationException($"Room with ID {roomId} does not exist.");
+        dbRoom.ChannelId = channelId;
+        context.Update(dbRoom);
+        await context.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task SetRoomEndDate(long roomId, DateTimeOffset? endDate)
     {
         Room? dbRoom = await GetRoomForUpdate(roomId) ?? throw new InvalidOperationException($"Room with ID {roomId} does not exist.");

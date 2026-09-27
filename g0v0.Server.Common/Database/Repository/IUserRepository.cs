@@ -17,6 +17,13 @@ public interface IUserRepository
     Task<User?> GetByIdAsync(int userId);
 
     /// <summary>
+    /// Gets users by their unique identifiers.
+    /// </summary>
+    /// <param name="userIds">The user IDs to load.</param>
+    /// <returns>The matching users.</returns>
+    Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyList<int> userIds);
+
+    /// <summary>
     /// Gets the username for a user by their unique identifier.
     /// </summary>
     /// <param name="userId">The user ID.</param>

@@ -21,6 +21,17 @@ public class UserRepository(MysqlDbContext context) : IUserRepository, IMySqlRep
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyList<int> userIds)
+    {
+        return userIds.Count == 0
+            ? []
+            : await context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync()
+                .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<string?> GetUsernameByIdAsync(int userId)
     {
         return await context.Users

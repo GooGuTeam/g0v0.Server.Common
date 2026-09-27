@@ -74,6 +74,14 @@ public interface IRoomRepository
     public Task UpdateRoomStatus(long roomId, MultiplayerRoomState state);
 
     /// <summary>
+    /// Updates the associated chat channel ID of a room.
+    /// </summary>
+    /// <param name="roomId">The room ID.</param>
+    /// <param name="channelId">The chat channel ID.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
+    public Task UpdateRoomChannelId(long roomId, int channelId);
+
+    /// <summary>
     /// Sets the end date of a room.
     /// </summary>
     /// <param name="roomId">The room ID.</param>
