@@ -7,8 +7,8 @@ namespace g0v0.Server.Common.Configuration;
 /// <summary>
 /// Stores gameplay feature flags that affect score and ruleset behavior.
 /// </summary>
-[ConfigurationFile("game")]
-public class GameConfiguration
+[ConfigFile("game")]
+public class GameConfig
 {
     /// <summary>
     /// Gets or sets a value indicating whether relax rulesets are enabled.

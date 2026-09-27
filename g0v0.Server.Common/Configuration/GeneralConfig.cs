@@ -8,8 +8,8 @@ namespace g0v0.Server.Common.Configuration;
 /// <summary>
 /// Represents the general configuration settings for the application, including global settings for any server instance.
 /// </summary>
-[ConfigurationFile("general")]
-public class GeneralConfiguration
+[ConfigFile("general")]
+public class GeneralConfig
 {
     #region Database
 

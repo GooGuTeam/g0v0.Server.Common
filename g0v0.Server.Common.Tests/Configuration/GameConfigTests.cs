@@ -7,14 +7,14 @@ using NUnit.Framework;
 namespace g0v0.Server.Common.Tests.Configuration;
 
 [TestFixture]
-public class GameConfigurationTests
+public class GameConfigTests
 {
     [Test]
     public void GameConfiguration_ShouldUseGameConfigurationFile()
     {
-        ConfigurationFileAttribute? attribute = typeof(GameConfiguration)
-            .GetCustomAttributes(typeof(ConfigurationFileAttribute), inherit: false)
-            .Single() as ConfigurationFileAttribute;
+        ConfigFileAttribute? attribute = typeof(GameConfig)
+            .GetCustomAttributes(typeof(ConfigFileAttribute), inherit: false)
+            .Single() as ConfigFileAttribute;
 
         Assert.That(attribute!.FileName, Is.EqualTo("game"));
     }
@@ -22,7 +22,7 @@ public class GameConfigurationTests
     [Test]
     public void FeatureFlags_ShouldBeReloadable()
     {
-        string[] reloadableProperties = typeof(GameConfiguration)
+        string[] reloadableProperties = typeof(GameConfig)
             .GetProperties()
             .Where(property => property.GetCustomAttributes(typeof(ReloadableAttribute), inherit: false).Length > 0)
             .Select(property => property.Name)
@@ -32,22 +32,22 @@ public class GameConfigurationTests
             reloadableProperties,
             Is.EquivalentTo(
             [
-                nameof(GameConfiguration.EnableRelax),
-                nameof(GameConfiguration.EnableAutopilot),
-                nameof(GameConfiguration.EnableAllBeatmapLeaderboard),
+                nameof(GameConfig.EnableRelax),
+                nameof(GameConfig.EnableAutopilot),
+                nameof(GameConfig.EnableAllBeatmapLeaderboard),
             ]));
     }
 
     [Test]
     public void DefaultValues_ShouldDisableOptionalGameplayFeatures()
     {
-        GameConfiguration configuration = new();
+        GameConfig config = new();
 
         Assert.Multiple(() =>
         {
-            Assert.That(configuration.EnableRelax, Is.False);
-            Assert.That(configuration.EnableAutopilot, Is.False);
-            Assert.That(configuration.EnableAllBeatmapLeaderboard, Is.False);
+            Assert.That(config.EnableRelax, Is.False);
+            Assert.That(config.EnableAutopilot, Is.False);
+            Assert.That(config.EnableAllBeatmapLeaderboard, Is.False);
         });
     }
 }

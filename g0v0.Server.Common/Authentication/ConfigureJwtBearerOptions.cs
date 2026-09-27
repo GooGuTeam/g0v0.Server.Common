@@ -14,7 +14,7 @@ namespace g0v0.Server.Common.Authentication;
 /// </summary>
 public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
 {
-    private readonly ConfigurationManager _manager;
+    private readonly ConfigManager _manager;
     private readonly ILogger<DatabaseJwtTokenHandler> _logger;
     private readonly IServiceProvider _serviceProvider;
 
@@ -25,7 +25,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <param name="serviceProvider">The root service provider used to resolve scoped dependencies.</param>
     /// <param name="logger">The logger for token handler setup diagnostics.</param>
     public ConfigureJwtBearerOptions(
-        ConfigurationManager manager,
+        ConfigManager manager,
         IServiceProvider serviceProvider,
         ILogger<DatabaseJwtTokenHandler> logger)
     {
@@ -55,7 +55,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <param name="options">The options to configure.</param>
     public void Configure(JwtBearerOptions options)
     {
-        GeneralConfiguration generalConfig = _manager.Get<GeneralConfiguration>();
+        GeneralConfig generalConfig = _manager.Get<GeneralConfig>();
         SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(generalConfig.JwtSecretKey));
 
         options.TokenValidationParameters = new TokenValidationParameters

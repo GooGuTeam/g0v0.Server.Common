@@ -6,7 +6,7 @@ namespace g0v0.Server.Common.Configuration.Attributes;
 /// Specifies the filename for a configuration class. The extension of file is not required. The extension is `.json`.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class ConfigurationFileAttribute(string fileName) : Attribute
+public class ConfigFileAttribute(string fileName) : Attribute
 {
     /// <summary>
     /// Gets the filename of configuration file.

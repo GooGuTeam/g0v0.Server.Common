@@ -21,7 +21,7 @@ public class FetcherTests
     {
         _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(Path.Combine(_tempDir, "config"));
-        WriteGeneralConfig(new GeneralConfiguration
+        WriteGeneralConfig(new GeneralConfig
         {
             FetcherClientId = 1,
             FetcherClientSecret = "secret",
@@ -300,11 +300,11 @@ public class FetcherTests
     {
         HttpClient client = new(handler);
         HttpService httpService = new(client);
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         return new Fetcher(httpService, manager, cache, repository, NullLogger<Fetcher>.Instance);
     }
 
-    private void WriteGeneralConfig(GeneralConfiguration config)
+    private void WriteGeneralConfig(GeneralConfig config)
     {
         string json = JsonConvert.SerializeObject(config);
         File.WriteAllText(Path.Combine(_tempDir, "config", "general.json"), json);

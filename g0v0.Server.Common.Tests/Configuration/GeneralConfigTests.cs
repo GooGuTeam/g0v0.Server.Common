@@ -7,14 +7,14 @@ using NUnit.Framework;
 namespace g0v0.Server.Common.Tests.Configuration;
 
 [TestFixture]
-public class GeneralConfigurationTests
+public class GeneralConfigTests
 {
-    private GeneralConfiguration _config = null!;
+    private GeneralConfig _config = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _config = new GeneralConfiguration();
+        _config = new GeneralConfig();
     }
 
     [Test]

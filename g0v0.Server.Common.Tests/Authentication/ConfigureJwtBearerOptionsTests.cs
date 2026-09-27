@@ -15,7 +15,7 @@ public class ConfigureJwtBearerOptionsTests
 {
     private string _tempDir = null!;
     private string _configDir = null!;
-    private ConfigurationManager _manager = null!;
+    private ConfigManager _manager = null!;
     private ILogger<DatabaseJwtTokenHandler> _logger = null!;
     private IServiceProvider _serviceProvider = null!;
 
@@ -48,7 +48,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtIssuer = "my_issuer",
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
@@ -75,7 +75,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtIssuer = string.Empty,
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
@@ -96,7 +96,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtIssuer = "my_issuer",
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
@@ -115,7 +115,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtSecretKey = "super_secret_key_1234567890123456",
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
@@ -134,7 +134,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtSecretKey = "super_secret_key_1234567890123456",
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
@@ -152,7 +152,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtSecretKey = "super_secret_key_1234567890123456",
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);
@@ -170,7 +170,7 @@ public class ConfigureJwtBearerOptionsTests
             JwtSecretKey = "super_secret_key_1234567890123456",
         });
 
-        _manager = new ConfigurationManager(_tempDir);
+        _manager = new ConfigManager(_tempDir);
 
         JwtBearerOptions options = new();
         ConfigureJwtBearerOptions configurer = new(_manager, _serviceProvider, _logger);

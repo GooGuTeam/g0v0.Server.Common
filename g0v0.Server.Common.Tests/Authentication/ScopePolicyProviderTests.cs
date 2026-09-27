@@ -86,7 +86,7 @@ public class ScopePolicyProviderTests
     private ScopePolicyProvider CreateProvider()
     {
         IOptions<AuthorizationOptions> options = Options.Create(new AuthorizationOptions());
-        ConfigurationManager config = new(_basePath);
+        ConfigManager config = new(_basePath);
 
         return new ScopePolicyProvider(options, config);
     }

@@ -8,7 +8,7 @@ namespace g0v0.Server.Common.Configuration;
 /// <summary>
 /// Represents the storage settings for the application.
 /// </summary>
-[ConfigurationFile("storage")]
+[ConfigFile("storage")]
 public class StorageConfiguration
 {
     /// <summary>

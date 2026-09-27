@@ -11,23 +11,23 @@ namespace g0v0.Server.Common.Configuration;
 /// A manager for loading and reloading configuration files.
 /// The configuration file is expected to be in JSON format and located in the "config" directory under the specified base path.
 /// The filename is determined by the type name of the configuration class, converted to snake_case,
-/// or by a custom filename specified using the <see cref="ConfigurationFileAttribute"/>.
+/// or by a custom filename specified using the <see cref="ConfigFileAttribute"/>.
 /// Only properties marked with the <see cref="ReloadableAttribute"/> will be updated when reloading the configuration.
 /// </summary>
 /// <remarks>
-/// Initializes a new instance of the <see cref="ConfigurationManager"/> class and loads the configuration from the file.
+/// Initializes a new instance of the <see cref="ConfigManager"/> class and loads the configuration from the file.
 /// </remarks>
 /// <param name="basePath">The base path to find `config/{filename}.json`.</param>
-public class ConfigurationManager(string basePath)
+public class ConfigManager(string basePath)
 {
     private const string ConfigBasePath = "config";
     private readonly Dictionary<Type, object> _configCache = new();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ConfigurationManager"/> class using a configuration path provider and loads the configuration from the file.
+    /// Initializes a new instance of the <see cref="ConfigManager"/> class using a configuration path provider and loads the configuration from the file.
     /// </summary>
     /// <param name="pathProvider">The path provider.</param>
-    public ConfigurationManager(IPathProvider pathProvider)
+    public ConfigManager(IPathProvider pathProvider)
         : this(pathProvider.GetBasePath())
     {
     }
@@ -85,7 +85,7 @@ public class ConfigurationManager(string basePath)
         string filename;
         Type t = typeof(T);
 
-        ConfigurationFileAttribute? attribute = t.GetCustomAttribute<ConfigurationFileAttribute>();
+        ConfigFileAttribute? attribute = t.GetCustomAttribute<ConfigFileAttribute>();
         filename = attribute != null ? attribute.FileName : t.Name.ToSnakeCase() + ".json";
 
         if (!filename.EndsWith(".json", StringComparison.Ordinal))

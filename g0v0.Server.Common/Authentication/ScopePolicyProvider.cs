@@ -12,7 +12,7 @@ namespace g0v0.Server.Common.Authentication;
 /// </summary>
 public class ScopePolicyProvider : IAuthorizationPolicyProvider
 {
-    private readonly ConfigurationManager _config;
+    private readonly ConfigManager _config;
     private readonly DefaultAuthorizationPolicyProvider _fallback;
 
     /// <summary>
@@ -22,7 +22,7 @@ public class ScopePolicyProvider : IAuthorizationPolicyProvider
     /// <param name="config">The shared general configuration.</param>
     public ScopePolicyProvider(
         IOptions<AuthorizationOptions> options,
-        ConfigurationManager config)
+        ConfigManager config)
     {
         _fallback = new DefaultAuthorizationPolicyProvider(options);
         _config = config;
@@ -85,8 +85,8 @@ public class ScopePolicyProvider : IAuthorizationPolicyProvider
             .RequireAuthenticatedUser()
             .RequireClaim(
                 OAuthClaimTypes.ClientId,
-                _config.Get<GeneralConfiguration>().OsuClientId.ToString(),
-                _config.Get<GeneralConfiguration>().OsuWebClientId.ToString())
+                _config.Get<GeneralConfig>().OsuClientId.ToString(),
+                _config.Get<GeneralConfig>().OsuWebClientId.ToString())
             .Build();
     }
 }

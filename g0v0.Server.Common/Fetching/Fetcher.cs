@@ -16,13 +16,13 @@ namespace g0v0.Server.Common.Fetching;
 /// Fetches osu! data from the osu! API and other sites.
 /// </summary>
 /// <param name="httpService">The shared HTTP service.</param>
-/// <param name="configurationManager">The configuration manager.</param>
+/// <param name="configManager">The configuration manager.</param>
 /// <param name="cache">The cache adapter.</param>
 /// <param name="beatmapSetRepository">The beatmap set repository.</param>
 /// <param name="logger">The logger.</param>
 public class Fetcher(
     IHttpService httpService,
-    ConfigurationManager configurationManager,
+    ConfigManager configManager,
     IStringCache cache,
     IBeatmapSetRepository beatmapSetRepository,
     ILogger<Fetcher> logger) : IFetcher, IDisposable
@@ -36,8 +36,8 @@ public class Fetcher(
         "https://catboy.best/osu/{0}",
     ];
 
-    private readonly GeneralConfiguration _config = configurationManager.Get<GeneralConfiguration>();
-    private readonly TimeSpan _rawCacheExpiry = TimeSpan.FromHours(configurationManager.Get<GeneralConfiguration>().FetcherBeatmapRawCacheExpireHours);
+    private readonly GeneralConfig _config = configManager.Get<GeneralConfig>();
+    private readonly TimeSpan _rawCacheExpiry = TimeSpan.FromHours(configManager.Get<GeneralConfig>().FetcherBeatmapRawCacheExpireHours);
     private readonly SemaphoreSlim _tokenLock = new(1, 1);
     private readonly Dictionary<string, string?> _tokenCache = new(StringComparer.Ordinal);
     private bool _disposed;

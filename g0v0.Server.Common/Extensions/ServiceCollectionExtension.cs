@@ -80,8 +80,8 @@ public static class ServiceCollectionExtension
     {
         services.AddSingleton<IConnectionMultiplexer, ConnectionMultiplexer>(serviceProvider =>
         {
-            ConfigurationManager manager = serviceProvider.GetRequiredService<ConfigurationManager>();
-            GeneralConfiguration generalConfig = manager.Get<GeneralConfiguration>();
+            ConfigManager manager = serviceProvider.GetRequiredService<ConfigManager>();
+            GeneralConfig generalConfig = manager.Get<GeneralConfig>();
             return ConnectionMultiplexer.Connect(generalConfig.RedisHost);
         });
         services.AddSingleton<IInterProcessCommunicationTransport>(serviceProvider =>
@@ -103,14 +103,14 @@ public static class ServiceCollectionExtension
     /// <param name="services">The service collection.</param>
     /// <returns>The updated service collection.</returns>
     /// <remarks>
-    /// Requires <see cref="ConfigurationManager"/> to be registered beforehand. Local storage also requires
+    /// Requires <see cref="ConfigManager"/> to be registered beforehand. Local storage also requires
     /// <see cref="IPathProvider"/> so relative paths can be resolved from the server base path.
     /// </remarks>
     public static IServiceCollection AddStorage(this IServiceCollection services)
     {
         services.AddSingleton<StorageService>(serviceProvider =>
         {
-            ConfigurationManager manager = serviceProvider.GetRequiredService<ConfigurationManager>();
+            ConfigManager manager = serviceProvider.GetRequiredService<ConfigManager>();
             StorageConfiguration storageConfig = manager.Get<StorageConfiguration>();
             IPathProvider? pathProvider = storageConfig.Type == StorageConfiguration.StorageType.Local
                 ? serviceProvider.GetRequiredService<IPathProvider>()
@@ -158,7 +158,7 @@ public static class ServiceCollectionExtension
     /// <param name="services">The service collection.</param>
     /// <returns>The updated service collection.</returns>
     /// <remarks>
-    /// Requires <see cref="ConfigurationManager"/>, <c>AddRepositories</c>, <c>AddRedis</c> and <c>AddCache</c> to be registered beforehand.
+    /// Requires <see cref="ConfigManager"/>, <c>AddRepositories</c>, <c>AddRedis</c> and <c>AddCache</c> to be registered beforehand.
     /// </remarks>
     public static IServiceCollection AddFetcher(this IServiceCollection services)
     {
@@ -179,7 +179,7 @@ public static class ServiceCollectionExtension
     /// <param name="services">The service collection.</param>
     /// <returns>The updated service collection.</returns>
     /// <remarks>
-    /// Requires <see cref="ConfigurationManager"/> and
+    /// Requires <see cref="ConfigManager"/> and
     /// <c>IOAuthTokenRepository</c> to be registered beforehand.
     /// </remarks>
     public static IServiceCollection AddOAuthAuthentication(this IServiceCollection services)

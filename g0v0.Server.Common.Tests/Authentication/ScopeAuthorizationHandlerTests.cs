@@ -41,7 +41,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read");
         ClaimsPrincipal user = new(new ClaimsIdentity(
@@ -64,7 +64,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read");
         ClaimsPrincipal user = new(new ClaimsIdentity(
@@ -87,7 +87,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read");
         ClaimsPrincipal user = new(new ClaimsIdentity(
@@ -110,7 +110,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read", "chat.write");
         ClaimsPrincipal user = new(new ClaimsIdentity(
@@ -133,7 +133,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read", "chat.write");
         ClaimsPrincipal user = new(new ClaimsIdentity(
@@ -157,7 +157,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read", "admin");
         ClaimsPrincipal user = new(new ClaimsIdentity(
@@ -180,7 +180,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement = new("chat.read");
         ClaimsPrincipal user = new(new ClaimsIdentity());
@@ -200,7 +200,7 @@ public class ScopeAuthorizationHandlerTests
             OsuWebClientId = 200,
         });
 
-        ConfigurationManager manager = new(_tempDir);
+        ConfigManager manager = new(_tempDir);
         ScopeAuthorizationHandler handler = new(manager);
         ScopeAuthorizationRequirement requirement1 = new("chat.read");
         ScopeAuthorizationRequirement requirement2 = new("chat.write");
