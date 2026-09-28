@@ -15,10 +15,6 @@ public static class StringExtensions
     /// <returns>The string with specified suffix.</returns>
     public static string AddSuffix(this string value, string suffix)
     {
-        if (value.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-        {
-            return value;
-        }
-        return value + suffix;
+        return value.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) ? value : value + suffix;
     }
 }
