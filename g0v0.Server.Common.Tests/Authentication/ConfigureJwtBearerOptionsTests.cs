@@ -66,13 +66,13 @@ public class ConfigureJwtBearerOptionsTests
     }
 
     [Test]
-    public void Configure_WithEmptyAudienceAndIssuer_ShouldDisableValidation()
+    public void Configure_WithEmptyAudienceAndMissingIssuer_ShouldKeepIssuerValidation()
     {
         WriteGeneralConfig(new
         {
             JwtSecretKey = "super_secret_key_1234567890123456",
             JwtAudience = string.Empty,
-            JwtIssuer = string.Empty,
+            JwtIssuer = (string?)null,
         });
 
         _manager = new ConfigManager(_tempDir);
@@ -82,8 +82,11 @@ public class ConfigureJwtBearerOptionsTests
 
         configurer.Configure(options);
 
+        // The audience is optional, but the issuer always exists: the server
+        // URL provides the fallback, so issuer validation stays enabled.
         Assert.That(options.TokenValidationParameters.ValidateAudience, Is.False);
-        Assert.That(options.TokenValidationParameters.ValidateIssuer, Is.False);
+        Assert.That(options.TokenValidationParameters.ValidateIssuer, Is.True);
+        Assert.That(options.TokenValidationParameters.ValidIssuer, Is.EqualTo("http://localhost:8000/"));
     }
 
     [Test]
