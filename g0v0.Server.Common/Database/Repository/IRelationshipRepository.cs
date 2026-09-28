@@ -55,6 +55,14 @@ public interface IRelationshipRepository
     Task<bool> IsBlockedAsync(int userId, int targetId);
 
     /// <summary>
+    /// Gets the IDs of the users the given user has blocked, mirroring osu-web's
+    /// foe relations of the user (<c>UserRelation::where(zebra_id, user)-&gt;where(foe, true)</c>).
+    /// </summary>
+    /// <param name="userId">The user ID.</param>
+    /// <returns>The target user IDs of the user's block relationships.</returns>
+    Task<IReadOnlyList<int>> GetBlockedUserIdsAsync(int userId);
+
+    /// <summary>
     /// Creates a new relationship record.
     /// </summary>
     /// <param name="relationship">The relationship to create.</param>

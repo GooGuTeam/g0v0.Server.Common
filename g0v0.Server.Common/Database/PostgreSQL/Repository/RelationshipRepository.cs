@@ -66,6 +66,16 @@ public class RelationshipRepository(PostgreSqlDbContext context) : IRelationship
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<int>> GetBlockedUserIdsAsync(int userId)
+    {
+        return await context.Relationships
+            .Where(r => r.UserId == userId && r.Type == RelationshipType.Block)
+            .Select(r => r.TargetId)
+            .ToListAsync()
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
     public async Task CreateAsync(Relationship relationship)
     {
         await context.Relationships.AddAsync(relationship).ConfigureAwait(false);
