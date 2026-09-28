@@ -50,8 +50,7 @@ public class ChatChannel
     /// Gets or sets the ID of the last message posted in the channel, if any.
     /// </summary>
     /// <remarks>
-    /// Mirrors the <c>last_message_id</c> column of osu-web's <c>channels</c>
-    /// table and is refreshed every time a message is received.
+    /// Refreshed every time a message is received.
     /// </remarks>
     public int? LastMessageId { get; set; }
 

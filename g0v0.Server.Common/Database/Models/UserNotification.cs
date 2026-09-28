@@ -8,7 +8,7 @@ namespace g0v0.Server.Common.Database.Models;
 
 /// <summary>
 /// Represents the per-user delivery record of a notification in the
-/// <c>user_notifications</c> table, mirroring osu-web's App\Models\UserNotification.
+/// <c>user_notifications</c> table.
 /// </summary>
 [Table("user_notifications")]
 [Index(nameof(NotificationId))]

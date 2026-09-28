@@ -7,9 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace g0v0.Server.Common.Database.Models;
 
 /// <summary>
-/// Represents a notification in the <c>notifications</c> table, mirroring the
-/// notification model of the reference implementations (osu-web's
-/// App\Models\Notification and the lazer API's app/database/notification.py).
+/// Represents a notification in the <c>notifications</c> table.
 /// </summary>
 [Table("notifications")]
 [Index(nameof(Category))]

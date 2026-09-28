@@ -36,9 +36,8 @@ public interface INotificationRepository
     Task<int> CountUnreadAsync(int userId);
 
     /// <summary>
-    /// Resolves notification IDs by identity filters, mirroring osu-web's
-    /// <c>Notification::byIdentity</c>: every filter is optional and only
-    /// non-empty filters constrain the query.
+    /// Resolves notification IDs by identity filters: every filter is optional
+    /// and only non-empty filters constrain the query.
     /// </summary>
     /// <param name="names">The notification names to match, empty for no name filter.</param>
     /// <param name="objectType">The object type to match, <see langword="null"/> for no filter.</param>

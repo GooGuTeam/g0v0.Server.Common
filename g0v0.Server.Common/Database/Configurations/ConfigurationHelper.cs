@@ -142,9 +142,8 @@ internal static class ConfigurationHelper
 
     public static string? SerializeMods(IList<APIMod>? mods)
     {
-        // Empty lists are serialized as "[]" (never NULL) to match the legacy
-        // lazer API schema, where osu-web's PlaylistModel requires mods to be a
-        // list rather than null.
+        // Empty lists are serialized as "[]" (never NULL): the playlist mods
+        // must always be a list rather than null.
         return JsonConvert.SerializeObject(mods ?? new List<APIMod>(), JsonSettings);
     }
 

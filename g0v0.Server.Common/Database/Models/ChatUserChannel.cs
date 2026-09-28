@@ -9,11 +9,11 @@ namespace g0v0.Server.Common.Database.Models;
 /// Represents a chat channel membership row in the <c>chat_user_channels</c> table.
 /// </summary>
 /// <remarks>
-/// This is the counterpart of osu-web's <c>user_channels</c> table: one row per
-/// (user, channel) pair holding the user's read marker and whether the channel
-/// is hidden from the user's channel list. PM and announcement channels keep
-/// their row when the user leaves - the row is only hidden - so that the
-/// conversation history stays reachable and reappears on the next message.
+/// One row per (user, channel) pair holding the user's read marker and whether
+/// the channel is hidden from the user's channel list. PM and announcement
+/// channels keep their row when the user leaves - the row is only hidden - so
+/// that the conversation history stays reachable and reappears on the next
+/// message.
 /// </remarks>
 [Table("chat_user_channels")]
 [Index(nameof(ChannelId))]

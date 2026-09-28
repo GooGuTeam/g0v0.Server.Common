@@ -64,7 +64,7 @@ public interface IChatRepository
     Task<IReadOnlyList<int>> GetChannelUserIdsAsync(int channelId);
 
     /// <summary>
-    /// Adds a membership row, or unhides an existing one, mirroring osu-web's <c>Channel::addUser</c>.
+    /// Adds a membership row, or unhides an existing one.
     /// </summary>
     /// <param name="channelId">The channel ID.</param>
     /// <param name="userId">The user ID.</param>
@@ -73,7 +73,7 @@ public interface IChatRepository
 
     /// <summary>
     /// Removes a membership row, or hides it for hideable (PM and announcement)
-    /// channels, mirroring osu-web's <c>Channel::removeUser</c>.
+    /// channels.
     /// </summary>
     /// <param name="channelId">The channel ID.</param>
     /// <param name="userId">The user ID.</param>
@@ -82,8 +82,8 @@ public interface IChatRepository
     Task<bool> RemoveUserChannelAsync(int channelId, int userId, bool hide);
 
     /// <summary>
-    /// Moves the read marker of a membership row forward, mirroring osu-web's
-    /// <c>UserChannel::markAsRead</c> (the marker never moves backwards).
+    /// Moves the read marker of a membership row forward (the marker never
+    /// moves backwards).
     /// </summary>
     /// <param name="channelId">The channel ID.</param>
     /// <param name="userId">The user ID.</param>
@@ -92,7 +92,7 @@ public interface IChatRepository
     Task<bool> MarkUserChannelAsReadAsync(int channelId, int userId, int messageId);
 
     /// <summary>
-    /// Unhides every membership row of a channel, mirroring osu-web's <c>Channel::unhide</c>.
+    /// Unhides every membership row of a channel.
     /// </summary>
     /// <param name="channelId">The channel ID.</param>
     /// <returns>The number of rows that were hidden.</returns>

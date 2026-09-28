@@ -6,8 +6,8 @@ namespace g0v0.Server.Common.Caching;
 /// Provides a cache of members ranked by a numeric score, shared across the g0v0 server.
 /// </summary>
 /// <remarks>
-/// Backed by a Redis sorted set. The chat server uses it for the two rolling
-/// windows of osu-web: the per-channel activity markers
+/// Backed by a Redis sorted set. The chat server uses it for two rolling
+/// windows: the per-channel activity markers
 /// (<c>chat:channel:{channelId}</c>, score is the last ack timestamp) and the
 /// per-user message throttle (<c>message_throttle:{userId}:{kind}</c>, score is
 /// the send timestamp).
