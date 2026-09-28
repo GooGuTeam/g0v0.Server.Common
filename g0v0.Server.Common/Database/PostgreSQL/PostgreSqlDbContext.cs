@@ -85,6 +85,16 @@ public class PostgreSqlDbContext : DbContext
     public DbSet<SilenceUser> ChatSilenceUsers { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the notifications.
+    /// </summary>
+    public DbSet<Notification> Notifications { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the per-user notification delivery records.
+    /// </summary>
+    public DbSet<UserNotification> UserNotifications { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the chat channel membership table set.
     /// </summary>
     public DbSet<ChatUserChannel> ChatUserChannels { get; set; } = null!;
