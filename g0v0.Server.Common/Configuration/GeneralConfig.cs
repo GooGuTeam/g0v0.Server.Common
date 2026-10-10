@@ -1,6 +1,7 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Configuration.Attributes;
+using g0v0.Server.Common.Extensions;
 using Newtonsoft.Json;
 
 namespace g0v0.Server.Common.Configuration;
@@ -136,6 +137,11 @@ public class GeneralConfig
     /// Gets or sets the server public url.
     /// </summary>
     public string ServerUrl { get; set; } = "http://localhost:8000";
+
+    /// <summary>
+    /// Gets the server public url with a trailing slash.
+    /// </summary>
+    public string GeneralServerUrl => ServerUrl.AddSuffix("/");
 
     #endregion
 }

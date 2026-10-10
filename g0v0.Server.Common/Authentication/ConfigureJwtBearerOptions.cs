@@ -66,7 +66,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
             ValidateAudience = !string.IsNullOrEmpty(generalConfig.JwtAudience),
             ValidAudience = generalConfig.JwtAudience,
             ValidateIssuer = true,
-            ValidIssuer = generalConfig.JwtIssuer ?? generalConfig.ServerUrl.AddSuffix("/"),
+            ValidIssuer = generalConfig.JwtIssuer ?? generalConfig.GeneralServerUrl,
             ValidateLifetime = true,
             NameClaimType = OAuthClaimTypes.Subject,
         };
