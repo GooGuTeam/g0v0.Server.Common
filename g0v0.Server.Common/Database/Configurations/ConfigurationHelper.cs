@@ -204,6 +204,16 @@ internal static class ConfigurationHelper
             : null;
     }
 
+    public static DateTime ConvertDateTimeOffsetToDateTime(DateTimeOffset value)
+    {
+        return value.UtcDateTime;
+    }
+
+    public static DateTimeOffset ConvertDateTimeToDateTimeOffset(DateTime value)
+    {
+        return new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc));
+    }
+
     /// <summary>
     /// Converts an enum value to its legacy MySQL native-enum representation
     /// (PascalCase to UPPER_SNAKE_CASE, e.g. <c>HostOnly</c> to <c>HOST_ONLY</c>).

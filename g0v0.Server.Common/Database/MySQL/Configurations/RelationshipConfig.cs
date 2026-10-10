@@ -20,8 +20,6 @@ public class RelationshipConfig : IEntityTypeConfiguration<Relationship>
     {
         builder.ToTable("relationship");
 
-        builder.Ignore(r => r.Id);
-
         builder.HasKey(r => new { r.UserId, r.TargetId, r.Type });
 
         builder.Property(r => r.UserId)

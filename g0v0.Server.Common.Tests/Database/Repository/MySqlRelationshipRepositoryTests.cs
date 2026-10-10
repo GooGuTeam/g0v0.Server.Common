@@ -289,10 +289,8 @@ public class MySqlRelationshipRepositoryTests
 
         await _repository.CreateAsync(relationship);
 
-        // The legacy MySQL table has no id column, so the model keeps the
-        // clr default and the row is identified by the composite key.
-        Assert.That(relationship.Id, Is.EqualTo(0));
-
+        // The table is keyed by the composite (user_id, target_id, type) primary
+        // key and has no surrogate id column.
         Relationship? saved = await _context.Relationships
             .Where(r => r.UserId == 1 && r.TargetId == 2)
             .FirstOrDefaultAsync();

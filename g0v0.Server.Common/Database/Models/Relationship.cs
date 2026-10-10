@@ -10,18 +10,15 @@ namespace g0v0.Server.Common.Database.Models;
 /// Represents a user relationship record in the <c>relationship</c> table.
 /// Tracks follow, friend, and block relationships between users.
 /// </summary>
+/// <remarks>
+/// Rows are keyed by the composite (<c>user_id</c>, <c>target_id</c>, <c>type</c>) primary
+/// key; there is no surrogate <c>id</c> column.
+/// </remarks>
 [Table("relationship")]
 [Index(nameof(UserId))]
 [Index(nameof(TargetId))]
 public class Relationship
 {
-    /// <summary>
-    /// Gets or sets the internal numeric identifier.
-    /// </summary>
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     /// <summary>
     /// Gets or sets the user ID who initiated the relationship.
     /// </summary>

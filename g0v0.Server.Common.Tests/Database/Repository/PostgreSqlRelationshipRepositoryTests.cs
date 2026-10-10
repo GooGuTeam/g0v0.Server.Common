@@ -278,7 +278,7 @@ public class PostgreSqlRelationshipRepositoryTests
     }
 
     [Test]
-    public async Task CreateAsync_ShouldSetId()
+    public async Task CreateAsync_ShouldPersistCompositeKeyWithoutSurrogateId()
     {
         Relationship relationship = new()
         {
@@ -289,7 +289,13 @@ public class PostgreSqlRelationshipRepositoryTests
 
         await _repository.CreateAsync(relationship);
 
-        Assert.That(relationship.Id, Is.Not.EqualTo(0));
+        // The table is keyed by the composite (user_id, target_id, type) primary
+        // key and has no surrogate id column.
+        Relationship? saved = await _context.Relationships
+            .Where(r => r.UserId == 1 && r.TargetId == 2)
+            .FirstOrDefaultAsync();
+        Assert.That(saved, Is.Not.Null);
+        Assert.That(saved!.Type, Is.EqualTo(RelationshipType.Follow));
     }
 
     #endregion
@@ -297,7 +303,7 @@ public class PostgreSqlRelationshipRepositoryTests
     #region UpdateAsync
 
     [Test]
-    public async Task UpdateAsync_ShouldUpdateRelationshipInDatabase()
+    public async Task UpdateAsync_ShouldReplaceRelationshipInDatabase()
     {
         Relationship relationship = new()
         {
@@ -308,8 +314,15 @@ public class PostgreSqlRelationshipRepositoryTests
         _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
-        relationship.Type = RelationshipType.Block;
-        await _repository.UpdateAsync(relationship);
+        // The table is keyed by (user_id, target_id, type): changing the
+        // type replaces the stored row instead of updating it in place.
+        Relationship changed = new()
+        {
+            UserId = 1,
+            TargetId = 2,
+            Type = RelationshipType.Block,
+        };
+        await _repository.UpdateAsync(changed);
 
         Relationship? updated = await _context.Relationships
             .Where(r => r.UserId == 1 && r.TargetId == 2)

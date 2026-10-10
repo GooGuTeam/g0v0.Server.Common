@@ -81,9 +81,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         {
             throw new InvalidOperationException($"Room with ID {roomId} has ended.");
         }
-
-        // clean up duplicate active records (keep only the earliest),
-        // refresh the join time of the survivor, otherwise create a fresh participation record.
+        
         List<RoomParticipatedUser> activeRecords = await context.RoomParticipatedUsers
             .Where(rpu => rpu.RoomId == roomId && rpu.UserId == userId && rpu.LeftAt == null)
             .OrderBy(rpu => rpu.JoinedAt)
@@ -102,14 +100,28 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         }
         else
         {
-            RoomParticipatedUser newRoomUser = new()
+            RoomParticipatedUser? historicalRecord = await context.RoomParticipatedUsers
+                .SingleOrDefaultAsync(rpu => rpu.RoomId == roomId && rpu.UserId == userId).ConfigureAwait(false);
+
+            if (historicalRecord != null)
             {
-                RoomId = roomId,
-                UserId = userId,
-                JoinedAt = DateTimeOffset.UtcNow,
-                LeftAt = null,
-            };
-            context.Add(newRoomUser);
+                // Rejoining reopens the existing record instead of inserting a new
+                // one, which the composite primary key would reject.
+                historicalRecord.JoinedAt = DateTimeOffset.UtcNow;
+                historicalRecord.LeftAt = null;
+                context.Update(historicalRecord);
+            }
+            else
+            {
+                RoomParticipatedUser newRoomUser = new()
+                {
+                    RoomId = roomId,
+                    UserId = userId,
+                    JoinedAt = DateTimeOffset.UtcNow,
+                    LeftAt = null,
+                };
+                context.Add(newRoomUser);
+            }
         }
 
         await context.SaveChangesAsync().ConfigureAwait(false);

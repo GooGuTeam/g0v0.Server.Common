@@ -668,12 +668,9 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.Relationship", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("UserId")
                         .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnName("user_id");
 
                     b.Property<int>("TargetId")
                         .HasColumnType("integer")
@@ -683,11 +680,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("type");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
+                    b.HasKey("UserId", "TargetId", "Type")
                         .HasName("pk_relationship");
 
                     b.HasIndex("TargetId")
@@ -805,12 +798,13 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.RoomParticipatedUser", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("RoomId")
                         .HasColumnType("bigint")
-                        .HasColumnName("id");
+                        .HasColumnName("room_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
 
                     b.Property<DateTimeOffset>("JoinedAt")
                         .HasColumnType("timestamp with time zone")
@@ -820,15 +814,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("left_at");
 
-                    b.Property<long>("RoomId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("room_id");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
+                    b.HasKey("RoomId", "UserId")
                         .HasName("pk_room_participated_users");
 
                     b.HasIndex("RoomId")
