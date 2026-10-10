@@ -33,12 +33,15 @@ dotnet_diagnostic.SA1516.severity = suggestion
 
 # SA1649: File name should match first type name (false positive for generics like ConfigurationManager<T>)
 dotnet_diagnostic.SA1649.severity = none
+# MA0048: File name must match type name (same class of false positives as
+# SA1649: generics, and EF Core migrations whose file names carry a tooling
+# timestamp prefix, e.g. 20261010141454_CompositeKeys)
 # Meziantou.Analyzer
 dotnet_diagnostic.MA0004.severity = suggestion
 dotnet_diagnostic.MA0006.severity = warning
 dotnet_diagnostic.MA0011.severity = suggestion
 dotnet_diagnostic.MA0026.severity = suggestion
-dotnet_diagnostic.MA0048.severity = warning
+dotnet_diagnostic.MA0048.severity = none
 dotnet_diagnostic.MA0051.severity = suggestion
 dotnet_diagnostic.MA0003.severity = warning
 dotnet_diagnostic.MA0020.severity = warning

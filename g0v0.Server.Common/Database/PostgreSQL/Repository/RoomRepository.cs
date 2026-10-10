@@ -81,7 +81,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
         {
             throw new InvalidOperationException($"Room with ID {roomId} has ended.");
         }
-        
+
         List<RoomParticipatedUser> activeRecords = await context.RoomParticipatedUsers
             .Where(rpu => rpu.RoomId == roomId && rpu.UserId == userId && rpu.LeftAt == null)
             .OrderBy(rpu => rpu.JoinedAt)
