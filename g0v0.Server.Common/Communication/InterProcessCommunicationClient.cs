@@ -1,6 +1,8 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -28,14 +30,16 @@ public sealed class InterProcessCommunicationClient
     private readonly ConcurrentDictionary<string, TypedResponderRegistration> _responders = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<Guid, PendingRequest> _pendingRequests = new();
     private readonly IInterProcessCommunicationTransport _transport;
+    private readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationClient"/> class for a known server.
     /// </summary>
     /// <param name="transport">The message transport implementation.</param>
     /// <param name="serverIdentifier">The current server identifier.</param>
-    public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, ServerIdentify serverIdentifier)
-        : this(transport, GetServerIdentifier(serverIdentifier))
+    /// <param name="logger">The logger for abnormal IPC situations. Defaults to a null logger.</param>
+    public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, ServerIdentify serverIdentifier, ILogger? logger = null)
+        : this(transport, GetServerIdentifier(serverIdentifier), logger)
     {
     }
 
@@ -44,16 +48,18 @@ public sealed class InterProcessCommunicationClient
     /// </summary>
     /// <param name="transport">The message transport implementation.</param>
     /// <param name="serverIdentifier">The current server identifier.</param>
+    /// <param name="logger">The logger for abnormal IPC situations. Defaults to a null logger.</param>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>
-    public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, string serverIdentifier)
+    public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, string serverIdentifier, ILogger? logger = null)
     {
         ArgumentNullException.ThrowIfNull(transport);
         ArgumentException.ThrowIfNullOrWhiteSpace(serverIdentifier);
 
         _transport = transport;
         ServerIdentifier = serverIdentifier;
+        _logger = logger ?? NullLogger.Instance;
 
         _transport.Subscribe(GetChannelName(serverIdentifier), HandleTransportMessageAsync);
     }
@@ -442,6 +448,9 @@ public sealed class InterProcessCommunicationClient
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
     }
 
+    private static string TruncateForLog(string value, int maxLength = 512)
+        => value.Length <= maxLength ? value : $"{value[..maxLength]}… ({value.Length} chars)";
+
     private static IpcMessage CreateErrorIpcMessage(Guid uuid, int code, string message)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(message);
@@ -453,6 +462,10 @@ public sealed class InterProcessCommunicationClient
     {
         if (!_noticeHandlers.TryGetValue(message.Name, out TypedHandlerRegistration? handlerRegistration))
         {
+            _logger.LogWarning(
+                "Received the IPC notice '{Name}' from '{SourceServer}' but no handler is registered; the notice is dropped.",
+                message.Name,
+                message.SourceServer);
             return;
         }
 
@@ -473,6 +486,9 @@ public sealed class InterProcessCommunicationClient
     {
         if (!_pendingRequests.TryGetValue(message.Uuid, out PendingRequest? pendingRequest))
         {
+            _logger.LogDebug(
+                "Received an IPC response for the unknown request '{Uuid}' (the request may have timed out).",
+                message.Uuid);
             return;
         }
 
@@ -483,6 +499,9 @@ public sealed class InterProcessCommunicationClient
     {
         if (!_pendingRequests.TryGetValue(message.Uuid, out PendingRequest? pendingRequest))
         {
+            _logger.LogDebug(
+                "Received an IPC error for the unknown request '{Uuid}' (the request may have timed out).",
+                message.Uuid);
             return;
         }
 
@@ -502,11 +521,18 @@ public sealed class InterProcessCommunicationClient
     {
         if (string.IsNullOrWhiteSpace(message.SourceServer))
         {
+            _logger.LogWarning(
+                "Received the IPC request '{Name}' without a source server; the request is dropped.",
+                message.Name);
             return;
         }
 
         if (!_responders.TryGetValue(message.Name, out TypedResponderRegistration? responderRegistration))
         {
+            _logger.LogWarning(
+                "Received the IPC request '{Name}' from '{SourceServer}' but no responder is registered; a 404 error is returned.",
+                message.Name,
+                message.SourceServer);
             await PublishMessageAsync(
                 message.SourceServer,
                 CreateErrorIpcMessage(message.Uuid, 404, $"No responder registered for '{message.Name}'."),
@@ -525,6 +551,7 @@ public sealed class InterProcessCommunicationClient
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "The IPC request '{Name}' from '{SourceServer}' failed.", message.Name, message.SourceServer);
             await PublishMessageAsync(
                 message.SourceServer,
                 CreateErrorIpcMessage(message.Uuid, 500, ex.Message),
@@ -556,9 +583,10 @@ public sealed class InterProcessCommunicationClient
                     break;
             }
         }
-        catch
+        catch (Exception ex)
         {
             // Ignore malformed transport messages so a bad payload does not stop the subscription.
+            _logger.LogError(ex, "Dropped a malformed IPC transport message: {RawMessage}", TruncateForLog(rawMessage));
         }
     }
 

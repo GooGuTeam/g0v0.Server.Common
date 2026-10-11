@@ -14,6 +14,7 @@ using g0v0.Server.Common.Threading;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace g0v0.Server.Common.Extensions;
@@ -92,7 +93,8 @@ public static class ServiceCollectionExtension
         services.AddSingleton<InterProcessCommunicationClient>(serviceProvider =>
         {
             IInterProcessCommunicationTransport transport = serviceProvider.GetRequiredService<IInterProcessCommunicationTransport>();
-            return new InterProcessCommunicationClient(transport, serverIdentify);
+            ILogger<InterProcessCommunicationClient> logger = serviceProvider.GetRequiredService<ILogger<InterProcessCommunicationClient>>();
+            return new InterProcessCommunicationClient(transport, serverIdentify, logger);
         });
         return services;
     }
