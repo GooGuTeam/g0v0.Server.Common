@@ -13,7 +13,7 @@ public static class AuthorizationPolicyNames
     public const string ClientOnly = "ClientOnly";
 
     /// <summary>
-    /// The policy that requires an authenticated token with a subject claim.
+    /// The policy that requires an authenticated token with a database-verified user ID.
     /// </summary>
     public const string RequireUserId = "RequireUserId";
 

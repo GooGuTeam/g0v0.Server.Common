@@ -2,7 +2,6 @@
 
 using System.Text;
 using g0v0.Server.Common.Configuration;
-using g0v0.Server.Common.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

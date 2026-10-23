@@ -8,6 +8,11 @@ namespace g0v0.Server.Common.Authentication;
 public static class OAuthClaimTypes
 {
     /// <summary>
+    /// The database-verified osu! user ID, independent of the JWT subject's grant-specific meaning.
+    /// </summary>
+    public const string UserId = "osu_user_id";
+
+    /// <summary>
     /// The claim type for the OAuth client ID.
     /// </summary>
     public const string ClientId = "client_id";
@@ -18,7 +23,7 @@ public static class OAuthClaimTypes
     public const string Scope = "scope";
 
     /// <summary>
-    /// The claim type for the authenticated user subject.
+    /// The raw JWT subject, which may identify a user or an OAuth client depending on the grant.
     /// </summary>
     public const string Subject = "sub";
 }

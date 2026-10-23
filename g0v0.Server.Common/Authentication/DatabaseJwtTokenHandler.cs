@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using System.Globalization;
 using System.Security.Claims;
 using g0v0.Server.Common.Database.Models;
 using g0v0.Server.Common.Database.Repository;
@@ -13,7 +14,7 @@ namespace g0v0.Server.Common.Authentication;
 /// <summary>
 /// Custom JWT token handler that verifies tokens exist in the database
 /// (oauth_tokens table) and are not expired. Also populates OAuth claims
-/// (client_id, scope) from the database token record.
+/// (osu_user_id, client_id, scope) from the database token record.
 /// </summary>
 public class DatabaseJwtTokenHandler(
     IServiceProvider serviceProvider,
@@ -75,7 +76,20 @@ public class DatabaseJwtTokenHandler(
         }
 
         ClaimsIdentity identity = result.ClaimsIdentity;
-        identity.AddClaim(new Claim(OAuthClaimTypes.ClientId, tokenRecord.ClientId.ToString()));
+
+        // These claims are authoritative database values, never values supplied by the JWT.
+        foreach (Claim claim in identity.Claims.Where(static claim =>
+                     claim.Type is OAuthClaimTypes.UserId or OAuthClaimTypes.ClientId or OAuthClaimTypes.Scope).ToArray())
+        {
+            identity.RemoveClaim(claim);
+        }
+
+        if (tokenRecord.UserId is { } userId)
+        {
+            identity.AddClaim(new Claim(OAuthClaimTypes.UserId, userId.ToString(CultureInfo.InvariantCulture)));
+        }
+
+        identity.AddClaim(new Claim(OAuthClaimTypes.ClientId, tokenRecord.ClientId.ToString(CultureInfo.InvariantCulture)));
 
         foreach (string scope in tokenRecord.Scope.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {

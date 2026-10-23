@@ -75,7 +75,7 @@ public class ScopePolicyProvider : IAuthorizationPolicyProvider
     {
         return new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
-            .RequireClaim(OAuthClaimTypes.Subject)
+            .RequireClaim(OAuthClaimTypes.UserId)
             .Build();
     }
 

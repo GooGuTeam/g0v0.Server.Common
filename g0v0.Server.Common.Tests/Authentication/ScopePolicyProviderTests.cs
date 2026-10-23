@@ -51,7 +51,7 @@ public class ScopePolicyProviderTests
     }
 
     [Test]
-    public async Task GetPolicyAsync_RequireUserId_ShouldRequireSubjectClaim()
+    public async Task GetPolicyAsync_RequireUserId_ShouldRequireVerifiedUserIdClaim()
     {
         ScopePolicyProvider provider = CreateProvider();
 
@@ -64,7 +64,7 @@ public class ScopePolicyProviderTests
             .OfType<ClaimsAuthorizationRequirement>()
             .Single();
 
-        Assert.That(claimRequirement.ClaimType, Is.EqualTo(OAuthClaimTypes.Subject));
+        Assert.That(claimRequirement.ClaimType, Is.EqualTo(OAuthClaimTypes.UserId));
     }
 
     [Test]
