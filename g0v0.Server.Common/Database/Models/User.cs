@@ -73,4 +73,7 @@ public class User
     /// </summary>
     [StringLength(32)]
     public required string Username { get; set; }
+    
+    [StringLength(60)]
+    public string PwBcrypt { get; set; } = null!;
 }
