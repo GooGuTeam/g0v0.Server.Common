@@ -73,7 +73,10 @@ public class User
     /// </summary>
     [StringLength(32)]
     public required string Username { get; set; }
-    
+
+    /// <summary>
+    /// Gets or sets the bcrypt password hash used by the stable client login flow.
+    /// </summary>
     [StringLength(60)]
     public string PwBcrypt { get; set; } = null!;
 }

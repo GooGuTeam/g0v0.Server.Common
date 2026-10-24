@@ -114,6 +114,11 @@ public class MysqlDbContext : DbContext
     /// </summary>
     public DbSet<ChatUserChannel> ChatUserChannels { get; set; } = null!;
 
+    /// <summary>
+    /// Gets or sets the per-mode user performance statistics table set.
+    /// </summary>
+    public DbSet<UserStatistics> UserStatistics { get; set; } = null!;
+
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

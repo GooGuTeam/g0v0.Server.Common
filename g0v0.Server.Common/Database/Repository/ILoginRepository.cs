@@ -15,13 +15,15 @@ public interface ILoginRepository
 
     /// <summary>Finds a device belonging to this account and hash.</summary>
     /// <param name="userId">The account ID.</param>
+    /// <param name="clientType">The client type of the device.</param>
     /// <param name="deviceHash">The device hash.</param>
     /// <param name="cancellationToken">Request cancellation.</param>
     /// <returns>The tracked device, if present.</returns>
-    Task<TrustedDevice?> GetDeviceAsync(int userId,string clientType, string deviceHash, CancellationToken cancellationToken = default);
+    Task<TrustedDevice?> GetDeviceAsync(int userId, string clientType, string deviceHash, CancellationToken cancellationToken = default);
 
     /// <summary>Finds the latest unexpired session for this account and device.</summary>
     /// <param name="userId">The account ID.</param>
+    /// <param name="clientType">The client type of the session.</param>
     /// <param name="deviceHash">The device hash.</param>
     /// <param name="now">The current UTC time.</param>
     /// <param name="cancellationToken">Request cancellation.</param>

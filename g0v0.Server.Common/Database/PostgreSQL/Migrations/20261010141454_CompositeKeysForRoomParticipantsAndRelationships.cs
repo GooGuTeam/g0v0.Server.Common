@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -30,12 +30,12 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
             migrationBuilder.AddPrimaryKey(
                 name: "pk_room_participated_users",
                 table: "room_participated_users",
-                columns: new[] { "room_id", "user_id" });
+                columns: ["room_id", "user_id"]);
 
             migrationBuilder.AddPrimaryKey(
                 name: "pk_relationship",
                 table: "relationship",
-                columns: new[] { "user_id", "target_id", "type" });
+                columns: ["user_id", "target_id", "type"]);
         }
 
         /// <inheritdoc />
