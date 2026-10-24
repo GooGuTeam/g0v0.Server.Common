@@ -25,6 +25,17 @@ public interface IBeatmapRepository
     Task<Beatmap?> GetByChecksumAsync(string checksum);
 
     /// <summary>
+    /// Gets the stored beatmaps whose difficulty is named by a stable <c>.osu</c> filename.
+    /// </summary>
+    /// <param name="filename">The filename as the stable client stores it, such as <c>Artist - Title (Mapper) [Version].osu</c>.</param>
+    /// <returns>The matching beatmaps; several sets may share a filename.</returns>
+    /// <remarks>
+    /// The stable client only sends the filename, and the database only stores the difficulty
+    /// version, so the lookup compares the bracketed part of the name with <see cref="Beatmap.Version"/>.
+    /// </remarks>
+    Task<IReadOnlyList<Beatmap>> GetByFilenameAsync(string filename);
+
+    /// <summary>
     /// Gets all beatmaps in a beatmap set.
     /// </summary>
     /// <param name="beatmapSetId">The beatmap set ID.</param>

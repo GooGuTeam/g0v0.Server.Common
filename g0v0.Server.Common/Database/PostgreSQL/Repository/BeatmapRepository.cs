@@ -30,6 +30,19 @@ public class BeatmapRepository(PostgreSqlDbContext context) : IBeatmapRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<Beatmap>> GetByFilenameAsync(string filename)
+    {
+        string? version = BeatmapFilename.ExtractVersion(filename);
+        return version is null
+            ? []
+            : await context.Beatmaps
+                .AsNoTracking()
+                .Where(b => b.Version == version)
+                .ToListAsync()
+                .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<Beatmap>> GetByBeatmapSetIdAsync(int beatmapSetId)
     {
         return await context.Beatmaps

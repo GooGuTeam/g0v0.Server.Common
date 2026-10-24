@@ -19,12 +19,14 @@ namespace g0v0.Server.Common.Fetching;
 /// <param name="configManager">The configuration manager.</param>
 /// <param name="cache">The cache adapter.</param>
 /// <param name="beatmapSetRepository">The beatmap set repository.</param>
+/// <param name="beatmapRepository">The beatmap repository, used to reuse a difficulty that is already stored.</param>
 /// <param name="logger">The logger.</param>
 public class Fetcher(
     IHttpService httpService,
     ConfigManager configManager,
     IStringCache cache,
     IBeatmapSetRepository beatmapSetRepository,
+    IBeatmapRepository beatmapRepository,
     ILogger<Fetcher> logger) : IFetcher, IDisposable
 {
     private const string OAuthEndpoint = "https://osu.ppy.sh/oauth/token";
@@ -69,6 +71,14 @@ public class Fetcher(
             return null;
         }
 
+        // A difficulty that is already stored is answered without an API round trip; the stable
+        // client asks for every local map on login, so this path is the hot one.
+        IReadOnlyList<Beatmap> stored = await beatmapRepository.GetByFilenameAsync(filename).ConfigureAwait(false);
+        if (stored.Count > 0)
+        {
+            return stored[0];
+        }
+
         // The osu! API matches the filename exactly as the client stores it, ".osu" included.
         string name = filename.Trim();
         Beatmap? beatmap = await TryFetchByFilenameAsync(name, cancellationToken).ConfigureAwait(false);
@@ -78,7 +88,7 @@ public class Fetcher(
             beatmap = await TryFetchByFilenameAsync(name + ".osu", cancellationToken).ConfigureAwait(false);
         }
 
-        return beatmap;
+        return beatmap is null ? null : await persistAsync(beatmap, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -238,6 +248,34 @@ public class Fetcher(
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Re-reads a fetched beatmap from the database, inserting it when the fetch did not persist it.
+    /// </summary>
+    /// <param name="beatmap">The freshly fetched beatmap.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The stored beatmap.</returns>
+    /// <remarks>
+    /// The lookup endpoint persists the whole beatmap set, so the insert only runs when the set
+    /// on the API side did not include the requested difficulty - without it the caller would get a
+    /// detached entity whose ID every later foreign key rejects.
+    /// </remarks>
+    private async Task<Beatmap> persistAsync(Beatmap beatmap, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Beatmap? stored = await beatmapRepository.GetByIdAsync(beatmap.Id).ConfigureAwait(false);
+        if (stored is not null)
+        {
+            return stored;
+        }
+
+        logger.LogWarning(
+            "Fetched beatmap {BeatmapId} ({Version}) was not part of the persisted set; inserting it.",
+            beatmap.Id,
+            beatmap.Version);
+        await beatmapRepository.CreateAsync(beatmap).ConfigureAwait(false);
+        return beatmap;
     }
 
     private async Task<Beatmap> FetchBeatmapCoreAsync(int? beatmapId, string? checksum, CancellationToken cancellationToken)

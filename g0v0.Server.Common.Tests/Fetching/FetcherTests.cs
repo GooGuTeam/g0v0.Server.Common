@@ -296,12 +296,16 @@ public class FetcherTests
         }));
     }
 
-    private Fetcher CreateFetcher(StubHttpMessageHandler handler, FakeStringCache cache, FakeBeatmapSetRepository repository)
+    private Fetcher CreateFetcher(
+        StubHttpMessageHandler handler,
+        FakeStringCache cache,
+        FakeBeatmapSetRepository repository,
+        FakeBeatmapRepository? beatmaps = null)
     {
         HttpClient client = new(handler);
         HttpService httpService = new(client);
         ConfigManager manager = new(_tempDir);
-        return new Fetcher(httpService, manager, cache, repository, NullLogger<Fetcher>.Instance);
+        return new Fetcher(httpService, manager, cache, repository, beatmaps ?? new FakeBeatmapRepository(), NullLogger<Fetcher>.Instance);
     }
 
     private void WriteGeneralConfig(GeneralConfig config)

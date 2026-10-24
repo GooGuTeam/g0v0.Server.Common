@@ -96,7 +96,7 @@ public static class UserScoreStatisticsUtils
 
     private static double GetLevel(long totalScore)
     {
-        // Same level increments as osu_lazer_api's calculate_score_to_level.
+        // The level thresholds below are the fixed table the score total is measured against.
         long[] requirements = LevelRequirements;
         double level = 0;
         double remaining = Math.Max(0, totalScore);
