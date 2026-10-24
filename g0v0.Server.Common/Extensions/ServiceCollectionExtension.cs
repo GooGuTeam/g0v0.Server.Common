@@ -8,12 +8,14 @@ using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.MySQL.Repository;
 using g0v0.Server.Common.Database.PostgreSQL.Repository;
 using g0v0.Server.Common.Fetching;
+using g0v0.Server.Common.GeoIP;
 using g0v0.Server.Common.Http;
 using g0v0.Server.Common.Storage;
 using g0v0.Server.Common.Threading;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -24,6 +26,21 @@ namespace g0v0.Server.Common.Extensions;
 /// </summary>
 public static class ServiceCollectionExtension
 {
+    /// <summary>Registers the singleton GeoIP service and its startup and periodic update worker.</summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>Requires ConfigManager and IPathProvider. An absent config/geoip.json uses default settings.</remarks>
+    public static IServiceCollection AddGeoIP(this IServiceCollection services)
+    {
+        services.TryAddSingleton<GeoIPConfig>(provider => provider.GetRequiredService<ConfigManager>().TryGet<GeoIPConfig>() ?? new GeoIPConfig());
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddHttpClient(nameof(GeoIPService));
+        services.TryAddSingleton<GeoIPService>();
+        services.TryAddSingleton<IGeoIPService>(provider => provider.GetRequiredService<GeoIPService>());
+        services.AddHostedService<GeoIPUpdateService>();
+        return services;
+    }
+
     /// <summary>
     /// Registers repository interfaces to matching implementations for the selected database backend.
     /// </summary>

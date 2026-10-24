@@ -89,8 +89,26 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
+      - name: Download latest GeoIP databases
+        shell: bash
+        run: |
+          mkdir -p geoip
+          cd geoip
+          for edition in Country ASN; do
+            file="GeoLite2-${edition}.mmdb"
+            base_url="https://raw.githubusercontent.com/Loyalsoldier/geoip/release"
+            curl --fail --location --retry 3 --connect-timeout 20 --max-time 180 --output "$file" "$base_url/$file"
+            curl --fail --location --retry 3 --connect-timeout 20 --max-time 180 --output "$file.sha256sum" "$base_url/$file.sha256sum"
+            sha256sum --check "$file.sha256sum"
+          done
+
       - name: Run tests
         run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+
+      - name: Run explicit GeoIP tests
+        env:
+          G0V0_GEOIP_TEST_DATABASE_DIRECTORY: ${{ github.workspace }}/geoip
+        run: dotnet test --no-build --configuration Release --verbosity normal --filter "FullyQualifiedName~GeoIPServiceTests" --logger "trx;LogFileName=geoip-test-results.trx" --collect:"XPlat Code Coverage"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
