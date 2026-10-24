@@ -53,4 +53,14 @@ public class GeneralConfigTests
 
         Assert.That(_config.MySqlConnectionString, Does.Contain("Server=192.168.1.100"));
     }
+
+    [TestCase(null, "https://server.test/")]
+    [TestCase("", "https://server.test/")]
+    [TestCase("https://frontend.test/", "https://frontend.test/")]
+    public void WebUrlUsesFrontendOrFallsBackToServer(string? frontend, string expected)
+    {
+        _config.ServerUrl = "https://server.test";
+        _config.FrontendUrl = frontend;
+        Assert.That(_config.WebUrl, Is.EqualTo(expected));
+    }
 }

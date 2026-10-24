@@ -138,6 +138,13 @@ public class GeneralConfig
     /// </summary>
     public string ServerUrl { get; set; } = "http://localhost:8000";
 
+    /// <summary>Gets or sets the optional frontend URL.</summary>
+    public string? FrontendUrl { get; set; }
+
+    /// <summary>Gets the frontend URL, falling back to the server URL as in osu_lazer_api.</summary>
+    [JsonIgnore]
+    public string WebUrl => (string.IsNullOrWhiteSpace(FrontendUrl) ? ServerUrl : FrontendUrl).AddSuffix("/");
+
     /// <summary>
     /// Gets the server public url with a trailing slash.
     /// </summary>
