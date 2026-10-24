@@ -10,7 +10,9 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <summary>
 /// MySQL-backed implementation of <see cref="IBeatmapSetRepository"/>.
 /// </summary>
-/// <param name="context">The database context.</param>
+/// <param name="context">
+/// The database context.
+/// </param>
 public class BeatmapSetRepository(MysqlDbContext context) : IBeatmapSetRepository, IMySqlRepository
 {
     /// <inheritdoc/>
@@ -54,10 +56,12 @@ public class BeatmapSetRepository(MysqlDbContext context) : IBeatmapSetRepositor
             if (existing == null)
             {
                 await context.BeatmapSets.AddAsync(beatmapSet).ConfigureAwait(false);
+                BeatmapSetLegacyDefaults.Apply(context, beatmapSet);
             }
             else
             {
                 context.Entry(existing).CurrentValues.SetValues(beatmapSet);
+                BeatmapSetLegacyDefaults.Apply(context, existing);
 
                 Dictionary<int, Beatmap> existingBeatmaps = existing.Beatmaps.ToDictionary(b => b.Id);
                 foreach (Beatmap beatmap in beatmapSet.Beatmaps)

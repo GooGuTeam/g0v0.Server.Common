@@ -297,6 +297,7 @@ public class MySqlRoomRepositoryTests
     {
         Id = id,
         Username = username,
+        PwBcrypt = "$2b$test",
     };
 
     private static MultiplayerRoom CreateRoom() => new(0)

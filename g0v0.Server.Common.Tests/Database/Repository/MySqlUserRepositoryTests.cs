@@ -114,5 +114,6 @@ public class MySqlUserRepositoryTests
     {
         Id = id,
         Username = username,
+        PwBcrypt = "$2b$test",
     };
 }

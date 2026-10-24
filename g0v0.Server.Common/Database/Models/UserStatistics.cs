@@ -25,7 +25,7 @@ public class UserStatistics
 
     /// <summary>
     /// Gets or sets the ruleset ID the statistics are tracked for
-    /// (0 = osu!, 1 = osu!taiko, 2 = osu!catch, 3 = osu!mania, 10-14 = custom rulesets).
+    /// (0-3 = base rulesets, 4 = osu!relax, 5 = osu!autopilot, 6 = taiko relax, 7 = catch relax, 10-14 = custom rulesets).
     /// </summary>
     public int Mode { get; set; }
 

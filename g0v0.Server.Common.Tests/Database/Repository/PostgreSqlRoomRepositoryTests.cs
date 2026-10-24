@@ -298,6 +298,7 @@ public class PostgreSqlRoomRepositoryTests
     {
         Id = id,
         Username = username,
+        PwBcrypt = "$2b$test",
     };
 
     private static MultiplayerRoom CreateRoom() => new(0)

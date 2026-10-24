@@ -111,5 +111,6 @@ public class PostgreSqlUserRepositoryTests
     {
         Id = id,
         Username = username,
+        PwBcrypt = "$2b$test",
     };
 }

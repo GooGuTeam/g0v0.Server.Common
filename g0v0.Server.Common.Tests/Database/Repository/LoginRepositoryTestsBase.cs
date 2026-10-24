@@ -23,16 +23,14 @@ public abstract class LoginRepositoryTestsBase
     public void TearDown() => _context.Dispose();
 
     [Test]
-    public async Task ReadsCredentialsExplicitlyFromTheShadowProperty()
+    public async Task ReadsTheStoredPasswordHash()
     {
-        User user = new() { Id = 1, Username = "alice" };
+        User user = new() { Id = 1, Username = "alice", PwBcrypt = "$2b$test" };
         _context.Add(user);
-        _context.Entry(user).Property("PwBcrypt").CurrentValue = "$2b$test";
         await _context.SaveChangesAsync();
         _context.ChangeTracker.Clear();
         Assert.That(await _repository.GetPasswordHashAsync(1), Is.EqualTo("$2b$test"));
         Assert.That(await _repository.GetPasswordHashAsync(2), Is.Null);
-        Assert.That(typeof(User).GetProperty("PwBcrypt"), Is.Null);
     }
 
     [Test]

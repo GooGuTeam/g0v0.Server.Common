@@ -15,7 +15,7 @@ public class UserStatisticsConfig : IEntityTypeConfiguration<UserStatistics>
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<UserStatistics> builder)
     {
-        builder.ToTable("user_statistics");
+        builder.ToTable("lazer_user_statistics");
 
         // The table identifies a statistics record by (user_id, mode).
         builder.HasKey(statistics => new { statistics.UserId, statistics.Mode });

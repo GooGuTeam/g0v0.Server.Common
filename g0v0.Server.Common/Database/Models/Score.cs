@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Scoring;
@@ -21,6 +22,14 @@ namespace g0v0.Server.Common.Database.Models;
 [Table("scores")]
 public class Score
 {
+    // The legacy columns are nullable, so these accessors cannot be auto properties: the fields
+    // start empty and a missing value is replaced instead of being exposed.
+#pragma warning disable IDE0032
+    private IDictionary<HitResult, int> _maximumStatistics = new Dictionary<HitResult, int>();
+
+    private IList<APIMod> _mods = new List<APIMod>();
+#pragma warning restore IDE0032
+
     /// <summary>
     /// Gets or sets the score ID.
     /// </summary>
@@ -102,12 +111,30 @@ public class Score
     /// <summary>
     /// Gets or sets the maximum possible hit result counts.
     /// </summary>
-    public IDictionary<HitResult, int> MaximumStatistics { get; set; } = new Dictionary<HitResult, int>();
+    /// <remarks>
+    /// The legacy column is nullable and older submissions hold no maximum statistics, so the
+    /// accessor materialises an empty dictionary instead of exposing <see langword="null"/>.
+    /// </remarks>
+    [AllowNull]
+    public IDictionary<HitResult, int> MaximumStatistics
+    {
+        get => _maximumStatistics;
+        set => _maximumStatistics = value ?? new Dictionary<HitResult, int>();
+    }
 
     /// <summary>
     /// Gets or sets the mods applied to the score.
     /// </summary>
-    public IList<APIMod> Mods { get; set; } = new List<APIMod>();
+    /// <remarks>
+    /// The legacy column is nullable, so the accessor materialises an empty list instead of
+    /// exposing <see langword="null"/>.
+    /// </remarks>
+    [AllowNull]
+    public IList<APIMod> Mods
+    {
+        get => _mods;
+        set => _mods = value ?? new List<APIMod>();
+    }
 
     /// <summary>
     /// Gets or sets the legacy ruleset ID.
@@ -193,8 +220,8 @@ public class Score
 
     private int NGeki
     {
-        get => this.GetRequiredStatistic(HitResult.Perfect);
-        set => this.SetRequiredStatistic(HitResult.Perfect, value);
+        get => this.GetRequiredStatistic(Mode is 1 or 6 ? HitResult.LargeBonus : HitResult.Perfect);
+        set => this.SetRequiredStatistic(Mode is 1 or 6 ? HitResult.LargeBonus : HitResult.Perfect, value);
     }
 
     private int NKatu
@@ -261,4 +288,5 @@ public class Score
 
     // ReSharper restore UnusedMember.Local
     #endregion
+
 }
