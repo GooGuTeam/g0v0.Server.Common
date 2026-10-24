@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using osu.Game.Beatmaps;
 
 namespace g0v0.Server.Common.Database.Models;
@@ -12,6 +13,12 @@ namespace g0v0.Server.Common.Database.Models;
 [Table("beatmaps")]
 public class Beatmap
 {
+    // The legacy column is nullable, so the accessors cannot be an auto property: the field starts
+    // as an empty object and a missing value is replaced instead of being exposed.
+#pragma warning disable IDE0032
+    private BeatmapCovers _covers = new();
+#pragma warning restore IDE0032
+
     /// <summary>
     /// Gets or sets the beatmap ID.
     /// </summary>
@@ -131,6 +138,22 @@ public class Beatmap
     /// Gets or sets the beatmap file format version used for legacy replay encoding.
     /// </summary>
     public int BeatmapVersion { get; set; } = 14;
+
+    /// <summary>
+    /// Gets or sets the cover art URLs inherited from the beatmap set, persisted as JSON.
+    /// </summary>
+    /// <remarks>
+    /// The osu! API publishes covers on the beatmap set only; the fetcher copies them onto each
+    /// difficulty so a beatmap row is enough to render its thumbnails. Rows written before the
+    /// column existed hold no covers, so the accessor materialises an empty object instead of
+    /// exposing <see langword="null"/>.
+    /// </remarks>
+    [AllowNull]
+    public BeatmapCovers Covers
+    {
+        get => _covers;
+        set => _covers = value ?? new BeatmapCovers();
+    }
 
     /// <summary>
     /// Gets or sets the beatmap set this beatmap belongs to.

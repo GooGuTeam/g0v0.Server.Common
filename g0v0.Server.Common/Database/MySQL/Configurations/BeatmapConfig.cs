@@ -1,8 +1,11 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Configurations;
+using g0v0.Server.Common.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
 using BeatmapModel = g0v0.Server.Common.Database.Models.Beatmap;
 
 namespace g0v0.Server.Common.Database.MySQL.Configurations;
@@ -12,6 +15,11 @@ namespace g0v0.Server.Common.Database.MySQL.Configurations;
 /// </summary>
 public class BeatmapConfig : IEntityTypeConfiguration<BeatmapModel>
 {
+    private static readonly JsonSerializerSettings JsonSettings = new()
+    {
+        NullValueHandling = NullValueHandling.Ignore,
+    };
+
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<BeatmapModel> builder)
     {
@@ -129,6 +137,20 @@ public class BeatmapConfig : IEntityTypeConfiguration<BeatmapModel>
                 value => ConfigurationHelper.ConvertDatabaseValueToBeatmapStatus(value))
             .IsRequired();
 
+        // Covers are inherited from the beatmap set and stored as JSON so the exact URLs, cache
+        // busting query strings included, survive a round trip. The legacy column is nullable, and
+        // rows written before it existed hold no covers, so it is mapped as optional; the model
+        // accessor turns a missing value into an empty object.
+        builder.Property(b => b.Covers)
+            .HasColumnName("covers")
+            .HasColumnType("json")
+            .IsRequired(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Property)
+            .HasConversion(
+                value => JsonConvert.SerializeObject(value, JsonSettings),
+                value => JsonConvert.DeserializeObject<BeatmapCovers>(value, JsonSettings) ?? new BeatmapCovers())
+            .Metadata.SetValueComparer(ComparerFor<BeatmapCovers>.Create());
+
         builder.Ignore(b => b.BeatmapVersion);
 
         builder.HasIndex(b => b.Status)
@@ -154,5 +176,16 @@ public class BeatmapConfig : IEntityTypeConfiguration<BeatmapModel>
 
         builder.HasIndex(b => b.Version)
             .HasDatabaseName("ix_beatmaps_version");
+    }
+
+    private static class ComparerFor<T>
+    {
+        public static ValueComparer<T> Create()
+        {
+            return new ValueComparer<T>(
+                (left, right) => JsonConvert.SerializeObject(left, JsonSettings) == JsonConvert.SerializeObject(right, JsonSettings),
+                value => JsonConvert.SerializeObject(value, JsonSettings).GetHashCode(StringComparison.Ordinal),
+                value => JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(value, JsonSettings), JsonSettings)!);
+        }
     }
 }

@@ -41,6 +41,14 @@ internal sealed class FakeFetcher : IFetcher
             : Task.FromResult(_beatmapFactory?.Invoke(0) ?? new Beatmap { Id = 0, BeatmapSetId = 0, Checksum = checksum, Version = "fetched", Mode = 0, DifficultyRating = 1.0, MapperId = 1, TotalLength = 1 });
     }
 
+    public Task<Beatmap?> FetchBeatmapByFilenameAsync(string filename, CancellationToken cancellationToken = default)
+    {
+        BeatmapFetchCount++;
+        return _exception != null
+            ? throw _exception
+            : Task.FromResult(_beatmapFactory?.Invoke(0));
+    }
+
     public Task<BeatmapSet> FetchBeatmapSetAsync(int beatmapSetId, CancellationToken cancellationToken = default)
     {
         SetFetchCount++;

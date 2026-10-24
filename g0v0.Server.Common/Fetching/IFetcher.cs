@@ -12,32 +12,71 @@ public interface IFetcher
     /// <summary>
     /// Fetches and persists a beatmap by its ID, along with its beatmap set and sibling beatmaps.
     /// </summary>
-    /// <param name="beatmapId">The beatmap ID.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The persisted beatmap.</returns>
+    /// <param name="beatmapId">
+    /// The beatmap ID.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The persisted beatmap.
+    /// </returns>
     Task<Beatmap> FetchBeatmapAsync(int beatmapId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Fetches and persists a beatmap by its checksum, along with its beatmap set and sibling beatmaps.
     /// </summary>
-    /// <param name="checksum">The beatmap checksum.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The persisted beatmap.</returns>
+    /// <param name="checksum">
+    /// The beatmap checksum.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The persisted beatmap.
+    /// </returns>
     Task<Beatmap> FetchBeatmapAsync(string checksum, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Looks a beatmap up by its local <c>.osu</c> filename, for example
+    /// <c>Artist - Title (Creator) [Insane].osu</c>, and persists it with its beatmap set.
+    /// </summary>
+    /// <param name="filename">
+    /// The local filename the client reports; the <c>.osu</c> extension is optional.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The persisted beatmap, or <see langword="null"/> when the osu! API does not know the file.
+    /// </returns>
+    Task<Beatmap?> FetchBeatmapByFilenameAsync(string filename, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Fetches and persists a beatmap set by its ID, along with all of its beatmaps.
     /// </summary>
-    /// <param name="beatmapSetId">The beatmap set ID.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The persisted beatmap set.</returns>
+    /// <param name="beatmapSetId">
+    /// The beatmap set ID.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The persisted beatmap set.
+    /// </returns>
     Task<BeatmapSet> FetchBeatmapSetAsync(int beatmapSetId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Fetches the raw .osu file content for a beatmap, with Redis caching and mirror fallback.
     /// </summary>
-    /// <param name="beatmapId">The beatmap ID.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The raw beatmap file content.</returns>
+    /// <param name="beatmapId">
+    /// The beatmap ID.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The raw beatmap file content.
+    /// </returns>
     Task<string> FetchBeatmapRawAsync(int beatmapId, CancellationToken cancellationToken = default);
 }

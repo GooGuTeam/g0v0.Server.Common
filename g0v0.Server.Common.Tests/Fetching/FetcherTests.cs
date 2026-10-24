@@ -331,6 +331,12 @@ public class FetcherTests
             return Task.FromResult(new BeatmapModel { Id = 0, BeatmapSetId = 0, Checksum = checksum, Version = "fetched", Mode = 0, MapperId = 1, TotalLength = 1 });
         }
 
+        public Task<BeatmapModel?> FetchBeatmapByFilenameAsync(string filename, CancellationToken cancellationToken = default)
+        {
+            _onFetch();
+            return Task.FromResult<BeatmapModel?>(null);
+        }
+
         public Task<BeatmapSetModel> FetchBeatmapSetAsync(int beatmapSetId, CancellationToken cancellationToken = default)
         {
             _onFetch();

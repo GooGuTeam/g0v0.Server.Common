@@ -75,7 +75,7 @@ internal sealed class OsuBeatmapSet
     public DateTimeOffset? LastUpdated { get; set; }
 
     [JsonProperty("covers")]
-    public BeatmapSetOnlineCovers? Covers { get; set; }
+    public OsuBeatmapSetCovers? Covers { get; set; }
 
     [JsonProperty("genre")]
     public BeatmapSetOnlineGenre? Genre { get; set; }

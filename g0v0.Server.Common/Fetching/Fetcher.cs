@@ -15,11 +15,21 @@ namespace g0v0.Server.Common.Fetching;
 /// <summary>
 /// Fetches osu! data from the osu! API and other sites.
 /// </summary>
-/// <param name="httpService">The shared HTTP service.</param>
-/// <param name="configManager">The configuration manager.</param>
-/// <param name="cache">The cache adapter.</param>
-/// <param name="beatmapSetRepository">The beatmap set repository.</param>
-/// <param name="logger">The logger.</param>
+/// <param name="httpService">
+/// The shared HTTP service.
+/// </param>
+/// <param name="configManager">
+/// The configuration manager.
+/// </param>
+/// <param name="cache">
+/// The cache adapter.
+/// </param>
+/// <param name="beatmapSetRepository">
+/// The beatmap set repository.
+/// </param>
+/// <param name="logger">
+/// The logger.
+/// </param>
 public class Fetcher(
     IHttpService httpService,
     ConfigManager configManager,
@@ -59,6 +69,26 @@ public class Fetcher(
         return string.IsNullOrWhiteSpace(checksum)
             ? throw new ArgumentException("Checksum must not be blank.", nameof(checksum))
             : await FetchBeatmapCoreAsync(beatmapId: null, checksum: checksum, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Beatmap?> FetchBeatmapByFilenameAsync(string filename, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(filename))
+        {
+            return null;
+        }
+
+        // The osu! API matches the filename exactly as the client stores it, ".osu" included.
+        string name = filename.Trim();
+        Beatmap? beatmap = await TryFetchByFilenameAsync(name, cancellationToken).ConfigureAwait(false);
+        if (beatmap is null && !name.EndsWith(".osu", StringComparison.OrdinalIgnoreCase))
+        {
+            // Tolerate callers that pass the bare difficulty name.
+            beatmap = await TryFetchByFilenameAsync(name + ".osu", cancellationToken).ConfigureAwait(false);
+        }
+
+        return beatmap;
     }
 
     /// <inheritdoc/>
@@ -158,7 +188,7 @@ public class Fetcher(
             SubmittedDate = dto.SubmittedDate ?? DateTimeOffset.MinValue,
             RankedDate = dto.RankedDate,
             LastUpdatedDate = dto.LastUpdated,
-            Covers = dto.Covers ?? default,
+            Covers = BeatmapCovers.ToGameCovers(dto.Covers),
             Genre = dto.Genre ?? default,
             Language = dto.Language ?? default,
             CurrentNominations = dto.CurrentNominations,
@@ -170,10 +200,12 @@ public class Fetcher(
         };
     }
 
-    private static Beatmap MapBeatmap(OsuBeatmap dto, int beatmapSetId)
+    private static Beatmap MapBeatmap(OsuBeatmap dto, int beatmapSetId, OsuBeatmapSetCovers? setCovers)
     {
         return new Beatmap
         {
+            // The API publishes covers per set; every difficulty inherits them.
+            Covers = BeatmapCovers.FromBeatmapSet(setCovers),
             Id = dto.Id,
             BeatmapSetId = beatmapSetId,
             Url = dto.Url ?? string.Empty,
@@ -206,21 +238,38 @@ public class Fetcher(
             : parsed;
     }
 
+    private async Task<Beatmap?> TryFetchByFilenameAsync(string name, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await FetchBeatmapByQueryAsync($"filename={Uri.EscapeDataString(name)}", expectedId: null, cancellationToken).ConfigureAwait(false);
+        }
+        catch (HttpServiceException exception) when (exception.StatusCode == 404)
+        {
+            return null;
+        }
+    }
+
     private async Task<Beatmap> FetchBeatmapCoreAsync(int? beatmapId, string? checksum, CancellationToken cancellationToken)
     {
         string query = beatmapId.HasValue ? $"id={beatmapId}" : $"checksum={Uri.EscapeDataString(checksum!)}";
+        return await FetchBeatmapByQueryAsync(query, beatmapId, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<Beatmap> FetchBeatmapByQueryAsync(string query, int? expectedId, CancellationToken cancellationToken)
+    {
         OsuBeatmap lookup = await GetJsonAsync<OsuBeatmap>(url: $"{BeatmapLookupEndpoint}?{query}", cancellationToken).ConfigureAwait(false);
 
         if (lookup.BeatmapSetId <= 0)
         {
-            throw new FetcherException($"Lookup for beatmap {beatmapId ?? 0} did not include a valid beatmap set ID.");
+            throw new FetcherException($"Lookup for beatmap {expectedId ?? lookup.Id} did not include a valid beatmap set ID.");
         }
 
         OsuBeatmapSet setDto = await GetJsonAsync<OsuBeatmapSet>(url: BeatmapSetEndpoint(lookup.BeatmapSetId), cancellationToken).ConfigureAwait(false);
         BeatmapSet set = await PersistSetAsync(setDto, lookup).ConfigureAwait(false);
 
-        Beatmap? result = set.Beatmaps.FirstOrDefault(b => b.Id == (beatmapId ?? lookup.Id));
-        return result ?? throw new FetcherException($"Fetched beatmap {beatmapId ?? lookup.Id} was not present in beatmap set {lookup.BeatmapSetId}.");
+        Beatmap? result = set.Beatmaps.FirstOrDefault(b => b.Id == (expectedId ?? lookup.Id));
+        return result ?? throw new FetcherException($"Fetched beatmap {expectedId ?? lookup.Id} was not present in beatmap set {lookup.BeatmapSetId}.");
     }
 
     private async Task<BeatmapSet> PersistSetAsync(OsuBeatmapSet setDto, OsuBeatmap? lookup)
@@ -251,7 +300,7 @@ public class Fetcher(
 
         foreach (OsuBeatmap beatmapDto in beatmaps.Values)
         {
-            set.Beatmaps.Add(MapBeatmap(beatmapDto, set.Id));
+            set.Beatmaps.Add(MapBeatmap(beatmapDto, set.Id, setDto.Covers));
         }
 
         return await beatmapSetRepository.UpsertWithBeatmapsAsync(set).ConfigureAwait(false);
