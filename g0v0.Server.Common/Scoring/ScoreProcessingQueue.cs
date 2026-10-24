@@ -12,21 +12,11 @@ namespace g0v0.Server.Common.Scoring;
 /// <summary>
 /// A reusable, independently owned score queue with durable recovery and scoped processing callbacks.
 /// </summary>
-/// <param name="scopes">
-/// Creates independent database scopes for background work.
-/// </param>
-/// <param name="logger">
-/// The worker logger.
-/// </param>
-/// <param name="scoreType">
-/// The client source type owned by this queue instance.
-/// </param>
-/// <param name="process">
-/// The client processing callback, invoked in a fresh dependency injection scope.
-/// </param>
-/// <param name="canProcess">
-/// An optional readiness predicate, such as requiring a completed replay upload.
-/// </param>
+/// <param name="scopes">Creates independent database scopes for background work.</param>
+/// <param name="logger">The worker logger.</param>
+/// <param name="scoreType">The client source type owned by this queue instance.</param>
+/// <param name="process">The client processing callback, invoked in a fresh dependency injection scope.</param>
+/// <param name="canProcess">An optional readiness predicate, such as requiring a completed replay upload.</param>
 [SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "This service implements a durable score queue.")]
 public sealed class ScoreProcessingQueue(
     IServiceScopeFactory scopes,

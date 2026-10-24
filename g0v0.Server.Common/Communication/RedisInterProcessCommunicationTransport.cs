@@ -14,9 +14,7 @@ public class RedisInterProcessCommunicationTransport : IInterProcessCommunicatio
     /// <summary>
     /// Initializes a new instance of the <see cref="RedisInterProcessCommunicationTransport"/> class.
     /// </summary>
-    /// <param name="connectionMultiplexer">
-    /// The Redis connection multiplexer.
-    /// </param>
+    /// <param name="connectionMultiplexer">The Redis connection multiplexer.</param>
     public RedisInterProcessCommunicationTransport(IConnectionMultiplexer connectionMultiplexer)
     {
         ArgumentNullException.ThrowIfNull(connectionMultiplexer);

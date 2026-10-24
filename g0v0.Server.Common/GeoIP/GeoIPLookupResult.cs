@@ -5,9 +5,7 @@ namespace g0v0.Server.Common.GeoIP;
 /// <summary>
 /// Contains available Country and ASN information for an IP address.
 /// </summary>
-/// <param name="Ip">
-/// The normalized IP address.
-/// </param>
+/// <param name="Ip">The normalized IP address.</param>
 public sealed record GeoIPLookupResult(string Ip)
 {
     /// <summary>

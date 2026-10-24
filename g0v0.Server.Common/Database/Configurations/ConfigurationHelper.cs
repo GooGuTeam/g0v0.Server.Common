@@ -241,15 +241,9 @@ internal static class ConfigurationHelper
     /// Converts an enum value to its legacy MySQL native-enum representation
     /// (PascalCase to UPPER_SNAKE_CASE, e.g. <c>HostOnly</c> to <c>HOST_ONLY</c>).
     /// </summary>
-    /// <typeparam name="TEnum">
-    /// The enum type.
-    /// </typeparam>
-    /// <param name="value">
-    /// The enum value.
-    /// </param>
-    /// <returns>
-    /// The legacy database representation.
-    /// </returns>
+    /// <typeparam name="TEnum">The enum type.</typeparam>
+    /// <param name="value">The enum value.</param>
+    /// <returns>The legacy database representation.</returns>
     public static string ConvertEnumToDatabaseValue<TEnum>(TEnum value)
         where TEnum : struct, Enum
     {
@@ -276,15 +270,9 @@ internal static class ConfigurationHelper
     /// <summary>
     /// Converts a legacy MySQL native-enum value back to its enum representation.
     /// </summary>
-    /// <typeparam name="TEnum">
-    /// The enum type.
-    /// </typeparam>
-    /// <param name="value">
-    /// The legacy database value.
-    /// </param>
-    /// <returns>
-    /// The parsed enum value.
-    /// </returns>
+    /// <typeparam name="TEnum">The enum type.</typeparam>
+    /// <param name="value">The legacy database value.</param>
+    /// <returns>The parsed enum value.</returns>
     public static TEnum ConvertDatabaseValueToEnum<TEnum>(string value)
         where TEnum : struct, Enum
     {

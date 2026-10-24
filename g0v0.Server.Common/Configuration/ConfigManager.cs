@@ -17,9 +17,7 @@ namespace g0v0.Server.Common.Configuration;
 /// <remarks>
 /// Initializes a new instance of the <see cref="ConfigManager"/> class and loads the configuration from the file.
 /// </remarks>
-/// <param name="basePath">
-/// The base path to find `config/{filename}.json`.
-/// </param>
+/// <param name="basePath">The base path to find `config/{filename}.json`.</param>
 public class ConfigManager(string basePath)
 {
     private const string ConfigBasePath = "config";
@@ -28,9 +26,7 @@ public class ConfigManager(string basePath)
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigManager"/> class using a configuration path provider and loads the configuration from the file.
     /// </summary>
-    /// <param name="pathProvider">
-    /// The path provider.
-    /// </param>
+    /// <param name="pathProvider">The path provider.</param>
     public ConfigManager(IPathProvider pathProvider)
         : this(pathProvider.GetBasePath())
     {
@@ -39,15 +35,9 @@ public class ConfigManager(string basePath)
     /// <summary>
     /// Gets a configuration of the specified type. If the configuration is not yet cached, it will be loaded from the file.
     /// </summary>
-    /// <typeparam name="T">
-    /// The type of configuration to retrieve.
-    /// </typeparam>
-    /// <returns>
-    /// The configuration instance.
-    /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the configuration file cannot be loaded.
-    /// </exception>
+    /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
+    /// <returns>The configuration instance.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the configuration file cannot be loaded.</exception>
     public T Get<T>()
     {
         // try to get cached value
@@ -67,12 +57,8 @@ public class ConfigManager(string basePath)
     /// <summary>
     /// Gets a configuration of the specified type, or <see langword="null"/> when its file does not exist.
     /// </summary>
-    /// <typeparam name="T">
-    /// The type of configuration to retrieve.
-    /// </typeparam>
-    /// <returns>
-    /// The configuration instance, or <see langword="null"/> when the file is absent.
-    /// </returns>
+    /// <typeparam name="T">The type of configuration to retrieve.</typeparam>
+    /// <returns>The configuration instance, or <see langword="null"/> when the file is absent.</returns>
     public T? TryGet<T>()
     {
         return File.Exists(GetFilePath<T>(basePath)) ? Get<T>() : default;
@@ -81,9 +67,7 @@ public class ConfigManager(string basePath)
     /// <summary>
     /// Reload the configuration from the file. Only properties marked with <see cref="ReloadableAttribute"/> will be updated.
     /// </summary>
-    /// <typeparam name="T">
-    /// The type of configuration to reload.
-    /// </typeparam>
+    /// <typeparam name="T">The type of configuration to reload.</typeparam>
     public void Reload<T>()
     {
         T config = LoadConfiguration<T>();

@@ -15,21 +15,11 @@ namespace g0v0.Server.Common.Fetching;
 /// <summary>
 /// Fetches osu! data from the osu! API and other sites.
 /// </summary>
-/// <param name="httpService">
-/// The shared HTTP service.
-/// </param>
-/// <param name="configManager">
-/// The configuration manager.
-/// </param>
-/// <param name="cache">
-/// The cache adapter.
-/// </param>
-/// <param name="beatmapSetRepository">
-/// The beatmap set repository.
-/// </param>
-/// <param name="logger">
-/// The logger.
-/// </param>
+/// <param name="httpService">The shared HTTP service.</param>
+/// <param name="configManager">The configuration manager.</param>
+/// <param name="cache">The cache adapter.</param>
+/// <param name="beatmapSetRepository">The beatmap set repository.</param>
+/// <param name="logger">The logger.</param>
 public class Fetcher(
     IHttpService httpService,
     ConfigManager configManager,

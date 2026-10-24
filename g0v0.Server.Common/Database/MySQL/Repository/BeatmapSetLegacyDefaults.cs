@@ -26,12 +26,8 @@ internal static class BeatmapSetLegacyDefaults
     /// <summary>
     /// Applies the defaults to a tracked beatmap set, when the model maps them.
     /// </summary>
-    /// <param name="context">
-    /// The database context that owns the entity.
-    /// </param>
-    /// <param name="beatmapSet">
-    /// The tracked beatmap set.
-    /// </param>
+    /// <param name="context">The database context that owns the entity.</param>
+    /// <param name="beatmapSet">The tracked beatmap set.</param>
     internal static void Apply(DbContext context, BeatmapSet beatmapSet)
     {
         ArgumentNullException.ThrowIfNull(context);

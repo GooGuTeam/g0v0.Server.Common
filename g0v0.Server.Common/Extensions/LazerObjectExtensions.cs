@@ -13,15 +13,9 @@ public static class LazerObjectExtensions
     /// <summary>
     /// Converts a lazer <see cref="RoomCategory"/> into a g0v0 <see cref="G0V0RoomCategory"/>.
     /// </summary>
-    /// <param name="category">
-    /// The lazer room category.
-    /// </param>
-    /// <param name="realtime">
-    /// Whether the room is a realtime multiplayer room.
-    /// </param>
-    /// <returns>
-    /// The equivalent g0v0 room category.
-    /// </returns>
+    /// <param name="category">The lazer room category.</param>
+    /// <param name="realtime">Whether the room is a realtime multiplayer room.</param>
+    /// <returns>The equivalent g0v0 room category.</returns>
     public static G0V0RoomCategory ToG0V0RoomCategory(this RoomCategory category, bool realtime = false)
     {
         return realtime

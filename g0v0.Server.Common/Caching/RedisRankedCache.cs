@@ -7,9 +7,7 @@ namespace g0v0.Server.Common.Caching;
 /// <summary>
 /// Redis-backed implementation of <see cref="IRankedCache"/> using sorted sets.
 /// </summary>
-/// <param name="connectionMultiplexer">
-/// The Redis connection multiplexer.
-/// </param>
+/// <param name="connectionMultiplexer">The Redis connection multiplexer.</param>
 public class RedisRankedCache(IConnectionMultiplexer connectionMultiplexer) : IRankedCache
 {
     private readonly IDatabase _database = connectionMultiplexer.GetDatabase();

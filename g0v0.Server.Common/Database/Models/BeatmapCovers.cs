@@ -66,12 +66,8 @@ public class BeatmapCovers
     /// <summary>
     /// Creates covers from the osu! API beatmap set covers.
     /// </summary>
-    /// <param name="covers">
-    /// The API covers, or <see langword="null"/> when the set has none.
-    /// </param>
-    /// <returns>
-    /// The mapped covers; an empty object when <paramref name="covers"/> is null.
-    /// </returns>
+    /// <param name="covers">The API covers, or <see langword="null"/> when the set has none.</param>
+    /// <returns>The mapped covers; an empty object when <paramref name="covers"/> is null.</returns>
     internal static BeatmapCovers FromBeatmapSet(OsuBeatmapSetCovers? covers) => covers is null
         ? new BeatmapCovers()
         : new BeatmapCovers
@@ -89,12 +85,8 @@ public class BeatmapCovers
     /// <summary>
     /// Creates the game library's covers value from the osu! API covers.
     /// </summary>
-    /// <param name="covers">
-    /// The API covers, or <see langword="null"/> when the set has none.
-    /// </param>
-    /// <returns>
-    /// The mapped covers.
-    /// </returns>
+    /// <param name="covers">The API covers, or <see langword="null"/> when the set has none.</param>
+    /// <returns>The mapped covers.</returns>
     internal static osu.Game.Beatmaps.BeatmapSetOnlineCovers ToGameCovers(OsuBeatmapSetCovers? covers)
     {
         return covers is not null

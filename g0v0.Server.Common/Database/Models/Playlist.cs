@@ -109,9 +109,7 @@ public class Playlist
     /// <summary>
     /// Converts this playlist item into the osu! multiplayer playlist item representation.
     /// </summary>
-    /// <returns>
-    /// The converted <see cref="MultiplayerPlaylistItem"/>.
-    /// </returns>
+    /// <returns>The converted <see cref="MultiplayerPlaylistItem"/>.</returns>
     public MultiplayerPlaylistItem ToMultiplayerPlaylistItem()
     {
         return new MultiplayerPlaylistItem

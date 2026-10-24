@@ -20,12 +20,8 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="BackgroundTaskRunner"/> class.
     /// </summary>
-    /// <param name="logger">
-    /// The logger used for background task failures.
-    /// </param>
-    /// <param name="serviceProvider">
-    /// The root service provider for optional host lifetime integration.
-    /// </param>
+    /// <param name="logger">The logger used for background task failures.</param>
+    /// <param name="serviceProvider">The root service provider for optional host lifetime integration.</param>
     public BackgroundTaskRunner(ILogger<BackgroundTaskRunner> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
@@ -82,9 +78,7 @@ public class BackgroundTaskRunner : IBackgroundTaskRunner, IAsyncDisposable
     /// <summary>
     /// Cancels the runner and waits for currently tracked tasks to complete.
     /// </summary>
-    /// <returns>
-    /// A task that completes when shutdown has finished.
-    /// </returns>
+    /// <returns>A task that completes when shutdown has finished.</returns>
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0)

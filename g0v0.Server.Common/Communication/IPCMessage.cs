@@ -21,18 +21,10 @@ public sealed class IpcMessage
     /// <summary>
     /// Initializes a new instance of the <see cref="IpcMessage"/> class.
     /// </summary>
-    /// <param name="type">
-    /// The message type.
-    /// </param>
-    /// <param name="name">
-    /// The message name.
-    /// </param>
-    /// <param name="uuid">
-    /// The message identifier.
-    /// </param>
-    /// <param name="data">
-    /// The message data payload.
-    /// </param>
+    /// <param name="type">The message type.</param>
+    /// <param name="name">The message name.</param>
+    /// <param name="uuid">The message identifier.</param>
+    /// <param name="data">The message data payload.</param>
     public IpcMessage(IpcMessageType type, string name, Guid uuid, object? data = null)
     {
         Type = type;

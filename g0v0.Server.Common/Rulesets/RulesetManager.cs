@@ -29,12 +29,8 @@ public class RulesetManager
     /// <summary>
     /// Initializes a new instance of the <see cref="RulesetManager"/> class.
     /// </summary>
-    /// <param name="rulesetPath">
-    /// The file system path to the directory containing custom ruleset DLL files.
-    /// </param>
-    /// <param name="includeOfficial">
-    /// Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.
-    /// </param>
+    /// <param name="rulesetPath">The file system path to the directory containing custom ruleset DLL files.</param>
+    /// <param name="includeOfficial">Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.</param>
     public RulesetManager(string rulesetPath, bool includeOfficial = true)
     {
         if (includeOfficial)
@@ -49,12 +45,8 @@ public class RulesetManager
     /// Initializes a new instance of the <see cref="RulesetManager"/> class using an <see cref="IPathProvider"/>
     /// to resolve the rulesets directory path.
     /// </summary>
-    /// <param name="pathProvider">
-    /// The path provider used to resolve the base path. The rulesets directory is expected at <c>{basePath}/rulesets</c>.
-    /// </param>
-    /// <param name="includeOfficial">
-    /// Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.
-    /// </param>
+    /// <param name="pathProvider">The path provider used to resolve the base path. The rulesets directory is expected at <c>{basePath}/rulesets</c>.</param>
+    /// <param name="includeOfficial">Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.</param>
     public RulesetManager(IPathProvider pathProvider, bool includeOfficial = true)
         : this(
             Path.Combine(pathProvider.GetBasePath(), RulesetPath), includeOfficial)
@@ -65,15 +57,9 @@ public class RulesetManager
     /// Initializes a new instance of the <see cref="RulesetManager"/> class using an <see cref="IPathProvider"/>
     /// to resolve the rulesets directory path.
     /// </summary>
-    /// <param name="pathProvider">
-    /// The path provider used to resolve the base path. The rulesets directory is expected at <c>{basePath}/rulesets</c>.
-    /// </param>
-    /// <param name="logger">
-    /// The logger.
-    /// </param>
-    /// <param name="includeOfficial">
-    /// Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.
-    /// </param>
+    /// <param name="pathProvider">The path provider used to resolve the base path. The rulesets directory is expected at <c>{basePath}/rulesets</c>.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="includeOfficial">Whether to load official osu! rulesets (Osu, Taiko, Catch, Mania). Defaults to <c>true</c>.</param>
     public RulesetManager(IPathProvider pathProvider, ILogger<RulesetManager> logger, bool includeOfficial = true)
         : this(pathProvider, includeOfficial)
     {
@@ -83,15 +69,9 @@ public class RulesetManager
     /// <summary>
     /// Retrieves a ruleset by its legacy numeric ID.
     /// </summary>
-    /// <param name="rulesetId">
-    /// The legacy ID of the ruleset to retrieve.
-    /// </param>
-    /// <returns>
-    /// The <see cref="Ruleset"/> instance matching the given ID.
-    /// </returns>
-    /// <param cref="ArgumentException">
-    /// Thrown when no ruleset is registered with the specified <paramref name="rulesetId"/>.
-    /// </param>
+    /// <param name="rulesetId">The legacy ID of the ruleset to retrieve.</param>
+    /// <returns>The <see cref="Ruleset"/> instance matching the given ID.</returns>
+    /// <param cref="ArgumentException">Thrown when no ruleset is registered with the specified <paramref name="rulesetId"/>.</param>
     public Ruleset GetRuleset(int rulesetId)
     {
         return _rulesetsById.TryGetValue(rulesetId, out Ruleset? ruleset)
@@ -102,15 +82,9 @@ public class RulesetManager
     /// <summary>
     /// Retrieves a ruleset by its short name (e.g., "osu", "taiko", "fruits", "mania").
     /// </summary>
-    /// <param name="shortName">
-    /// The short name of the ruleset to retrieve.
-    /// </param>
-    /// <returns>
-    /// The <see cref="Ruleset"/> instance matching the given short name.
-    /// </returns>
-    /// <param cref="ArgumentException">
-    /// Thrown when no ruleset is registered with the specified <paramref name="shortName"/>.
-    /// </param>
+    /// <param name="shortName">The short name of the ruleset to retrieve.</param>
+    /// <returns>The <see cref="Ruleset"/> instance matching the given short name.</returns>
+    /// <param cref="ArgumentException">Thrown when no ruleset is registered with the specified <paramref name="shortName"/>.</param>
     public Ruleset GetRuleset(string shortName)
     {
         return _rulesets.TryGetValue(shortName, out Ruleset? ruleset)
@@ -121,9 +95,7 @@ public class RulesetManager
     /// <summary>
     /// Returns all registered rulesets, ensuring no duplicates.
     /// </summary>
-    /// <returns>
-    /// A collection of unique <see cref="Ruleset"/> instances.
-    /// </returns>
+    /// <returns>A collection of unique <see cref="Ruleset"/> instances.</returns>
     public IEnumerable<Ruleset> GetAllRulesets()
     {
         return _rulesets.Values.Distinct();
@@ -132,9 +104,7 @@ public class RulesetManager
     /// <summary>
     /// Registers a ruleset by its short name and, if it implements <see cref="ILegacyRuleset"/>, by its legacy ID.
     /// </summary>
-    /// <param name="ruleset">
-    /// The ruleset instance to register.
-    /// </param>
+    /// <param name="ruleset">The ruleset instance to register.</param>
     private void AddRuleset(Ruleset ruleset)
     {
         if (!_rulesets.TryAdd(ruleset.ShortName, ruleset))
@@ -174,9 +144,7 @@ public class RulesetManager
     /// Scans the specified directory for custom ruleset DLLs matching the pattern <c>osu.Game.Rulesets.*.dll</c>,
     /// loads each one, and registers any concrete <see cref="Ruleset"/> subclass found within.
     /// </summary>
-    /// <param name="rulesetPath">
-    /// The directory path to scan for ruleset DLLs.
-    /// </param>
+    /// <param name="rulesetPath">The directory path to scan for ruleset DLLs.</param>
     private void LoadFromDisk(string rulesetPath)
     {
         if (!Directory.Exists(rulesetPath))

@@ -9,18 +9,10 @@ namespace g0v0.Server.Common.GeoIP;
 /// <summary>
 /// Checks GeoIP databases at startup and periodically without failing the host on update errors.
 /// </summary>
-/// <param name="geoIP">
-/// The shared lookup service.
-/// </param>
-/// <param name="config">
-/// The update configuration.
-/// </param>
-/// <param name="timeProvider">
-/// The scheduling clock.
-/// </param>
-/// <param name="logger">
-/// The update logger.
-/// </param>
+/// <param name="geoIP">The shared lookup service.</param>
+/// <param name="config">The update configuration.</param>
+/// <param name="timeProvider">The scheduling clock.</param>
+/// <param name="logger">The update logger.</param>
 public sealed partial class GeoIPUpdateService(IGeoIPService geoIP, GeoIPConfig config, TimeProvider timeProvider, ILogger<GeoIPUpdateService> logger) : BackgroundService
 {
     /// <inheritdoc />

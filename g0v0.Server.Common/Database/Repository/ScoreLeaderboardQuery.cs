@@ -36,36 +36,16 @@ public static class ScoreLeaderboardQuery
     /// <summary>
     /// Reads the leaderboard of a beatmap, best score first, one row per user.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="beatmapId">
-    /// The beatmap ID.
-    /// </param>
-    /// <param name="mode">
-    /// The stored ruleset ID, relax and autopilot variants included.
-    /// </param>
-    /// <param name="limit">
-    /// The maximum number of rows.
-    /// </param>
-    /// <param name="legacyOnly">
-    /// Whether only stable scores are considered.
-    /// </param>
-    /// <param name="userIds">
-    /// The users to restrict to, or <see langword="null"/> for everyone.
-    /// </param>
-    /// <param name="countryCode">
-    /// The two-letter country to restrict to, or <see langword="null"/>.
-    /// </param>
-    /// <param name="modAcronyms">
-    /// The exact mod set a row must carry, or <see langword="null"/> for any.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// The cancellation token.
-    /// </param>
-    /// <returns>
-    /// The leaderboard rows.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="beatmapId">The beatmap ID.</param>
+    /// <param name="mode">The stored ruleset ID, relax and autopilot variants included.</param>
+    /// <param name="limit">The maximum number of rows.</param>
+    /// <param name="legacyOnly">Whether only stable scores are considered.</param>
+    /// <param name="userIds">The users to restrict to, or <see langword="null"/> for everyone.</param>
+    /// <param name="countryCode">The two-letter country to restrict to, or <see langword="null"/>.</param>
+    /// <param name="modAcronyms">The exact mod set a row must carry, or <see langword="null"/> for any.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The leaderboard rows.</returns>
     public static async Task<IReadOnlyList<Score>> GetLeaderboardAsync(
         DbContext context,
         int beatmapId,
@@ -97,30 +77,14 @@ public static class ScoreLeaderboardQuery
     /// <summary>
     /// Counts the users that have a score on the beatmap.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="beatmapId">
-    /// The beatmap ID.
-    /// </param>
-    /// <param name="mode">
-    /// The stored ruleset ID.
-    /// </param>
-    /// <param name="legacyOnly">
-    /// Whether only stable scores are counted.
-    /// </param>
-    /// <param name="userIds">
-    /// The users to restrict the count to, or <see langword="null"/> for everyone.
-    /// </param>
-    /// <param name="countryCode">
-    /// The two-letter country to restrict the count to, or <see langword="null"/>.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// The cancellation token.
-    /// </param>
-    /// <returns>
-    /// The number of distinct users on the leaderboard.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="beatmapId">The beatmap ID.</param>
+    /// <param name="mode">The stored ruleset ID.</param>
+    /// <param name="legacyOnly">Whether only stable scores are counted.</param>
+    /// <param name="userIds">The users to restrict the count to, or <see langword="null"/> for everyone.</param>
+    /// <param name="countryCode">The two-letter country to restrict the count to, or <see langword="null"/>.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The number of distinct users on the leaderboard.</returns>
     public static Task<int> CountLeaderboardAsync(
         DbContext context,
         int beatmapId,
@@ -140,27 +104,13 @@ public static class ScoreLeaderboardQuery
     /// <summary>
     /// Reads the best score of one user on a beatmap.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="beatmapId">
-    /// The beatmap ID.
-    /// </param>
-    /// <param name="mode">
-    /// The stored ruleset ID.
-    /// </param>
-    /// <param name="userId">
-    /// The user ID.
-    /// </param>
-    /// <param name="legacyOnly">
-    /// Whether only stable scores are considered.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// The cancellation token.
-    /// </param>
-    /// <returns>
-    /// The user's best score, or <see langword="null"/> when they have not set one.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="beatmapId">The beatmap ID.</param>
+    /// <param name="mode">The stored ruleset ID.</param>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="legacyOnly">Whether only stable scores are considered.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The user's best score, or <see langword="null"/> when they have not set one.</returns>
     public static Task<Score?> GetBestScoreAsync(
         DbContext context,
         int beatmapId,
@@ -180,27 +130,13 @@ public static class ScoreLeaderboardQuery
     /// <summary>
     /// Gets the one-based position a user holds on the leaderboard of a beatmap.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="beatmapId">
-    /// The beatmap ID.
-    /// </param>
-    /// <param name="mode">
-    /// The stored ruleset ID.
-    /// </param>
-    /// <param name="userId">
-    /// The user ID.
-    /// </param>
-    /// <param name="legacyOnly">
-    /// Whether only stable scores are considered.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// The cancellation token.
-    /// </param>
-    /// <returns>
-    /// The position, or 0 when the user is not on the leaderboard.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="beatmapId">The beatmap ID.</param>
+    /// <param name="mode">The stored ruleset ID.</param>
+    /// <param name="userId">The user ID.</param>
+    /// <param name="legacyOnly">Whether only stable scores are considered.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The position, or 0 when the user is not on the leaderboard.</returns>
     public static async Task<int> GetLeaderboardRankAsync(
         DbContext context,
         int beatmapId,

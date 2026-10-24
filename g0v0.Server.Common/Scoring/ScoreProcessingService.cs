@@ -22,24 +22,12 @@ namespace g0v0.Server.Common.Scoring;
 /// <summary>
 /// Calculates a persisted solo score and personal statistics using its original .osu file.
 /// </summary>
-/// <param name="fetcher">
-/// The beatmap file fetcher.
-/// </param>
-/// <param name="beatmaps">
-/// The beatmap metadata repository.
-/// </param>
-/// <param name="scores">
-/// The score repository.
-/// </param>
-/// <param name="rulesets">
-/// The registered rulesets.
-/// </param>
-/// <param name="attributes">
-/// The shared difficulty and performance utility.
-/// </param>
-/// <param name="configs">
-/// Reads the gameplay feature flags that decide whether RX and AP award performance.
-/// </param>
+/// <param name="fetcher">The beatmap file fetcher.</param>
+/// <param name="beatmaps">The beatmap metadata repository.</param>
+/// <param name="scores">The score repository.</param>
+/// <param name="rulesets">The registered rulesets.</param>
+/// <param name="attributes">The shared difficulty and performance utility.</param>
+/// <param name="configs">Reads the gameplay feature flags that decide whether RX and AP award performance.</param>
 public sealed class ScoreProcessingService(IFetcher fetcher, IBeatmapRepository beatmaps, IScoreRepository scores, RulesetManager rulesets, ScoreAttributeUtils attributes, ConfigManager configs) : IScoreProcessingService
 {
     private readonly GameConfig _game = configs.Get<GameConfig>();
@@ -47,15 +35,9 @@ public sealed class ScoreProcessingService(IFetcher fetcher, IBeatmapRepository 
     /// <summary>
     /// Processes a queued score, marking it complete only after all calculations succeed.
     /// </summary>
-    /// <param name="score">
-    /// The unprocessed record.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// Worker cancellation.
-    /// </param>
-    /// <returns>
-    /// A task representing calculation and persistence.
-    /// </returns>
+    /// <param name="score">The unprocessed record.</param>
+    /// <param name="cancellationToken">Worker cancellation.</param>
+    /// <returns>A task representing calculation and persistence.</returns>
     public async Task ProcessAsync(Score score, CancellationToken cancellationToken)
     {
         string content = await fetcher.FetchBeatmapRawAsync(score.BeatmapId, cancellationToken);

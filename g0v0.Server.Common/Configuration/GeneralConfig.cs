@@ -144,7 +144,7 @@ public class GeneralConfig
     public string? FrontendUrl { get; set; }
 
     /// <summary>
-    /// Gets the frontend URL, falling back to the server URL as in osu_lazer_api.
+    /// Gets the frontend URL, falling back to the server URL when none is configured.
     /// </summary>
     [JsonIgnore]
     public string WebUrl => (string.IsNullOrWhiteSpace(FrontendUrl) ? ServerUrl : FrontendUrl).AddSuffix("/");

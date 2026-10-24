@@ -21,18 +21,10 @@ public static class UserScoreStatisticsUtils
     /// <summary>
     /// Updates lifetime counters and best-per-beatmap aggregates. Call once within the score completion transaction.
     /// </summary>
-    /// <param name="statistics">
-    /// The account statistics for this exact stored mode.
-    /// </param>
-    /// <param name="score">
-    /// The completed score.
-    /// </param>
-    /// <param name="history">
-    /// Previously processed scores for the same account and mode.
-    /// </param>
-    /// <param name="playTime">
-    /// Actual play duration in seconds, bounded by the modded .osu length.
-    /// </param>
+    /// <param name="statistics">The account statistics for this exact stored mode.</param>
+    /// <param name="score">The completed score.</param>
+    /// <param name="history">Previously processed scores for the same account and mode.</param>
+    /// <param name="playTime">Actual play duration in seconds, bounded by the modded .osu length.</param>
     public static void Apply(UserStatistics statistics, Score score, IEnumerable<Score> history, int playTime)
     {
         statistics.TotalScore += score.TotalScore;
@@ -86,15 +78,9 @@ public static class UserScoreStatisticsUtils
     /// <summary>
     /// Decides whether a completed score counts as a play.
     /// </summary>
-    /// <param name="score">
-    /// The completed score.
-    /// </param>
-    /// <param name="playTime">
-    /// Actual play duration in seconds, bounded by the modded .osu length.
-    /// </param>
-    /// <returns>
-    /// Whether the score increments the play counters.
-    /// </returns>
+    /// <param name="score">The completed score.</param>
+    /// <param name="playTime">Actual play duration in seconds, bounded by the modded .osu length.</param>
+    /// <returns>Whether the score increments the play counters.</returns>
     /// <remarks>
     /// A failed score still counts when the player reached a meaningful amount of the map: more than
     /// eight seconds, at least 5000 points and at least a tenth of the maximum hits (capped at 20).

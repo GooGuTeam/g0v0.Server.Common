@@ -14,29 +14,17 @@ public static class ScoreModeUtils
     /// <summary>
     /// Resolves the gameplay ruleset for a stored score mode.
     /// </summary>
-    /// <param name="mode">
-    /// The persisted mode ID.
-    /// </param>
-    /// <returns>
-    /// The underlying ruleset ID.
-    /// </returns>
+    /// <param name="mode">The persisted mode ID.</param>
+    /// <returns>The underlying ruleset ID.</returns>
     public static int GetBaseRulesetId(int mode) => mode switch { 4 or 5 => 0, 6 => 1, 7 => 2, _ => mode };
 
     /// <summary>
     /// Selects a separate RX/AP mode only when its feature is enabled.
     /// </summary>
-    /// <param name="mode">
-    /// The base ruleset ID.
-    /// </param>
-    /// <param name="mods">
-    /// The submitted mods.
-    /// </param>
-    /// <param name="config">
-    /// The gameplay feature flags.
-    /// </param>
-    /// <returns>
-    /// The mode to persist on scores and personal statistics.
-    /// </returns>
+    /// <param name="mode">The base ruleset ID.</param>
+    /// <param name="mods">The submitted mods.</param>
+    /// <param name="config">The gameplay feature flags.</param>
+    /// <returns>The mode to persist on scores and personal statistics.</returns>
     public static int GetScoreMode(int mode, IEnumerable<APIMod> mods, GameConfig config)
     {
         string[] acronyms = mods.Select(m => m.Acronym).ToArray();
@@ -55,21 +43,11 @@ public static class ScoreModeUtils
     /// <summary>
     /// Decides whether the mods of a score still allow it to award performance.
     /// </summary>
-    /// <param name="mode">
-    /// The stored score mode, which tells RX and AP apart from the vanilla rulesets.
-    /// </param>
-    /// <param name="mods">
-    /// The mods the score was played with, as the ruleset instantiated them.
-    /// </param>
-    /// <param name="config">
-    /// The gameplay feature flags.
-    /// </param>
-    /// <param name="legacyScore">
-    /// Whether the score is a legacy score, which is scored through <see cref="ModClassic"/>.
-    /// </param>
-    /// <returns>
-    /// Whether the score may contribute performance.
-    /// </returns>
+    /// <param name="mode">The stored score mode, which tells RX and AP apart from the vanilla rulesets.</param>
+    /// <param name="mods">The mods the score was played with, as the ruleset instantiated them.</param>
+    /// <param name="config">The gameplay feature flags.</param>
+    /// <param name="legacyScore">Whether the score is a legacy score, which is scored through <see cref="ModClassic"/>.</param>
+    /// <returns>Whether the score may contribute performance.</returns>
     /// <remarks>
     /// osu! marks every mod that osu-web accepts on a ranked leaderboard with
     /// <see cref="Mod.Ranked"/>, which covers the mods that disqualify performance (<c>AT</c>,

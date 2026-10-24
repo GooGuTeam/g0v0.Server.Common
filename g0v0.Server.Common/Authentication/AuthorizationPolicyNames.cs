@@ -25,11 +25,7 @@ public static class AuthorizationPolicyNames
     /// <summary>
     /// Builds a scope policy name for the provided scopes.
     /// </summary>
-    /// <param name="scopes">
-    /// The required scopes.
-    /// </param>
-    /// <returns>
-    /// The encoded policy name.
-    /// </returns>
+    /// <param name="scopes">The required scopes.</param>
+    /// <returns>The encoded policy name.</returns>
     public static string RequireScope(params string[] scopes) => $"{ScopePrefix}{string.Join(",", scopes)}";
 }

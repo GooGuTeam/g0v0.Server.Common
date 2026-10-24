@@ -9,9 +9,7 @@ namespace g0v0.Server.Common.Http;
 /// <summary>
 /// Default implementation of <see cref="IHttpService"/> using <see cref="HttpClient"/>.
 /// </summary>
-/// <param name="httpClient">
-/// The HTTP client.
-/// </param>
+/// <param name="httpClient">The HTTP client.</param>
 public class HttpService(HttpClient httpClient) : IHttpService
 {
     /// <inheritdoc/>

@@ -13,9 +13,7 @@ public class MysqlDbContext : DbContext
     /// <summary>
     /// Initializes a new instance of the <see cref="MysqlDbContext"/> class.
     /// </summary>
-    /// <param name="options">
-    /// The EF Core context options.
-    /// </param>
+    /// <param name="options">The EF Core context options.</param>
     public MysqlDbContext(DbContextOptions<MysqlDbContext> options)
         : base(options)
     {

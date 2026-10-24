@@ -17,9 +17,7 @@ public class HttpServiceException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="HttpServiceException"/> class.
     /// </summary>
-    /// <param name="message">
-    /// The error message.
-    /// </param>
+    /// <param name="message">The error message.</param>
     public HttpServiceException(string message)
         : base(message)
     {
@@ -28,12 +26,8 @@ public class HttpServiceException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="HttpServiceException"/> class.
     /// </summary>
-    /// <param name="message">
-    /// The error message.
-    /// </param>
-    /// <param name="statusCode">
-    /// The HTTP status code of the failed response.
-    /// </param>
+    /// <param name="message">The error message.</param>
+    /// <param name="statusCode">The HTTP status code of the failed response.</param>
     public HttpServiceException(string message, int? statusCode)
         : base(message)
     {
@@ -43,12 +37,8 @@ public class HttpServiceException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="HttpServiceException"/> class.
     /// </summary>
-    /// <param name="message">
-    /// The error message.
-    /// </param>
-    /// <param name="innerException">
-    /// The inner exception.
-    /// </param>
+    /// <param name="message">The error message.</param>
+    /// <param name="innerException">The inner exception.</param>
     public HttpServiceException(string message, Exception? innerException)
         : base(message, innerException)
     {

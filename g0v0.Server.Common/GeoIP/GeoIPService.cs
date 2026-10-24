@@ -30,21 +30,11 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="GeoIPService"/> class and opens existing local databases.
     /// </summary>
-    /// <param name="config">
-    /// The database configuration.
-    /// </param>
-    /// <param name="pathProvider">
-    /// The server base path provider.
-    /// </param>
-    /// <param name="httpClientFactory">
-    /// The factory used for update HTTP requests.
-    /// </param>
-    /// <param name="logger">
-    /// The service logger.
-    /// </param>
-    /// <param name="timeProvider">
-    /// The clock used for database freshness checks.
-    /// </param>
+    /// <param name="config">The database configuration.</param>
+    /// <param name="pathProvider">The server base path provider.</param>
+    /// <param name="httpClientFactory">The factory used for update HTTP requests.</param>
+    /// <param name="logger">The service logger.</param>
+    /// <param name="timeProvider">The clock used for database freshness checks.</param>
     public GeoIPService(GeoIPConfig config, IPathProvider pathProvider, IHttpClientFactory httpClientFactory, ILogger<GeoIPService> logger, TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(config);

@@ -61,27 +61,17 @@ internal static class ScoreProcessingPersistence
     /// <summary>
     /// Decides whether a beatmap status exposes a score leaderboard.
     /// </summary>
-    /// <param name="status">
-    /// The stored online status.
-    /// </param>
-    /// <returns>
-    /// Whether leaderboard rows are kept for the beatmap.
-    /// </returns>
+    /// <param name="status">The stored online status.</param>
+    /// <returns>Whether leaderboard rows are kept for the beatmap.</returns>
     private static bool HasLeaderboard(BeatmapOnlineStatus status) =>
         status is BeatmapOnlineStatus.Ranked or BeatmapOnlineStatus.Approved or BeatmapOnlineStatus.Qualified or BeatmapOnlineStatus.Loved;
 
     /// <summary>
     /// Replaces the performance entry of the user on the beatmap when this score beats it.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="score">
-    /// The completed score.
-    /// </param>
-    /// <returns>
-    /// A task representing the change.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="score">The completed score.</param>
+    /// <returns>A task representing the change.</returns>
     /// <remarks>
     /// Only a passing, ranked score that may award performance produces an entry. The entry is keyed
     /// by the score ID, so a better score replaces the previous row instead of adding one.
@@ -120,18 +110,10 @@ internal static class ScoreProcessingPersistence
     /// <summary>
     /// Maintains the leaderboard entry of the user on the beatmap for the mod set of this score.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="score">
-    /// The completed score.
-    /// </param>
-    /// <param name="hasLeaderboard">
-    /// Whether the beatmap exposes a leaderboard at all.
-    /// </param>
-    /// <returns>
-    /// A task representing the change.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="score">The completed score.</param>
+    /// <param name="hasLeaderboard">Whether the beatmap exposes a leaderboard at all.</param>
+    /// <returns>A task representing the change.</returns>
     /// <remarks>
     /// The table keeps the best entry of a user per mod set, so a better score with the same mods
     /// replaces that entry and a score with a new mod set adds one. When the replacement is the
@@ -191,18 +173,10 @@ internal static class ScoreProcessingPersistence
     /// <summary>
     /// Increments the per-beatmap and per-month play counters of a counted play.
     /// </summary>
-    /// <param name="context">
-    /// The database context.
-    /// </param>
-    /// <param name="score">
-    /// The completed score.
-    /// </param>
-    /// <param name="playTime">
-    /// Actual play duration in seconds.
-    /// </param>
-    /// <returns>
-    /// A task representing the change.
-    /// </returns>
+    /// <param name="context">The database context.</param>
+    /// <param name="score">The completed score.</param>
+    /// <param name="playTime">Actual play duration in seconds.</param>
+    /// <returns>A task representing the change.</returns>
     private static async Task IncrementPlaycountsAsync(DbContext context, Score score, int playTime)
     {
         if (!UserScoreStatisticsUtils.IsValidPlay(score, playTime))

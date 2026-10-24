@@ -13,9 +13,7 @@ public class PostgreSqlDbContext : DbContext
     /// <summary>
     /// Initializes a new instance of the <see cref="PostgreSqlDbContext"/> class.
     /// </summary>
-    /// <param name="options">
-    /// The EF Core context options.
-    /// </param>
+    /// <param name="options">The EF Core context options.</param>
     public PostgreSqlDbContext(DbContextOptions<PostgreSqlDbContext> options)
         : base(options)
     {

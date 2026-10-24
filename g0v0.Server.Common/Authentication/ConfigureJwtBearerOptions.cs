@@ -21,15 +21,9 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigureJwtBearerOptions"/> class.
     /// </summary>
-    /// <param name="manager">
-    /// The configuration manager for general settings.
-    /// </param>
-    /// <param name="serviceProvider">
-    /// The root service provider used to resolve scoped dependencies.
-    /// </param>
-    /// <param name="logger">
-    /// The logger for token handler setup diagnostics.
-    /// </param>
+    /// <param name="manager">The configuration manager for general settings.</param>
+    /// <param name="serviceProvider">The root service provider used to resolve scoped dependencies.</param>
+    /// <param name="logger">The logger for token handler setup diagnostics.</param>
     public ConfigureJwtBearerOptions(
         ConfigManager manager,
         IServiceProvider serviceProvider,
@@ -43,12 +37,8 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <summary>
     /// Configures named JWT bearer options.
     /// </summary>
-    /// <param name="name">
-    /// The authentication scheme name.
-    /// </param>
-    /// <param name="options">
-    /// The options to configure.
-    /// </param>
+    /// <param name="name">The authentication scheme name.</param>
+    /// <param name="options">The options to configure.</param>
     public void Configure(string? name, JwtBearerOptions options)
     {
         if (!string.Equals(name, JwtBearerDefaults.AuthenticationScheme, StringComparison.Ordinal))
@@ -62,9 +52,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
     /// <summary>
     /// Configures the default JWT bearer options.
     /// </summary>
-    /// <param name="options">
-    /// The options to configure.
-    /// </param>
+    /// <param name="options">The options to configure.</param>
     public void Configure(JwtBearerOptions options)
     {
         GeneralConfig generalConfig = _manager.Get<GeneralConfig>();

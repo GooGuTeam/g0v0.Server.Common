@@ -12,14 +12,8 @@ public interface IScoreProcessingService
     /// <summary>
     /// Processes a queued score, marking it complete only after all calculations succeed.
     /// </summary>
-    /// <param name="score">
-    /// The unprocessed record.
-    /// </param>
-    /// <param name="cancellationToken">
-    /// Worker cancellation.
-    /// </param>
-    /// <returns>
-    /// A task representing calculation and persistence.
-    /// </returns>
+    /// <param name="score">The unprocessed record.</param>
+    /// <param name="cancellationToken">Worker cancellation.</param>
+    /// <returns>A task representing calculation and persistence.</returns>
     Task ProcessAsync(Score score, CancellationToken cancellationToken);
 }

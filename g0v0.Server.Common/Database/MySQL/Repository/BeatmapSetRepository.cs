@@ -10,9 +10,7 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <summary>
 /// MySQL-backed implementation of <see cref="IBeatmapSetRepository"/>.
 /// </summary>
-/// <param name="context">
-/// The database context.
-/// </param>
+/// <param name="context">The database context.</param>
 public class BeatmapSetRepository(MysqlDbContext context) : IBeatmapSetRepository, IMySqlRepository
 {
     /// <inheritdoc/>

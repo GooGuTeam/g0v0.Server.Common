@@ -16,15 +16,9 @@ public class ScopeAuthorizationHandler(ConfigManager config)
     /// <summary>
     /// Evaluates whether the current user satisfies the required OAuth scopes.
     /// </summary>
-    /// <param name="context">
-    /// The authorization context.
-    /// </param>
-    /// <param name="requirement">
-    /// The scope requirement.
-    /// </param>
-    /// <returns>
-    /// A completed task.
-    /// </returns>
+    /// <param name="context">The authorization context.</param>
+    /// <param name="requirement">The scope requirement.</param>
+    /// <returns>A completed task.</returns>
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         ScopeAuthorizationRequirement requirement)

@@ -5,8 +5,6 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <summary>
 /// Provides MySQL login persistence.
 /// </summary>
-/// <param name="context">
-/// The request-scoped database context.
-/// </param>
+/// <param name="context">The request-scoped database context.</param>
 public class LoginRepository(MysqlDbContext context)
     : g0v0.Server.Common.Database.Repository.LoginRepository<MysqlDbContext>(context), IMySqlRepository;

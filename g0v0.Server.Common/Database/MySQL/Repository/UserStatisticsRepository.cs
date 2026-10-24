@@ -9,9 +9,7 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <summary>
 /// Persists per-mode user performance statistics in the legacy MySQL schema.
 /// </summary>
-/// <param name="context">
-/// The MySQL database context.
-/// </param>
+/// <param name="context">The MySQL database context.</param>
 public class UserStatisticsRepository(MysqlDbContext context) : IUserStatisticsRepository, IMySqlRepository
 {
     /// <inheritdoc/>

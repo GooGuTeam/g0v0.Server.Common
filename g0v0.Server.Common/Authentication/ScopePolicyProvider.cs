@@ -18,12 +18,8 @@ public class ScopePolicyProvider : IAuthorizationPolicyProvider
     /// <summary>
     /// Initializes a new instance of the <see cref="ScopePolicyProvider"/> class.
     /// </summary>
-    /// <param name="options">
-    /// Authorization options.
-    /// </param>
-    /// <param name="config">
-    /// The shared general configuration.
-    /// </param>
+    /// <param name="options">Authorization options.</param>
+    /// <param name="config">The shared general configuration.</param>
     public ScopePolicyProvider(
         IOptions<AuthorizationOptions> options,
         ConfigManager config)
@@ -35,28 +31,20 @@ public class ScopePolicyProvider : IAuthorizationPolicyProvider
     /// <summary>
     /// Gets the default authorization policy.
     /// </summary>
-    /// <returns>
-    /// The default authorization policy.
-    /// </returns>
+    /// <returns>The default authorization policy.</returns>
     public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => _fallback.GetDefaultPolicyAsync();
 
     /// <summary>
     /// Gets the fallback authorization policy.
     /// </summary>
-    /// <returns>
-    /// The fallback policy if configured; otherwise, <see langword="null"/>.
-    /// </returns>
+    /// <returns>The fallback policy if configured; otherwise, <see langword="null"/>.</returns>
     public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() => _fallback.GetFallbackPolicyAsync();
 
     /// <summary>
     /// Gets an authorization policy by name, creating OAuth policies when needed.
     /// </summary>
-    /// <param name="policyName">
-    /// The policy name.
-    /// </param>
-    /// <returns>
-    /// The resolved policy, or <see langword="null"/> if not found.
-    /// </returns>
+    /// <param name="policyName">The policy name.</param>
+    /// <returns>The resolved policy, or <see langword="null"/> if not found.</returns>
     public async Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
         if (string.Equals(policyName, AuthorizationPolicyNames.ClientOnly, StringComparison.Ordinal))
