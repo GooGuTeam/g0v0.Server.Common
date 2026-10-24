@@ -16,4 +16,9 @@ public enum ServerIdentify
     /// The realtime server.
     /// </summary>
     Realtime,
+
+    /// <summary>
+    /// The stable server.
+    /// </summary>
+    Stable
 }

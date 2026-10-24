@@ -15,8 +15,9 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<Score> builder)
     {
+        builder.HasIndex(s => new { s.Type, s.Processed, s.Id });
         builder.Ignore(s => s.Statistics);
-        builder.Ignore(s => s.ClassicTotalScoreWithoutMods);
+        builder.Property<int>("PinnedOrder").HasColumnName("pinned_order").IsRequired();
 
         builder.Property(s => s.ClientVersion)
             .HasColumnName("client_version")
@@ -34,6 +35,8 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
         builder.Property(s => s.Mods)
             .HasColumnName("mods")
             .HasColumnType("json")
+            .IsRequired(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Property)
             .HasConversion(
                 value => ConfigurationHelper.SerializeMods(value),
                 value => ConfigurationHelper.DeserializeMods(value))
@@ -111,9 +114,14 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
                 value => ConfigurationHelper.ConvertDatabaseValueToMode(value))
             .IsRequired();
 
+        // The legacy column is nullable: rows written by clients that do not report maximum
+        // statistics hold NULL, so the mapping must accept a missing value instead of failing the
+        // whole query with a DBNull cast.
         builder.Property(s => s.MaximumStatistics)
             .HasColumnName("maximum_statistics")
             .HasColumnType("json")
+            .IsRequired(false)
+            .UsePropertyAccessMode(PropertyAccessMode.Property)
             .HasConversion(
                 value => ConfigurationHelper.SerializeStatistics(value),
                 value => ConfigurationHelper.DeserializeStatistics(value))

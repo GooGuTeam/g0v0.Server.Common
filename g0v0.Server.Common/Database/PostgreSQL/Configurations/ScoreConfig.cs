@@ -15,6 +15,7 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<Score> builder)
     {
+        builder.HasIndex(s => new { s.Type, s.Processed, s.Id });
         builder.Property(s => s.ClientVersion)
             .HasColumnName("client_version")
             .HasMaxLength(50)
