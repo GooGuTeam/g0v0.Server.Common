@@ -13,7 +13,9 @@ public class MysqlDbContext : DbContext
     /// <summary>
     /// Initializes a new instance of the <see cref="MysqlDbContext"/> class.
     /// </summary>
-    /// <param name="options">The EF Core context options.</param>
+    /// <param name="options">
+    /// The EF Core context options.
+    /// </param>
     public MysqlDbContext(DbContextOptions<MysqlDbContext> options)
         : base(options)
     {
@@ -118,6 +120,26 @@ public class MysqlDbContext : DbContext
     /// Gets or sets the per-mode user performance statistics table set.
     /// </summary>
     public DbSet<UserStatistics> UserStatistics { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the highest-performance score per user, beatmap and mode table set.
+    /// </summary>
+    public DbSet<BestScore> BestScores { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the highest-scoring entry per user, beatmap, mode and mod set table set.
+    /// </summary>
+    public DbSet<LeaderboardScore> LeaderboardScores { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the per-user beatmap play count table set.
+    /// </summary>
+    public DbSet<BeatmapPlaycount> BeatmapPlaycounts { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the per-user monthly play count table set.
+    /// </summary>
+    public DbSet<MonthlyPlaycount> MonthlyPlaycounts { get; set; } = null!;
 
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

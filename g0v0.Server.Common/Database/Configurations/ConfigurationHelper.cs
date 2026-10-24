@@ -19,6 +19,10 @@ internal static class ConfigurationHelper
         [1] = "TAIKO",
         [2] = "FRUITS",
         [3] = "MANIA",
+        [4] = "OSURX",
+        [5] = "OSUAP",
+        [6] = "TAIKORX",
+        [7] = "FRUITSRX",
         [10] = "SENTAKKI",
         [11] = "TAU",
         [12] = "RUSH",
@@ -32,10 +36,10 @@ internal static class ConfigurationHelper
         ["TAIKO"] = 1,
         ["FRUITS"] = 2,
         ["MANIA"] = 3,
-        ["OSURX"] = 0,
-        ["OSUAP"] = 0,
-        ["TAIKORX"] = 1,
-        ["FRUITSRX"] = 2,
+        ["OSURX"] = 4,
+        ["OSUAP"] = 5,
+        ["TAIKORX"] = 6,
+        ["FRUITSRX"] = 7,
         ["SENTAKKI"] = 10,
         ["TAU"] = 11,
         ["RUSH"] = 12,
@@ -93,6 +97,11 @@ internal static class ConfigurationHelper
         value => (SerializeMods(value) ?? string.Empty).GetHashCode(StringComparison.Ordinal),
         value => DeserializeMods(SerializeMods(value)));
 
+    public static ValueComparer<IList<string>> ModAcronymsComparer { get; } = new(
+        (left, right) => SerializeModAcronyms(left) == SerializeModAcronyms(right),
+        value => (SerializeModAcronyms(value) ?? string.Empty).GetHashCode(StringComparison.Ordinal),
+        value => DeserializeModAcronyms(SerializeModAcronyms(value)));
+
     public static ValueComparer<IDictionary<HitResult, int>> StatisticsComparer { get; } = new(
         (left, right) => SerializeStatistics(left) == SerializeStatistics(right),
         value => (SerializeStatistics(value) ?? string.Empty).GetHashCode(StringComparison.Ordinal),
@@ -140,6 +149,20 @@ internal static class ConfigurationHelper
             : throw new InvalidOperationException($"Unsupported score rank '{value}'.");
     }
 
+    public static string? SerializeModAcronyms(IList<string>? mods)
+    {
+        // Empty lists are serialized as "[]" (never NULL) so the stored mod set of a best score is
+        // always a JSON array the leaderboard can compare against.
+        return JsonConvert.SerializeObject(mods ?? new List<string>(), JsonSettings);
+    }
+
+    public static IList<string> DeserializeModAcronyms(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? new List<string>()
+            : JsonConvert.DeserializeObject<List<string>>(value, JsonSettings) ?? new List<string>();
+    }
+
     public static string? SerializeMods(IList<APIMod>? mods)
     {
         // Empty lists are serialized as "[]" (never NULL): the playlist mods
@@ -158,7 +181,7 @@ internal static class ConfigurationHelper
     {
         if (statistics == null || statistics.Count == 0)
         {
-            return null;
+            return "{}";
         }
 
         Dictionary<string, int> payload = statistics
@@ -218,9 +241,15 @@ internal static class ConfigurationHelper
     /// Converts an enum value to its legacy MySQL native-enum representation
     /// (PascalCase to UPPER_SNAKE_CASE, e.g. <c>HostOnly</c> to <c>HOST_ONLY</c>).
     /// </summary>
-    /// <typeparam name="TEnum">The enum type.</typeparam>
-    /// <param name="value">The enum value.</param>
-    /// <returns>The legacy database representation.</returns>
+    /// <typeparam name="TEnum">
+    /// The enum type.
+    /// </typeparam>
+    /// <param name="value">
+    /// The enum value.
+    /// </param>
+    /// <returns>
+    /// The legacy database representation.
+    /// </returns>
     public static string ConvertEnumToDatabaseValue<TEnum>(TEnum value)
         where TEnum : struct, Enum
     {
@@ -247,9 +276,15 @@ internal static class ConfigurationHelper
     /// <summary>
     /// Converts a legacy MySQL native-enum value back to its enum representation.
     /// </summary>
-    /// <typeparam name="TEnum">The enum type.</typeparam>
-    /// <param name="value">The legacy database value.</param>
-    /// <returns>The parsed enum value.</returns>
+    /// <typeparam name="TEnum">
+    /// The enum type.
+    /// </typeparam>
+    /// <param name="value">
+    /// The legacy database value.
+    /// </param>
+    /// <returns>
+    /// The parsed enum value.
+    /// </returns>
     public static TEnum ConvertDatabaseValueToEnum<TEnum>(string value)
         where TEnum : struct, Enum
     {

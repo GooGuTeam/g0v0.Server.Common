@@ -9,7 +9,9 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <summary>
 /// MySQL-backed implementation of <see cref="IScoreRepository"/>.
 /// </summary>
-/// <param name="context">The database context.</param>
+/// <param name="context">
+/// The database context.
+/// </param>
 public class ScoreRepository(MysqlDbContext context) : IScoreRepository, IMySqlRepository
 {
     /// <inheritdoc/>
@@ -87,6 +89,55 @@ public class ScoreRepository(MysqlDbContext context) : IScoreRepository, IMySqlR
     }
 
     /// <inheritdoc/>
+    public Task<IReadOnlyList<Score>> GetBeatmapLeaderboardAsync(
+        int beatmapId,
+        int mode,
+        int limit,
+        bool legacyOnly = false,
+        IReadOnlyCollection<int>? userIds = null,
+        string? countryCode = null,
+        IReadOnlyCollection<string>? modAcronyms = null,
+        CancellationToken cancellationToken = default)
+        => ScoreLeaderboardQuery.GetLeaderboardAsync(
+            context,
+            beatmapId,
+            mode,
+            limit,
+            legacyOnly,
+            userIds,
+            countryCode,
+            modAcronyms,
+            cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<int> CountBeatmapLeaderboardAsync(
+        int beatmapId,
+        int mode,
+        bool legacyOnly = false,
+        IReadOnlyCollection<int>? userIds = null,
+        string? countryCode = null,
+        CancellationToken cancellationToken = default)
+        => ScoreLeaderboardQuery.CountLeaderboardAsync(context, beatmapId, mode, legacyOnly, userIds, countryCode, cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<Score?> GetBestBeatmapScoreAsync(
+        int beatmapId,
+        int mode,
+        int userId,
+        bool legacyOnly = false,
+        CancellationToken cancellationToken = default)
+        => ScoreLeaderboardQuery.GetBestScoreAsync(context, beatmapId, mode, userId, legacyOnly, cancellationToken);
+
+    /// <inheritdoc/>
+    public Task<int> GetBeatmapLeaderboardRankAsync(
+        int beatmapId,
+        int mode,
+        int userId,
+        bool legacyOnly = false,
+        CancellationToken cancellationToken = default)
+        => ScoreLeaderboardQuery.GetLeaderboardRankAsync(context, beatmapId, mode, userId, legacyOnly, cancellationToken);
+
+    /// <inheritdoc/>
     public async Task CreateAsync(Score score)
     {
         await context.Scores.AddAsync(score).ConfigureAwait(false);
@@ -122,4 +173,14 @@ public class ScoreRepository(MysqlDbContext context) : IScoreRepository, IMySqlR
         score.HasReplay = true;
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<Score>> GetUnprocessedScoresAsync(long afterId, int limit, string? type = null)
+        => limit <= 0 ? [] : await context.Scores.AsNoTracking()
+            .Where(s => s.Id > afterId && !s.Processed && (type == null || s.Type == type))
+            .OrderBy(s => s.Id).Take(limit).ToListAsync().ConfigureAwait(false);
+
+    /// <inheritdoc/>
+    public Task CompleteProcessingAsync(Score score, int playTime = 0)
+        => ScoreProcessingPersistence.CompleteAsync(context, score, playTime);
 }
