@@ -30,6 +30,21 @@ public class MysqlDbContext : DbContext
     public DbSet<OAuthToken> OAuthTokens { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets the trusted devices table set.
+    /// </summary>
+    public DbSet<TrustedDevice> TrustedDevices { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the login sessions table set.
+    /// </summary>
+    public DbSet<LoginSession> LoginSessions { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the login attempt logs table set.
+    /// </summary>
+    public DbSet<LoginLogSession> LoginLogSessions { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the relationships table set.
     /// </summary>
     public DbSet<Relationship> Relationships { get; set; } = null!;
