@@ -10,7 +10,9 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <summary>
 /// Persists chat channels, messages and silences in the legacy MySQL schema.
 /// </summary>
-/// <param name="context">The MySQL database context.</param>
+/// <param name="context">
+/// The MySQL database context.
+/// </param>
 public class ChatRepository(MysqlDbContext context) : IChatRepository, IMySqlRepository
 {
     /// <inheritdoc />

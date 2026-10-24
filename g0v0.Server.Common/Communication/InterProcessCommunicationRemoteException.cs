@@ -17,7 +17,9 @@ public sealed class InterProcessCommunicationRemoteException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationRemoteException"/> class.
     /// </summary>
-    /// <param name="message">The error message.</param>
+    /// <param name="message">
+    /// The error message.
+    /// </param>
     public InterProcessCommunicationRemoteException(string message)
         : base(message)
     {
@@ -26,8 +28,12 @@ public sealed class InterProcessCommunicationRemoteException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationRemoteException"/> class.
     /// </summary>
-    /// <param name="message">The error message.</param>
-    /// <param name="innerException">The inner exception.</param>
+    /// <param name="message">
+    /// The error message.
+    /// </param>
+    /// <param name="innerException">
+    /// The inner exception.
+    /// </param>
     public InterProcessCommunicationRemoteException(string message, Exception innerException)
         : base(message, innerException)
     {
@@ -36,8 +42,12 @@ public sealed class InterProcessCommunicationRemoteException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationRemoteException"/> class.
     /// </summary>
-    /// <param name="requestId">The request identifier that caused the remote error.</param>
-    /// <param name="message">The remote error message.</param>
+    /// <param name="requestId">
+    /// The request identifier that caused the remote error.
+    /// </param>
+    /// <param name="message">
+    /// The remote error message.
+    /// </param>
     public InterProcessCommunicationRemoteException(Guid requestId, string message)
         : base(message)
     {
@@ -47,9 +57,15 @@ public sealed class InterProcessCommunicationRemoteException : Exception
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationRemoteException"/> class.
     /// </summary>
-    /// <param name="requestId">The request identifier that caused the remote error.</param>
-    /// <param name="code">The remote error code.</param>
-    /// <param name="message">The remote error message.</param>
+    /// <param name="requestId">
+    /// The request identifier that caused the remote error.
+    /// </param>
+    /// <param name="code">
+    /// The remote error code.
+    /// </param>
+    /// <param name="message">
+    /// The remote error message.
+    /// </param>
     public InterProcessCommunicationRemoteException(Guid requestId, int code, string message)
         : base(message)
     {

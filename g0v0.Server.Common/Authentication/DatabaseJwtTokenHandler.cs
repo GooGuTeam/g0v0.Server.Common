@@ -26,9 +26,15 @@ public class DatabaseJwtTokenHandler(
     /// <summary>
     /// Validates a JWT and verifies that the token record exists and is active in the database.
     /// </summary>
-    /// <param name="token">The serialized JWT.</param>
-    /// <param name="validationParameters">The token validation parameters.</param>
-    /// <returns>The token validation result.</returns>
+    /// <param name="token">
+    /// The serialized JWT.
+    /// </param>
+    /// <param name="validationParameters">
+    /// The token validation parameters.
+    /// </param>
+    /// <returns>
+    /// The token validation result.
+    /// </returns>
     public override Task<TokenValidationResult> ValidateTokenAsync(
         string token,
         TokenValidationParameters validationParameters)

@@ -5,9 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace g0v0.Server.Common.Database.Repository;
 
-/// <summary>Shares login persistence between the database providers.</summary>
-/// <typeparam name="TContext">The provider context.</typeparam>
-/// <param name="context">The request-scoped context.</param>
+/// <summary>
+/// Shares login persistence between the database providers.
+/// </summary>
+/// <typeparam name="TContext">
+/// The provider context.
+/// </typeparam>
+/// <param name="context">
+/// The request-scoped context.
+/// </param>
 public abstract class LoginRepository<TContext>(TContext context) : ILoginRepository
     where TContext : DbContext
 {

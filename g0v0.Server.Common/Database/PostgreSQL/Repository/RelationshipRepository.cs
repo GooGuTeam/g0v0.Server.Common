@@ -9,7 +9,9 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 /// <summary>
 /// PostgreSQL-backed implementation of <see cref="IRelationshipRepository"/>.
 /// </summary>
-/// <param name="context">The database context.</param>
+/// <param name="context">
+/// The database context.
+/// </param>
 public class RelationshipRepository(PostgreSqlDbContext context) : IRelationshipRepository, IPostgreSqlRepository
 {
     /// <inheritdoc/>

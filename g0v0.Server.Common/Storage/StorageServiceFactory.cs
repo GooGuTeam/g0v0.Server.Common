@@ -13,9 +13,15 @@ public static class StorageServiceFactory
     /// <summary>
     /// Creates a storage service for the supplied configuration.
     /// </summary>
-    /// <param name="configuration">The storage configuration.</param>
-    /// <param name="pathProvider">The path provider required by local storage.</param>
-    /// <returns>The created storage service.</returns>
+    /// <param name="configuration">
+    /// The storage configuration.
+    /// </param>
+    /// <param name="pathProvider">
+    /// The path provider required by local storage.
+    /// </param>
+    /// <returns>
+    /// The created storage service.
+    /// </returns>
     public static StorageService Create(StorageConfiguration configuration, IPathProvider? pathProvider = null)
     {
         ArgumentNullException.ThrowIfNull(configuration);

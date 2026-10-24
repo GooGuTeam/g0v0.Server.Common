@@ -26,10 +26,18 @@ namespace g0v0.Server.Common.Extensions;
 /// </summary>
 public static class ServiceCollectionExtension
 {
-    /// <summary>Registers the singleton GeoIP service and its startup and periodic update worker.</summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The updated service collection.</returns>
-    /// <remarks>Requires ConfigManager and IPathProvider. An absent config/geoip.json uses default settings.</remarks>
+    /// <summary>
+    /// Registers the singleton GeoIP service and its startup and periodic update worker.
+    /// </summary>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
+    /// <remarks>
+    /// Requires ConfigManager and IPathProvider. An absent config/geoip.json uses default settings.
+    /// </remarks>
     public static IServiceCollection AddGeoIP(this IServiceCollection services)
     {
         services.TryAddSingleton<GeoIPConfig>(provider => provider.GetRequiredService<ConfigManager>().TryGet<GeoIPConfig>() ?? new GeoIPConfig());
@@ -44,11 +52,15 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers repository interfaces to matching implementations for the selected database backend.
     /// </summary>
-    /// <param name="services">The service collection.</param>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
     /// <param name="useLegacyDatabase">
     /// <see langword="true"/> to register MySQL repositories; <see langword="false"/> to register PostgreSQL repositories.
     /// </param>
-    /// <returns>The updated service collection.</returns>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     public static IServiceCollection AddRepositories(this IServiceCollection services, bool useLegacyDatabase = true)
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
@@ -79,18 +91,30 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers the Redis connection multiplexer, IPC transport, and inter-process communication client for a known server.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="serverIdentify">The server identifier used for IPC channel naming.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <param name="serverIdentify">
+    /// The server identifier used for IPC channel naming.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     public static IServiceCollection AddRedis(this IServiceCollection services, ServerIdentify serverIdentify)
         => services.AddRedis(InterProcessCommunicationClient.GetServerIdentifier(serverIdentify));
 
     /// <summary>
     /// Registers the Redis connection multiplexer, IPC transport, and inter-process communication client for a raw server identifier.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="serverIdentify">The server identifier used for IPC channel naming.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <param name="serverIdentify">
+    /// The server identifier used for IPC channel naming.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>
@@ -119,8 +143,12 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers the configured storage service implementation.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     /// <remarks>
     /// Requires <see cref="ConfigManager"/> to be registered beforehand. Local storage also requires
     /// <see cref="IPathProvider"/> so relative paths can be resolved from the server base path.
@@ -145,8 +173,12 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers the shared background task runner.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     public static IServiceCollection AddBackgroundTaskRunner(this IServiceCollection services)
     {
         services.AddSingleton<BackgroundTaskRunner>();
@@ -158,8 +190,12 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers the shared string cache used across g0v0 server services.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     /// <remarks>
     /// Requires <c>AddRedis</c> to be registered beforehand so an <see cref="IConnectionMultiplexer"/> is available.
     /// </remarks>
@@ -174,8 +210,12 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers the osu! Fetcher service and its shared HTTP dependency.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     /// <remarks>
     /// Requires <see cref="ConfigManager"/>, <c>AddRepositories</c>, <c>AddRedis</c> and <c>AddCache</c> to be registered beforehand.
     /// </remarks>
@@ -195,8 +235,12 @@ public static class ServiceCollectionExtension
     /// <summary>
     /// Registers the shared g0v0 OAuth/JWT authentication and authorization components.
     /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <returns>The updated service collection.</returns>
+    /// <param name="services">
+    /// The service collection.
+    /// </param>
+    /// <returns>
+    /// The updated service collection.
+    /// </returns>
     /// <remarks>
     /// Requires <see cref="ConfigManager"/> and
     /// <c>IOAuthTokenRepository</c> to be registered beforehand.

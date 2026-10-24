@@ -7,7 +7,9 @@ namespace g0v0.Server.Common.Caching;
 /// <summary>
 /// Redis-backed implementation of <see cref="IStringCache"/>.
 /// </summary>
-/// <param name="connectionMultiplexer">The Redis connection multiplexer.</param>
+/// <param name="connectionMultiplexer">
+/// The Redis connection multiplexer.
+/// </param>
 public class RedisStringCache(IConnectionMultiplexer connectionMultiplexer) : IStringCache
 {
     private readonly IDatabase _database = connectionMultiplexer.GetDatabase();

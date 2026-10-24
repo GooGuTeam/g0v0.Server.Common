@@ -12,14 +12,22 @@ public interface IOAuthTokenRepository
     /// <summary>
     /// Gets a valid OAuth token record by access token value.
     /// </summary>
-    /// <param name="token">The raw access token.</param>
-    /// <returns>The matching token record if found and valid; otherwise, <see langword="null"/>.</returns>
+    /// <param name="token">
+    /// The raw access token.
+    /// </param>
+    /// <returns>
+    /// The matching token record if found and valid; otherwise, <see langword="null"/>.
+    /// </returns>
     Task<OAuthToken?> GetByAccessTokenAsync(string token);
 
     /// <summary>
     /// Checks whether an access token exists and is still valid.
     /// </summary>
-    /// <param name="token">The raw access token.</param>
-    /// <returns><see langword="true"/> if the token exists and is not expired; otherwise, <see langword="false"/>.</returns>
+    /// <param name="token">
+    /// The raw access token.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if the token exists and is not expired; otherwise, <see langword="false"/>.
+    /// </returns>
     Task<bool> CheckAccessTokenIsValidAsync(string token);
 }

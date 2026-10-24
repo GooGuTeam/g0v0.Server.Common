@@ -21,8 +21,12 @@ public sealed class IpcErrorBody
     /// <summary>
     /// Initializes a new instance of the <see cref="IpcErrorBody"/> class.
     /// </summary>
-    /// <param name="code">The error code.</param>
-    /// <param name="message">The error message.</param>
+    /// <param name="code">
+    /// The error code.
+    /// </param>
+    /// <param name="message">
+    /// The error message.
+    /// </param>
     public IpcErrorBody(int code, string message)
     {
         Code = code;

@@ -9,7 +9,9 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 /// <summary>
 /// Persists per-mode user performance statistics in the v2 PostgreSQL schema.
 /// </summary>
-/// <param name="context">The PostgreSQL database context.</param>
+/// <param name="context">
+/// The PostgreSQL database context.
+/// </param>
 public class UserStatisticsRepository(PostgreSqlDbContext context) : IUserStatisticsRepository, IPostgreSqlRepository
 {
     /// <inheritdoc/>

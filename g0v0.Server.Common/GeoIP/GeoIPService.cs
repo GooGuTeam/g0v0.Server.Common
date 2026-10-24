@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 
 namespace g0v0.Server.Common.GeoIP;
 
-/// <summary>Manages reusable in-memory Country and ASN database readers.</summary>
+/// <summary>
+/// Manages reusable in-memory Country and ASN database readers.
+/// </summary>
 public sealed partial class GeoIPService : IGeoIPService, IDisposable
 {
     private static readonly string[] Editions = ["Country", "ASN"];
@@ -25,12 +27,24 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
     private readonly Dictionary<string, DatabaseReader> _readers = new(StringComparer.Ordinal);
     private bool _disposed;
 
-    /// <summary>Initializes a new instance of the <see cref="GeoIPService"/> class and opens existing local databases.</summary>
-    /// <param name="config">The database configuration.</param>
-    /// <param name="pathProvider">The server base path provider.</param>
-    /// <param name="httpClientFactory">The factory used for update HTTP requests.</param>
-    /// <param name="logger">The service logger.</param>
-    /// <param name="timeProvider">The clock used for database freshness checks.</param>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GeoIPService"/> class and opens existing local databases.
+    /// </summary>
+    /// <param name="config">
+    /// The database configuration.
+    /// </param>
+    /// <param name="pathProvider">
+    /// The server base path provider.
+    /// </param>
+    /// <param name="httpClientFactory">
+    /// The factory used for update HTTP requests.
+    /// </param>
+    /// <param name="logger">
+    /// The service logger.
+    /// </param>
+    /// <param name="timeProvider">
+    /// The clock used for database freshness checks.
+    /// </param>
     public GeoIPService(GeoIPConfig config, IPathProvider pathProvider, IHttpClientFactory httpClientFactory, ILogger<GeoIPService> logger, TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(config);
@@ -175,7 +189,9 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
         }
     }
 
-    /// <summary>Closes the database readers after any running update completes.</summary>
+    /// <summary>
+    /// Closes the database readers after any running update completes.
+    /// </summary>
     public void Dispose()
     {
         lock (_disposeLock)

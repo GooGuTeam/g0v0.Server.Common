@@ -35,9 +35,15 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationClient"/> class for a known server.
     /// </summary>
-    /// <param name="transport">The message transport implementation.</param>
-    /// <param name="serverIdentifier">The current server identifier.</param>
-    /// <param name="logger">The logger for abnormal IPC situations. Defaults to a null logger.</param>
+    /// <param name="transport">
+    /// The message transport implementation.
+    /// </param>
+    /// <param name="serverIdentifier">
+    /// The current server identifier.
+    /// </param>
+    /// <param name="logger">
+    /// The logger for abnormal IPC situations. Defaults to a null logger.
+    /// </param>
     public InterProcessCommunicationClient(IInterProcessCommunicationTransport transport, ServerIdentify serverIdentifier, ILogger? logger = null)
         : this(transport, GetServerIdentifier(serverIdentifier), logger)
     {
@@ -46,9 +52,15 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Initializes a new instance of the <see cref="InterProcessCommunicationClient"/> class with a raw server identifier.
     /// </summary>
-    /// <param name="transport">The message transport implementation.</param>
-    /// <param name="serverIdentifier">The current server identifier.</param>
-    /// <param name="logger">The logger for abnormal IPC situations. Defaults to a null logger.</param>
+    /// <param name="transport">
+    /// The message transport implementation.
+    /// </param>
+    /// <param name="serverIdentifier">
+    /// The current server identifier.
+    /// </param>
+    /// <param name="logger">
+    /// The logger for abnormal IPC situations. Defaults to a null logger.
+    /// </param>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>
@@ -72,8 +84,12 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Converts a known server identifier enum value to the Redis IPC wire identifier.
     /// </summary>
-    /// <param name="serverIdentifier">The known server identifier.</param>
-    /// <returns>The snake_case wire identifier.</returns>
+    /// <param name="serverIdentifier">
+    /// The known server identifier.
+    /// </param>
+    /// <returns>
+    /// The snake_case wire identifier.
+    /// </returns>
     public static string GetServerIdentifier(ServerIdentify serverIdentifier)
     {
         return Enum.IsDefined(serverIdentifier)
@@ -84,16 +100,24 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Builds the Redis pub/sub channel name for a known server identifier.
     /// </summary>
-    /// <param name="serverIdentifier">The target server identifier.</param>
-    /// <returns>The Redis channel name.</returns>
+    /// <param name="serverIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <returns>
+    /// The Redis channel name.
+    /// </returns>
     public static string GetChannelName(ServerIdentify serverIdentifier)
         => GetChannelName(GetServerIdentifier(serverIdentifier));
 
     /// <summary>
     /// Builds the Redis pub/sub channel name for a raw server identifier.
     /// </summary>
-    /// <param name="serverIdentifier">The target server identifier.</param>
-    /// <returns>The Redis channel name.</returns>
+    /// <param name="serverIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <returns>
+    /// The Redis channel name.
+    /// </returns>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>
@@ -107,17 +131,27 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Registers a notice handler without a specific payload type.
     /// </summary>
-    /// <param name="name">The notice name.</param>
-    /// <param name="handler">The notice handler.</param>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="handler">
+    /// The notice handler.
+    /// </param>
     public void RegisterNoticeHandler(string name, Func<object?, Task> handler)
         => RegisterNoticeHandler<object>(name, handler);
 
     /// <summary>
     /// Registers a notice handler and converts the incoming payload to the supplied type before invocation.
     /// </summary>
-    /// <param name="name">The notice name.</param>
-    /// <param name="payloadType">The payload type to deserialize to.</param>
-    /// <param name="handler">The notice handler.</param>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="payloadType">
+    /// The payload type to deserialize to.
+    /// </param>
+    /// <param name="handler">
+    /// The notice handler.
+    /// </param>
     public void RegisterNoticeHandler(string name, Type payloadType, Func<object?, Task> handler)
     {
         ValidateHandlerRegistration(name, payloadType, handler);
@@ -131,18 +165,30 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Registers a typed notice handler.
     /// </summary>
-    /// <typeparam name="TPayload">The payload type.</typeparam>
-    /// <param name="name">The notice name.</param>
-    /// <param name="handler">The notice handler.</param>
+    /// <typeparam name="TPayload">
+    /// The payload type.
+    /// </typeparam>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="handler">
+    /// The notice handler.
+    /// </param>
     public void RegisterNoticeHandler<TPayload>(string name, Func<TPayload?, Task> handler)
         => RegisterNoticeHandler(name, typeof(TPayload), payload => handler(CastPayload<TPayload>(payload)));
 
     /// <summary>
     /// Registers a typed synchronous notice handler.
     /// </summary>
-    /// <typeparam name="TPayload">The payload type.</typeparam>
-    /// <param name="name">The notice name.</param>
-    /// <param name="handler">The notice handler.</param>
+    /// <typeparam name="TPayload">
+    /// The payload type.
+    /// </typeparam>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="handler">
+    /// The notice handler.
+    /// </param>
     public void RegisterNoticeHandler<TPayload>(string name, Action<TPayload?> handler)
         => RegisterNoticeHandler(name, typeof(TPayload), payload =>
         {
@@ -153,18 +199,30 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Registers a notice handler that receives the source server identifier alongside the payload.
     /// </summary>
-    /// <typeparam name="TPayload">The payload type.</typeparam>
-    /// <param name="name">The notice name.</param>
-    /// <param name="handler">The notice handler receiving the source server identifier and the payload.</param>
+    /// <typeparam name="TPayload">
+    /// The payload type.
+    /// </typeparam>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="handler">
+    /// The notice handler receiving the source server identifier and the payload.
+    /// </param>
     public void RegisterNoticeHandler<TPayload>(string name, Func<string, TPayload?, Task> handler)
         => RegisterNoticeHandler(name, typeof(TPayload), (source, payload) => handler(source, CastPayload<TPayload>(payload)));
 
     /// <summary>
     /// Registers a notice handler that receives the source server identifier alongside the payload.
     /// </summary>
-    /// <param name="name">The notice name.</param>
-    /// <param name="payloadType">The payload type to deserialize to.</param>
-    /// <param name="handler">The notice handler receiving the source server identifier and the payload.</param>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="payloadType">
+    /// The payload type to deserialize to.
+    /// </param>
+    /// <param name="handler">
+    /// The notice handler receiving the source server identifier and the payload.
+    /// </param>
     public void RegisterNoticeHandler(string name, Type payloadType, Func<string, object?, Task> handler)
     {
         ValidateHandlerRegistration(name, payloadType, handler);
@@ -178,17 +236,27 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Registers a responder without a specific payload type.
     /// </summary>
-    /// <param name="name">The request name.</param>
-    /// <param name="responder">The responder implementation.</param>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="responder">
+    /// The responder implementation.
+    /// </param>
     public void RegisterResponder(string name, Func<object?, Task<object?>> responder)
         => RegisterResponder<object>(name, responder);
 
     /// <summary>
     /// Registers a responder and converts the incoming payload to the supplied type before invocation.
     /// </summary>
-    /// <param name="name">The request name.</param>
-    /// <param name="payloadType">The payload type to deserialize to.</param>
-    /// <param name="responder">The responder implementation.</param>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="payloadType">
+    /// The payload type to deserialize to.
+    /// </param>
+    /// <param name="responder">
+    /// The responder implementation.
+    /// </param>
     public void RegisterResponder(string name, Type payloadType, Func<object?, Task<object?>> responder)
     {
         ValidateHandlerRegistration(name, payloadType, responder);
@@ -202,19 +270,33 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Registers a typed responder.
     /// </summary>
-    /// <typeparam name="TRequest">The request payload type.</typeparam>
-    /// <param name="name">The request name.</param>
-    /// <param name="responder">The responder implementation.</param>
+    /// <typeparam name="TRequest">
+    /// The request payload type.
+    /// </typeparam>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="responder">
+    /// The responder implementation.
+    /// </param>
     public void RegisterResponder<TRequest>(string name, Func<TRequest?, Task<object?>> responder)
         => RegisterResponder(name, typeof(TRequest), payload => responder(CastPayload<TRequest>(payload)));
 
     /// <summary>
     /// Registers a typed responder.
     /// </summary>
-    /// <typeparam name="TRequest">The request payload type.</typeparam>
-    /// <typeparam name="TResponse">The response payload type.</typeparam>
-    /// <param name="name">The request name.</param>
-    /// <param name="responder">The responder implementation.</param>
+    /// <typeparam name="TRequest">
+    /// The request payload type.
+    /// </typeparam>
+    /// <typeparam name="TResponse">
+    /// The response payload type.
+    /// </typeparam>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="responder">
+    /// The responder implementation.
+    /// </param>
     public void RegisterResponder<TRequest, TResponse>(string name, Func<TRequest?, Task<TResponse?>> responder)
         => RegisterResponder(name, typeof(TRequest), async payload =>
             await responder(CastPayload<TRequest>(payload)).ConfigureAwait(false));
@@ -222,10 +304,18 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Registers a typed synchronous responder.
     /// </summary>
-    /// <typeparam name="TRequest">The request payload type.</typeparam>
-    /// <typeparam name="TResponse">The response payload type.</typeparam>
-    /// <param name="name">The request name.</param>
-    /// <param name="responder">The responder implementation.</param>
+    /// <typeparam name="TRequest">
+    /// The request payload type.
+    /// </typeparam>
+    /// <typeparam name="TResponse">
+    /// The response payload type.
+    /// </typeparam>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="responder">
+    /// The responder implementation.
+    /// </param>
     public void RegisterResponder<TRequest, TResponse>(string name, Func<TRequest?, TResponse?> responder)
         => RegisterResponder(name, typeof(TRequest), payload =>
             Task.FromResult<object?>(responder(CastPayload<TRequest>(payload))));
@@ -233,11 +323,21 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Sends a one-way notice to a known server.
     /// </summary>
-    /// <param name="targetServerIdentifier">The target server identifier.</param>
-    /// <param name="name">The notice name.</param>
-    /// <param name="payload">The payload to serialize.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A task that completes once the notice has been published.</returns>
+    /// <param name="targetServerIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="payload">
+    /// The payload to serialize.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// A task that completes once the notice has been published.
+    /// </returns>
     public Task SendNoticeAsync(
         ServerIdentify targetServerIdentifier,
         string name,
@@ -248,11 +348,21 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Sends a one-way notice to another server using a raw server identifier.
     /// </summary>
-    /// <param name="targetServerIdentifier">The target server identifier.</param>
-    /// <param name="name">The notice name.</param>
-    /// <param name="payload">The payload to serialize.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A task that completes once the notice has been published.</returns>
+    /// <param name="targetServerIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <param name="name">
+    /// The notice name.
+    /// </param>
+    /// <param name="payload">
+    /// The payload to serialize.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// A task that completes once the notice has been published.
+    /// </returns>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>
@@ -271,13 +381,27 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Sends a request to a known server and converts the response to the specified type.
     /// </summary>
-    /// <typeparam name="TResponse">The expected response payload type.</typeparam>
-    /// <param name="targetServerIdentifier">The target server identifier.</param>
-    /// <param name="name">The request name.</param>
-    /// <param name="payload">The request payload.</param>
-    /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The deserialized response payload.</returns>
+    /// <typeparam name="TResponse">
+    /// The expected response payload type.
+    /// </typeparam>
+    /// <param name="targetServerIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="payload">
+    /// The request payload.
+    /// </param>
+    /// <param name="timeout">
+    /// The request timeout. Defaults to 30 seconds.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The deserialized response payload.
+    /// </returns>
     public Task<TResponse?> RequestAsync<TResponse>(
         ServerIdentify targetServerIdentifier,
         string name,
@@ -289,13 +413,27 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Sends a request and converts the response to the specified type using a raw server identifier.
     /// </summary>
-    /// <typeparam name="TResponse">The expected response payload type.</typeparam>
-    /// <param name="targetServerIdentifier">The target server identifier.</param>
-    /// <param name="name">The request name.</param>
-    /// <param name="payload">The request payload.</param>
-    /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The deserialized response payload.</returns>
+    /// <typeparam name="TResponse">
+    /// The expected response payload type.
+    /// </typeparam>
+    /// <param name="targetServerIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="payload">
+    /// The request payload.
+    /// </param>
+    /// <param name="timeout">
+    /// The request timeout. Defaults to 30 seconds.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The deserialized response payload.
+    /// </returns>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>
@@ -314,13 +452,27 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Sends a request to a known server and converts the response to the specified type.
     /// </summary>
-    /// <param name="targetServerIdentifier">The target server identifier.</param>
-    /// <param name="name">The request name.</param>
-    /// <param name="responseType">The expected response payload type.</param>
-    /// <param name="payload">The request payload.</param>
-    /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The deserialized response payload.</returns>
+    /// <param name="targetServerIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="responseType">
+    /// The expected response payload type.
+    /// </param>
+    /// <param name="payload">
+    /// The request payload.
+    /// </param>
+    /// <param name="timeout">
+    /// The request timeout. Defaults to 30 seconds.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The deserialized response payload.
+    /// </returns>
     public Task<object?> RequestAsync(
         ServerIdentify targetServerIdentifier,
         string name,
@@ -333,13 +485,27 @@ public sealed class InterProcessCommunicationClient
     /// <summary>
     /// Sends a request and converts the response to the specified type using a raw server identifier.
     /// </summary>
-    /// <param name="targetServerIdentifier">The target server identifier.</param>
-    /// <param name="name">The request name.</param>
-    /// <param name="responseType">The expected response payload type.</param>
-    /// <param name="payload">The request payload.</param>
-    /// <param name="timeout">The request timeout. Defaults to 30 seconds.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The deserialized response payload.</returns>
+    /// <param name="targetServerIdentifier">
+    /// The target server identifier.
+    /// </param>
+    /// <param name="name">
+    /// The request name.
+    /// </param>
+    /// <param name="responseType">
+    /// The expected response payload type.
+    /// </param>
+    /// <param name="payload">
+    /// The request payload.
+    /// </param>
+    /// <param name="timeout">
+    /// The request timeout. Defaults to 30 seconds.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The deserialized response payload.
+    /// </returns>
     /// <remarks>
     /// Raw string identifiers are used unchanged. Prefer the <see cref="ServerIdentify"/> overload when targeting a known server.
     /// </remarks>

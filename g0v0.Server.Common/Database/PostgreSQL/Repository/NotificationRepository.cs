@@ -9,7 +9,9 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 /// <summary>
 /// Persists notifications in the v2 PostgreSQL schema.
 /// </summary>
-/// <param name="context">The PostgreSQL database context.</param>
+/// <param name="context">
+/// The PostgreSQL database context.
+/// </param>
 public class NotificationRepository(PostgreSqlDbContext context) : INotificationRepository, IPostgreSqlRepository
 {
     /// <inheritdoc />

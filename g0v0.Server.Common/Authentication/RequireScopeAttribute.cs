@@ -14,7 +14,9 @@ public class RequireScopeAttribute : AuthorizeAttribute
     /// <summary>
     /// Initializes a new instance of the <see cref="RequireScopeAttribute"/> class.
     /// </summary>
-    /// <param name="scopes">The required scopes.</param>
+    /// <param name="scopes">
+    /// The required scopes.
+    /// </param>
     public RequireScopeAttribute(params string[] scopes)
     {
         Policy = AuthorizationPolicyNames.RequireScope(scopes);

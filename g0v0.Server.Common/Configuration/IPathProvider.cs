@@ -12,6 +12,8 @@ public interface IPathProvider
     /// The configuration file is expected to be located in the "config" directory under this base path.
     /// The ruleset assembly is expected to be located in the "rulesets" directory under this base path.
     /// </summary>
-    /// <returns>The base path of files.</returns>
+    /// <returns>
+    /// The base path of files.
+    /// </returns>
     string GetBasePath();
 }

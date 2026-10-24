@@ -275,9 +275,15 @@ public class RoomRepository(MysqlDbContext context) : IRoomRepository, IMySqlRep
     /// <summary>
     /// Checks whether the user has an active participation record in the room.
     /// </summary>
-    /// <param name="roomId">The room ID.</param>
-    /// <param name="userId">The user ID.</param>
-    /// <returns><see langword="true"/> when the user is currently in the room; otherwise, <see langword="false"/>.</returns>
+    /// <param name="roomId">
+    /// The room ID.
+    /// </param>
+    /// <param name="userId">
+    /// The user ID.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the user is currently in the room; otherwise, <see langword="false"/>.
+    /// </returns>
     public async Task<bool> CheckUserInRoom(long roomId, int userId)
     {
         bool userAndRoomExists = await CheckUserAndRoomExists(roomId, userId).ConfigureAwait(false);

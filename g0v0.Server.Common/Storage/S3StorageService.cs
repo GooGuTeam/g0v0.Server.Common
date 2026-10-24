@@ -19,7 +19,9 @@ public class S3StorageService : StorageService
     /// <summary>
     /// Initializes a new instance of the <see cref="S3StorageService"/> class.
     /// </summary>
-    /// <param name="settings">The AWS S3 storage settings.</param>
+    /// <param name="settings">
+    /// The AWS S3 storage settings.
+    /// </param>
     public S3StorageService(S3StorageSettings settings)
         : this(
             (settings ?? throw new ArgumentNullException(nameof(settings))).S3AccessKeyId,
@@ -33,11 +35,21 @@ public class S3StorageService : StorageService
     /// <summary>
     /// Initializes a new instance of the <see cref="S3StorageService"/> class.
     /// </summary>
-    /// <param name="accessKeyId">The AWS access key ID.</param>
-    /// <param name="secretAccessKey">The AWS secret access key.</param>
-    /// <param name="bucketName">The S3 bucket name.</param>
-    /// <param name="regionName">The AWS region name.</param>
-    /// <param name="publicUrlBase">An optional public URL base for files in the bucket.</param>
+    /// <param name="accessKeyId">
+    /// The AWS access key ID.
+    /// </param>
+    /// <param name="secretAccessKey">
+    /// The AWS secret access key.
+    /// </param>
+    /// <param name="bucketName">
+    /// The S3 bucket name.
+    /// </param>
+    /// <param name="regionName">
+    /// The AWS region name.
+    /// </param>
+    /// <param name="publicUrlBase">
+    /// An optional public URL base for files in the bucket.
+    /// </param>
     public S3StorageService(
         string accessKeyId,
         string secretAccessKey,
@@ -51,12 +63,24 @@ public class S3StorageService : StorageService
     /// <summary>
     /// Initializes a new instance of the <see cref="S3StorageService"/> class.
     /// </summary>
-    /// <param name="accessKeyId">The access key ID.</param>
-    /// <param name="secretAccessKey">The secret access key.</param>
-    /// <param name="bucketName">The bucket name.</param>
-    /// <param name="regionName">The signing region name.</param>
-    /// <param name="publicUrlBase">An optional public URL base for files in the bucket.</param>
-    /// <param name="endpointUrl">An optional S3-compatible endpoint URL.</param>
+    /// <param name="accessKeyId">
+    /// The access key ID.
+    /// </param>
+    /// <param name="secretAccessKey">
+    /// The secret access key.
+    /// </param>
+    /// <param name="bucketName">
+    /// The bucket name.
+    /// </param>
+    /// <param name="regionName">
+    /// The signing region name.
+    /// </param>
+    /// <param name="publicUrlBase">
+    /// An optional public URL base for files in the bucket.
+    /// </param>
+    /// <param name="endpointUrl">
+    /// An optional S3-compatible endpoint URL.
+    /// </param>
     protected S3StorageService(
         string accessKeyId,
         string secretAccessKey,
@@ -279,8 +303,12 @@ public class S3StorageService : StorageService
     /// <summary>
     /// Gets the path component from a URL.
     /// </summary>
-    /// <param name="url">The URL.</param>
-    /// <returns>The path without a leading slash.</returns>
+    /// <param name="url">
+    /// The URL.
+    /// </param>
+    /// <returns>
+    /// The path without a leading slash.
+    /// </returns>
     protected static string GetUrlPath(string url)
     {
         if (Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
@@ -295,24 +323,38 @@ public class S3StorageService : StorageService
     /// <summary>
     /// Gets the host component from an absolute URL.
     /// </summary>
-    /// <param name="url">The URL.</param>
-    /// <returns>The host, or <see langword="null"/> when the URL is not absolute.</returns>
+    /// <param name="url">
+    /// The URL.
+    /// </param>
+    /// <returns>
+    /// The host, or <see langword="null"/> when the URL is not absolute.
+    /// </returns>
     protected static string? GetUrlHost(string url)
         => Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) ? uri.Host : null;
 
     /// <summary>
     /// Converts empty strings to <see langword="null"/>.
     /// </summary>
-    /// <param name="value">The value to normalize.</param>
-    /// <returns><see langword="null"/> for empty strings; otherwise, the original value.</returns>
+    /// <param name="value">
+    /// The value to normalize.
+    /// </param>
+    /// <returns>
+    /// <see langword="null"/> for empty strings; otherwise, the original value.
+    /// </returns>
     protected static string? NullIfEmpty(string value) => value.Length == 0 ? null : value;
 
     /// <summary>
     /// Joins a public URL base with a file path.
     /// </summary>
-    /// <param name="publicUrlBase">The public URL base.</param>
-    /// <param name="filePath">The object key.</param>
-    /// <returns>The public URL.</returns>
+    /// <param name="publicUrlBase">
+    /// The public URL base.
+    /// </param>
+    /// <param name="filePath">
+    /// The object key.
+    /// </param>
+    /// <returns>
+    /// The public URL.
+    /// </returns>
     private static string JoinPublicUrl(string publicUrlBase, string filePath)
         => $"{publicUrlBase.TrimEnd('/')}/{filePath.TrimStart('/')}";
 

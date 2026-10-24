@@ -13,67 +13,111 @@ public interface IBeatmapRepository
     /// <summary>
     /// Gets a beatmap by its unique identifier.
     /// </summary>
-    /// <param name="beatmapId">The beatmap ID.</param>
-    /// <returns>The matching beatmap if found; otherwise, <see langword="null"/>.</returns>
+    /// <param name="beatmapId">
+    /// The beatmap ID.
+    /// </param>
+    /// <returns>
+    /// The matching beatmap if found; otherwise, <see langword="null"/>.
+    /// </returns>
     Task<Beatmap?> GetByIdAsync(int beatmapId);
 
     /// <summary>
     /// Gets a beatmap by its checksum.
     /// </summary>
-    /// <param name="checksum">The beatmap checksum.</param>
-    /// <returns>The matching beatmap if found; otherwise, <see langword="null"/>.</returns>
+    /// <param name="checksum">
+    /// The beatmap checksum.
+    /// </param>
+    /// <returns>
+    /// The matching beatmap if found; otherwise, <see langword="null"/>.
+    /// </returns>
     Task<Beatmap?> GetByChecksumAsync(string checksum);
 
     /// <summary>
     /// Gets all beatmaps in a beatmap set.
     /// </summary>
-    /// <param name="beatmapSetId">The beatmap set ID.</param>
-    /// <returns>A list of beatmaps belonging to the specified beatmap set.</returns>
+    /// <param name="beatmapSetId">
+    /// The beatmap set ID.
+    /// </param>
+    /// <returns>
+    /// A list of beatmaps belonging to the specified beatmap set.
+    /// </returns>
     Task<IReadOnlyList<Beatmap>> GetByBeatmapSetIdAsync(int beatmapSetId);
 
     /// <summary>
     /// Gets all beatmaps mapped by a specific user.
     /// </summary>
-    /// <param name="mapperId">The mapper user ID.</param>
-    /// <returns>A list of beatmaps created by the specified mapper.</returns>
+    /// <param name="mapperId">
+    /// The mapper user ID.
+    /// </param>
+    /// <returns>
+    /// A list of beatmaps created by the specified mapper.
+    /// </returns>
     Task<IReadOnlyList<Beatmap>> GetByMapperIdAsync(int mapperId);
 
     /// <summary>
     /// Gets a beatmap by ID, fetching and persisting it from the osu! API when it is not in the database.
     /// </summary>
-    /// <param name="beatmapId">The beatmap ID.</param>
-    /// <param name="fetcher">The fetcher used to load the beatmap on a cache miss.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The matching beatmap.</returns>
+    /// <param name="beatmapId">
+    /// The beatmap ID.
+    /// </param>
+    /// <param name="fetcher">
+    /// The fetcher used to load the beatmap on a cache miss.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The matching beatmap.
+    /// </returns>
     Task<Beatmap> GetOrFetchByIdAsync(int beatmapId, IFetcher fetcher, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a beatmap by checksum, fetching and persisting it from the osu! API when it is not in the database.
     /// </summary>
-    /// <param name="checksum">The beatmap checksum.</param>
-    /// <param name="fetcher">The fetcher used to load the beatmap on a cache miss.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The matching beatmap.</returns>
+    /// <param name="checksum">
+    /// The beatmap checksum.
+    /// </param>
+    /// <param name="fetcher">
+    /// The fetcher used to load the beatmap on a cache miss.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// The cancellation token.
+    /// </param>
+    /// <returns>
+    /// The matching beatmap.
+    /// </returns>
     Task<Beatmap> GetOrFetchByChecksumAsync(string checksum, IFetcher fetcher, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Creates a new beatmap record.
     /// </summary>
-    /// <param name="beatmap">The beatmap to create.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="beatmap">
+    /// The beatmap to create.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation.
+    /// </returns>
     Task CreateAsync(Beatmap beatmap);
 
     /// <summary>
     /// Updates an existing beatmap record.
     /// </summary>
-    /// <param name="beatmap">The beatmap to update.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="beatmap">
+    /// The beatmap to update.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation.
+    /// </returns>
     Task UpdateAsync(Beatmap beatmap);
 
     /// <summary>
     /// Removes a beatmap record.
     /// </summary>
-    /// <param name="beatmap">The beatmap to remove.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="beatmap">
+    /// The beatmap to remove.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Task"/> representing the asynchronous operation.
+    /// </returns>
     Task DeleteAsync(Beatmap beatmap);
 }

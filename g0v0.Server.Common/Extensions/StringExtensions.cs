@@ -10,9 +10,15 @@ public static class StringExtensions
     /// <summary>
     /// Add a suffix to a string if suffix don't exist.
     /// </summary>
-    /// <param name="value">The string.</param>
-    /// <param name="suffix">The suffix.</param>
-    /// <returns>The string with specified suffix.</returns>
+    /// <param name="value">
+    /// The string.
+    /// </param>
+    /// <param name="suffix">
+    /// The suffix.
+    /// </param>
+    /// <returns>
+    /// The string with specified suffix.
+    /// </returns>
     public static string AddSuffix(this string value, string suffix)
     {
         return value.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) ? value : value + suffix;

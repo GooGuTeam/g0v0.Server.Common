@@ -14,8 +14,12 @@ public class LocalStorageService : StorageService
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalStorageService"/> class.
     /// </summary>
-    /// <param name="settings">The local storage settings.</param>
-    /// <param name="pathProvider">The path provider used to resolve relative storage paths.</param>
+    /// <param name="settings">
+    /// The local storage settings.
+    /// </param>
+    /// <param name="pathProvider">
+    /// The path provider used to resolve relative storage paths.
+    /// </param>
     public LocalStorageService(LocalStorageSettings settings, IPathProvider pathProvider)
         : this(ResolveStoragePath(settings, pathProvider))
     {
@@ -24,7 +28,9 @@ public class LocalStorageService : StorageService
     /// <summary>
     /// Initializes a new instance of the <see cref="LocalStorageService"/> class.
     /// </summary>
-    /// <param name="storagePath">The storage directory path.</param>
+    /// <param name="storagePath">
+    /// The storage directory path.
+    /// </param>
     public LocalStorageService(string storagePath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(storagePath);
