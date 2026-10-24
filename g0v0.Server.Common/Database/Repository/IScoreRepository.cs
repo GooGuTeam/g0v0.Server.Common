@@ -24,6 +24,13 @@ public interface IScoreRepository
     Task<IReadOnlyList<Score>> GetByBeatmapIdAsync(int beatmapId);
 
     /// <summary>
+    /// Gets passing scores associated with a multiplayer room.
+    /// </summary>
+    /// <param name="roomId">The room ID.</param>
+    /// <returns>The passing scores for the room's playlist items.</returns>
+    Task<IReadOnlyList<Score>> GetPassingScoresForRoomAsync(long roomId);
+
+    /// <summary>
     /// Gets all scores for a user.
     /// </summary>
     /// <param name="userId">The user ID.</param>

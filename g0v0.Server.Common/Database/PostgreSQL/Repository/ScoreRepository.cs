@@ -30,6 +30,16 @@ public class ScoreRepository(PostgreSqlDbContext context) : IScoreRepository, IP
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<Score>> GetPassingScoresForRoomAsync(long roomId)
+    {
+        return await context.Scores
+            .AsNoTracking()
+            .Where(s => s.RoomId == roomId && s.PlaylistItemId != null && s.Passed)
+            .ToListAsync()
+            .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<Score>> GetByUserIdAsync(int userId)
     {
         return await context.Scores

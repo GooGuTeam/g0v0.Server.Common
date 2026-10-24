@@ -36,6 +36,30 @@ public class PostgreSqlScoreRepositoryTests
     }
 
     [Test]
+    public async Task GetPassingScoresForRoomAsync_FiltersRoomPlaylistAndFailedScores()
+    {
+        ScoreModel passing = CreateScore(id: 1);
+        passing.RoomId = 42;
+        passing.Passed = true;
+        ScoreModel failed = CreateScore(id: 2);
+        failed.RoomId = 42;
+        failed.Passed = false;
+        ScoreModel otherRoom = CreateScore(id: 3);
+        otherRoom.RoomId = 43;
+        otherRoom.Passed = true;
+        ScoreModel noPlaylist = CreateScore(id: 4);
+        noPlaylist.RoomId = 42;
+        noPlaylist.Passed = true;
+        noPlaylist.PlaylistItemId = null;
+        _context.Scores.AddRange(passing, failed, otherRoom, noPlaylist);
+        await _context.SaveChangesAsync();
+
+        IReadOnlyList<ScoreModel> results = await _repository.GetPassingScoresForRoomAsync(42);
+
+        Assert.That(results.Select(score => score.Id), Is.EqualTo(new long[] { 1 }));
+    }
+
+    [Test]
     public async Task GetRecentByUserIdAndModeAsync_ShouldReturnOrderedLimitedScores()
     {
         _context.Scores.AddRange(
