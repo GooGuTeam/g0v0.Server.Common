@@ -3,6 +3,7 @@
 using g0v0.Server.Common.Database.Models;
 using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NUnit.Framework;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Scoring;
@@ -216,6 +217,37 @@ public class ScoreRepositoryTests(RepositoryBackend backend)
             Assert.That(persisted.Statistics[HitResult.Great], Is.EqualTo(320));
             Assert.That(persisted.MaximumStatistics[HitResult.Great], Is.EqualTo(400));
         });
+    }
+
+    [TestCase("{\"great\":320,\"large_tick_hit\":15,\"slider_tail_hit\":0}")]
+    [TestCase("{\"Great\":320,\"LargeTickHit\":15,\"SliderTailHit\":0}")]
+    public void StatisticsJson_ReadsExistingKeysAndWritesBackendFormat(string storedJson)
+    {
+        Dictionary<HitResult, int> statistics = new()
+        {
+            [HitResult.Great] = 320,
+            [HitResult.LargeTickHit] = 15,
+            [HitResult.SliderTailHit] = 0,
+        };
+        string expectedJson = backend == RepositoryBackend.MySql
+            ? "{\"great\":320,\"large_tick_hit\":15,\"slider_tail_hit\":0}"
+            : "{\"Great\":320,\"LargeTickHit\":15,\"SliderTailHit\":0}";
+
+        // MySQL stores ordinary statistics in hit-count columns; only maximum statistics are JSON.
+        string[] properties = backend == RepositoryBackend.MySql
+            ? [nameof(ScoreModel.MaximumStatistics)]
+            : [nameof(ScoreModel.Statistics), nameof(ScoreModel.MaximumStatistics)];
+
+        foreach (string property in properties)
+        {
+            // The in-memory provider does not apply value converters when saving entities.
+            ValueConverter converter = _context.Model.FindEntityType(typeof(ScoreModel))!.FindProperty(property)!.GetValueConverter()!;
+            Assert.Multiple(() =>
+            {
+                Assert.That(converter.ConvertToProvider(statistics), Is.EqualTo(expectedJson), property);
+                Assert.That(converter.ConvertFromProvider(storedJson), Is.EqualTo(statistics), property);
+            });
+        }
     }
 
     [Test]

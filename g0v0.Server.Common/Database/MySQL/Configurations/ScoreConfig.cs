@@ -123,7 +123,7 @@ public class ScoreConfig : IEntityTypeConfiguration<Score>
             .IsRequired(false)
             .UsePropertyAccessMode(PropertyAccessMode.Property)
             .HasConversion(
-                value => ConfigurationHelper.SerializeStatistics(value),
+                value => ConfigurationHelper.SerializeLegacyStatistics(value),
                 value => ConfigurationHelper.DeserializeStatistics(value))
             .Metadata.SetValueComparer(ConfigurationHelper.StatisticsComparer);
 

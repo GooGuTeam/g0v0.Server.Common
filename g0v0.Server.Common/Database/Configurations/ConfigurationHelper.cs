@@ -178,18 +178,10 @@ internal static class ConfigurationHelper
     }
 
     public static string? SerializeStatistics(IDictionary<HitResult, int>? statistics)
-    {
-        if (statistics == null || statistics.Count == 0)
-        {
-            return "{}";
-        }
+        => SerializeStatistics(statistics, useSnakeCase: false);
 
-        Dictionary<string, int> payload = statistics
-            .OrderBy(entry => entry.Key.ToString(), StringComparer.Ordinal)
-            .ToDictionary(entry => entry.Key.ToString(), entry => entry.Value, StringComparer.Ordinal);
-
-        return JsonConvert.SerializeObject(payload, JsonSettings);
-    }
+    public static string? SerializeLegacyStatistics(IDictionary<HitResult, int>? statistics)
+        => SerializeStatistics(statistics, useSnakeCase: true);
 
     public static IDictionary<HitResult, int> DeserializeStatistics(string? value)
     {
@@ -277,6 +269,23 @@ internal static class ConfigurationHelper
         where TEnum : struct, Enum
     {
         return Enum.Parse<TEnum>(value.Replace("_", string.Empty), ignoreCase: true);
+    }
+
+    private static string? SerializeStatistics(IDictionary<HitResult, int>? statistics, bool useSnakeCase)
+    {
+        if (statistics == null || statistics.Count == 0)
+        {
+            return "{}";
+        }
+
+        Dictionary<string, int> payload = statistics
+            .OrderBy(entry => entry.Key.ToString(), StringComparer.Ordinal)
+            .ToDictionary(
+                entry => useSnakeCase ? entry.Key.ToString().ToSnakeCase() : entry.Key.ToString(),
+                entry => entry.Value,
+                StringComparer.Ordinal);
+
+        return JsonConvert.SerializeObject(payload, JsonSettings);
     }
 
     private static bool TryParseHitResult(string key, out HitResult result)
