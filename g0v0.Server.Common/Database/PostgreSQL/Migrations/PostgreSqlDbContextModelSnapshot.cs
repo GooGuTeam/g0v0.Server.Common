@@ -1516,6 +1516,15 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(2)")
                         .HasColumnName("country_code");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("email");
+
+                    b.Property<int>("G0V0Playmode")
+                        .HasColumnType("integer")
+                        .HasColumnName("g0v0_playmode");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -1532,9 +1541,17 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_supporter");
 
+                    b.Property<DateTimeOffset>("JoinDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("join_date");
+
                     b.Property<DateTimeOffset?>("LastVisit")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_visit");
+
+                    b.Property<int>("Playmode")
+                        .HasColumnType("integer")
+                        .HasColumnName("playmode");
 
                     b.Property<bool>("PmFriendsOnly")
                         .HasColumnType("boolean")
@@ -1551,6 +1568,10 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(60)")
                         .HasColumnName("pw_bcrypt");
 
+                    b.Property<int>("SupportLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("support_level");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -1562,6 +1583,10 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 
                     b.HasIndex("CountryCode")
                         .HasDatabaseName("ix_users_country_code");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_email");
 
                     b.HasIndex("Username")
                         .IsUnique()

@@ -45,11 +45,32 @@ public interface IUserRepository
     Task<bool> UsernameExistsAsync(string username);
 
     /// <summary>
+    /// Gets a user by their unique email address.
+    /// </summary>
+    /// <param name="email">The email address to search for.</param>
+    /// <returns>The matching user if found; otherwise, <see langword="null"/>.</returns>
+    Task<User?> GetByEmailAsync(string email);
+
+    /// <summary>
     /// Creates a new user record.
     /// </summary>
     /// <param name="user">The user to create.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     Task CreateAsync(User user);
+
+    /// <summary>
+    /// Creates a new user record together with the initial per-mode statistics rows.
+    /// </summary>
+    /// <param name="user">The user to create.</param>
+    /// <param name="statisticsModes">The mode IDs to seed statistics for.</param>
+    /// <param name="cancellationToken">Request cancellation.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <remarks>
+    /// Registration writes the account and its statistics as one unit of work, so a failure cannot
+    /// leave an account without statistics that a retry would then report as an already taken
+    /// username. <see cref="User.Id"/> is populated from the inserted row.
+    /// </remarks>
+    Task CreateAsync(User user, IReadOnlyList<int> statisticsModes, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates an existing user record.

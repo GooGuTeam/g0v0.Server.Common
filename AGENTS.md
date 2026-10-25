@@ -51,6 +51,9 @@ Enforced by `.editorconfig`, `.globalconfig`, and `stylecop.json`:
 - Uses **Newtonsoft.Json**, not `System.Text.Json`. Match its attribute conventions when adding config classes.
 - `Reload<T>()` only copies properties marked `[Reloadable]`; new properties default to "set once at startup".
 - `basePath` typically comes from an injected `IPathProvider`.
+- Shared config classes live here and are consumed by the servers: `GeneralConfig`, `GameConfig`, `ChatConfig`,
+  `VerificationConfig`, `StorageConfiguration`, `GeoIPConfig` and `RegistrationConfig`. Add a new one here rather than
+  in a server project, so every server reads the same schema; the JSON itself still sits in each server's content root.
 
 ## Database
 
@@ -94,6 +97,43 @@ Realtime server; both backends implement the full set of room/playlist/participa
   and `jsonb` mod columns, plus a dedicated EF migration for the three tables.
 - `Room.Id`, `Playlist.RoomId` and `RoomParticipatedUser.RoomId` are `long` on both backends. Do not widen the
   `users.id`/`user_id` integer columns when adding room relations.
+
+### User registration and the legacy user columns
+
+`POST /users` in the Stable server creates accounts through `IUserRepository.CreateAsync(user, statisticsModes, ...)`,
+which writes the account and its per-mode statistics rows in one transaction. Registration is the only writer that
+needs every `NOT NULL` column of `lazer_users`, so the model and the MySQL mapping have to stay aligned with the legacy
+table (see `/home/mingxuangame/code/osu_lazer_api/migrations/versions/2025-08-10_fdb3822a30ba_init.py` and later
+alterations).
+
+- `User` maps only the columns this server reads or writes: identity, username, email, password hash, country, supporter
+  and activity flags, `last_visit`, `join_date`, `support_level`, and the two ruleset preferences.
+- The ruleset preferences (`playmode`, `g0v0_playmode`) are `int` on both backends. MySQL stores them as native
+  `gamemode` enum columns, so `Database/MySQL/Configurations/UserConfig.cs` converts through
+  `ConfigurationHelper.ConvertModeToDatabaseValue`/`ConvertDatabaseValueToMode` — the same encoding `Score.Mode` uses.
+  Never write a mode ID that is missing from the enum domain; the insert is rejected.
+- The remaining legacy `NOT NULL` columns (`priv`, `has_supported`, `max_blocks`, `max_friends`, `comments_count`,
+  `post_count`, `is_admin`, `is_gmt`, `is_qat`, `is_bng`) are **shadow properties** of the MySQL mapping.
+  `UserConfig.SupplyLegacyColumns` fills them for an insert and marks them unmodified for an update; calling it is
+  mandatory in **every** MySQL user write (`CreateAsync` with and without statistics, and `UpdateAsync`), because EF
+  would otherwise insert NULL (rejected by MySQL) or reset the stored privilege flags and limits. The insert branch is
+  covered by `UserRepositoryTests.CreateAsync_OnTheLegacySchema_*`; the update branch cannot be observed through the
+  in-memory provider (it does not round-trip shadow values attached by `DbSet.Update`), so preserve it by review.
+  Do not write `null` into any of them: the Python lazer API reads those columns untyped.
+- `Email` is nullable in the model and unique-indexed, matching a legacy table whose column is `NOT NULL` but whose
+  pre-registration rows have no address. Registration always writes one.
+- Registration seeds statistics through `Utils/UserStatisticsDefaults.GetModes`: modes 0-3 always, plus 4/6/7 when
+  `GameConfig.EnableRelax` and 5 when `EnableAutopilot`. Keep that list in step with the modes the score pipeline can
+  persist.
+- Password hashing lives in `Utils/UserPasswordHasher`: osu! stores a bcrypt hash of the **hex MD5 digest** the
+  client sends, never of the plain text. `HashPassword`/`HashDigest` write it, `VerifyDigest` checks the digest a login
+  carries and treats a malformed stored hash as a mismatch. Do not call `BCrypt.Net.BCrypt` directly from a server
+  project; a plain-text hash silently makes every login of that account fail.
+- Username, email and password acceptance live in `Utils/UserCredentialValidator`; the servers call it instead of
+  duplicating the rules. The password policy is a strength check (8-32 characters, more than three distinct characters,
+  at least two of lowercase/uppercase/digit/symbol), deliberately replacing bancho.py's disallowed-word list;
+  `RegistrationConfig.DisallowedUsernames` defaults to the lazer API's `banned_name` list. The violation messages are
+  shown to the player verbatim, so keep their wording.
 
 ### Migrations (PostgreSQL only)
 
