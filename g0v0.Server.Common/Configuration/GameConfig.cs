@@ -27,4 +27,16 @@ public class GameConfig
     /// </summary>
     [Reloadable]
     public bool EnableAllBeatmapLeaderboard { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether osu!supporter are enabled for new registration.
+    /// </summary>
+    [Reloadable]
+    public bool EnableSupporterForNewRegistration { get; set; }
+
+    /// <summary>
+    /// Gets or sets an array of seasonal background image urls.
+    /// </summary>
+    [Reloadable]
+    public string[] SeasonalBackgrounds { get; set; } = [];
 }
