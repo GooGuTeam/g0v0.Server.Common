@@ -1106,6 +1106,14 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("queue_mode");
 
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasDefaultValue("Realtime")
+                        .HasColumnName("source");
+
                     b.Property<DateTimeOffset?>("StartsAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -1142,6 +1150,9 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
 
                     b.HasIndex("Name")
                         .HasDatabaseName("ix_rooms_name");
+
+                    b.HasIndex("Source")
+                        .HasDatabaseName("ix_rooms_source");
 
                     b.ToTable("rooms", (string)null);
                 });

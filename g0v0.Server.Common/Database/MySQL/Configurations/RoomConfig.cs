@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -27,6 +28,12 @@ public class RoomConfig : IEntityTypeConfiguration<DbRoom>
     public void Configure(EntityTypeBuilder<DbRoom> builder)
     {
         builder.ToTable("rooms");
+
+        builder.Property(room => room.Source)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .HasDefaultValue(ServerIdentify.Realtime)
+            .HasSentinel(ServerIdentify.Realtime);
 
         // Enums are stored as native MySQL enum columns in the legacy schema,
         // using UPPER_SNAKE_CASE values (e.g. `HOST_ONLY`, `HEAD_TO_HEAD`).

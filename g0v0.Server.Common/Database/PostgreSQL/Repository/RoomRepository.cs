@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Models;
 using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
     public async Task<Room> CreateRoom(
         MultiplayerRoom room,
         int hostUserId,
+        ServerIdentify source,
         G0V0RoomCategory category = G0V0RoomCategory.Normal,
         bool tournamentMode = false)
     {
@@ -32,6 +34,7 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
             Name = room.Settings.Name,
             HostId = hostUserId,
             Category = category,
+            Source = source,
             Status = RoomStatus.Idle,
             Type = room.Settings.MatchType,
             Password = room.Settings.Password,
@@ -57,12 +60,12 @@ public class RoomRepository(PostgreSqlDbContext context) : IRoomRepository, IPos
     }
 
     /// <inheritdoc/>
-    public async Task<Room?> GetRoom(long roomId)
+    public async Task<Room?> GetRoom(long roomId, ServerIdentify source)
     {
         return await context.Rooms
             .Include(r => r.Host)
             .Include(r => r.Playlists).ThenInclude(p => p.Beatmap)
-            .FirstOrDefaultAsync(r => r.Id == roomId).ConfigureAwait(false);
+            .FirstOrDefaultAsync(r => r.Id == roomId && r.Source == source).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

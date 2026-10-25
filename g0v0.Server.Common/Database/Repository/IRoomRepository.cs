@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Models;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
@@ -17,21 +18,24 @@ public interface IRoomRepository
     /// </summary>
     /// <param name="room">The multiplayer room to persist.</param>
     /// <param name="hostUserId">The user ID of the room host.</param>
+    /// <param name="source">The server creating the room.</param>
     /// <param name="category">The room category.</param>
     /// <param name="tournamentMode">Whether the room runs in tournament mode.</param>
     /// <returns>The created room with its playlist items.</returns>
     public Task<Room> CreateRoom(
         MultiplayerRoom room,
         int hostUserId,
+        ServerIdentify source,
         G0V0RoomCategory category = G0V0RoomCategory.Normal,
         bool tournamentMode = false);
 
     /// <summary>
-    /// Gets a room by its ID, including its host and playlist items.
+    /// Gets a room owned by the requested server, including its host and playlist items.
     /// </summary>
     /// <param name="roomId">The room ID.</param>
-    /// <returns>The room, or <see langword="null"/> when no such room exists.</returns>
-    public Task<Room?> GetRoom(long roomId);
+    /// <param name="source">The server that owns the room.</param>
+    /// <returns>The room, or <see langword="null"/> when it does not exist or belongs to another server.</returns>
+    public Task<Room?> GetRoom(long roomId, ServerIdentify source);
 
     /// <summary>
     /// Adds the user to the room, refreshing an existing participation record or creating a new one.

@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Communication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using DbRoom = g0v0.Server.Common.Database.Models.Room;
@@ -20,6 +21,12 @@ public class RoomConfig : IEntityTypeConfiguration<DbRoom>
     public void Configure(EntityTypeBuilder<DbRoom> builder)
     {
         builder.ToTable("rooms");
+
+        builder.Property(room => room.Source)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .HasDefaultValue(ServerIdentify.Realtime)
+            .HasSentinel(ServerIdentify.Realtime);
 
         // Enums are stored as human-readable strings in the v2 schema.
         builder.Property(room => room.Category)

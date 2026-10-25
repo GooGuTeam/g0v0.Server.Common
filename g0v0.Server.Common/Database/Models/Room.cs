@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using g0v0.Server.Common.Communication;
 using Microsoft.EntityFrameworkCore;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
@@ -14,6 +15,7 @@ namespace g0v0.Server.Common.Database.Models;
 /// </summary>
 [Index(nameof(Name))]
 [Index(nameof(Category))]
+[Index(nameof(Source))]
 [Index(nameof(HostId))]
 [Index(nameof(Id))]
 [Table("rooms")]
@@ -36,6 +38,11 @@ public class Room
     /// Gets or sets the room category.
     /// </summary>
     public G0V0RoomCategory Category { get; set; } = G0V0RoomCategory.Normal;
+
+    /// <summary>
+    /// Gets or sets the server that created this room. Historical rooms belong to Realtime.
+    /// </summary>
+    public ServerIdentify Source { get; set; } = ServerIdentify.Realtime;
 
     /// <summary>
     /// Gets or sets the room status.

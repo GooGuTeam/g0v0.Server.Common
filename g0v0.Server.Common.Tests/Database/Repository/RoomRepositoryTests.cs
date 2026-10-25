@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Database.Models;
 using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -61,8 +62,10 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         _context.Dispose();
     }
 
-    [Test]
-    public async Task CreateRoom_ShouldPersistRoomWithHostAndPlaylist()
+    [TestCase(ServerIdentify.Realtime)]
+    [TestCase(ServerIdentify.Stable)]
+    [TestCase(ServerIdentify.Lazer)]
+    public async Task CreateRoom_ShouldPersistRoomWithHostAndPlaylist(ServerIdentify source)
     {
         Users.Add(CreateUser(1, "host"));
         Users.Add(CreateUser(2, "guest"));
@@ -70,7 +73,12 @@ public class RoomRepositoryTests(RepositoryBackend backend)
 
         // The legacy MySQL schema has no tournament_mode column, so the flag is ignored there.
         bool tournamentMode = backend == RepositoryBackend.PostgreSql;
-        Room created = await _repository.CreateRoom(CreateRoom(), 1, G0V0RoomCategory.Realtime, tournamentMode);
+        Room created = await _repository.CreateRoom(CreateRoom(), 1, source, G0V0RoomCategory.Realtime, tournamentMode);
+        _context.ChangeTracker.Clear();
+        Room? fetched = await _repository.GetRoom(created.Id, source);
+
+        Assert.That(fetched, Is.Not.Null);
+        Assert.That(fetched!.Source, Is.EqualTo(source));
 
         Assert.That(created.Id, Is.GreaterThan(0));
         Assert.That(created.HostId, Is.EqualTo(1));
@@ -79,6 +87,21 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Assert.That(created.Playlists, Has.Count.EqualTo(1));
         Assert.That(created.TournamentMode, Is.EqualTo(tournamentMode));
         Assert.That(created.ParticipantCount, Is.EqualTo(1));
+    }
+
+    [TestCase(ServerIdentify.Realtime, ServerIdentify.Stable)]
+    [TestCase(ServerIdentify.Stable, ServerIdentify.Realtime)]
+    [TestCase(ServerIdentify.Lazer, ServerIdentify.Realtime)]
+    [TestCase(ServerIdentify.Lazer, ServerIdentify.Stable)]
+    public async Task GetRoom_WhenSourceDoesNotMatch_ReturnsNull(ServerIdentify owner, ServerIdentify reader)
+    {
+        Users.Add(CreateUser(1, "host"));
+        await _context.SaveChangesAsync();
+        Room created = await _repository.CreateRoom(CreateRoom(), 1, owner, G0V0RoomCategory.Realtime);
+        _context.ChangeTracker.Clear();
+
+        Assert.That(await _repository.GetRoom(created.Id, reader), Is.Null);
+        Assert.That(await _repository.GetRoom(created.Id, owner), Is.Not.Null);
     }
 
     [Test]
@@ -94,10 +117,10 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Beatmaps.Add(beatmap);
         await _context.SaveChangesAsync();
 
-        Room created = await _repository.CreateRoom(CreateRoom(), 1);
+        Room created = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         await _repository.AddItemToPlaylist(CreatePlaylistItem(100), created.Id, 1);
 
-        Room? fetched = await _repository.GetRoom(created.Id);
+        Room? fetched = await _repository.GetRoom(created.Id, ServerIdentify.Realtime);
 
         Assert.That(fetched, Is.Not.Null);
         Assert.That(fetched!.Playlists, Has.Count.EqualTo(2));
@@ -111,7 +134,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         await _repository.AddUserToRoom(room.Id, 1);
         await _repository.AddUserToRoom(room.Id, 2);
         await _repository.AddUserToRoom(room.Id, 2);
@@ -121,7 +144,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
             .CountAsync(rpu => rpu.RoomId == room.Id && rpu.LeftAt == null);
         Assert.That(activeCount, Is.EqualTo(2));
 
-        Room? fetched = await _repository.GetRoom(room.Id);
+        Room? fetched = await _repository.GetRoom(room.Id, ServerIdentify.Realtime);
         Assert.That(fetched!.ParticipantCount, Is.EqualTo(2));
     }
 
@@ -132,7 +155,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         await _repository.AddUserToRoom(room.Id, 1);
         await _repository.AddUserToRoom(room.Id, 2);
         await _repository.RemoveUserFromRoom(room.Id, 2);
@@ -141,7 +164,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Assert.That(inRoom, Is.False);
 
         // Host remains, so the room is not ended.
-        Room? fetched = await _repository.GetRoom(room.Id);
+        Room? fetched = await _repository.GetRoom(room.Id, ServerIdentify.Realtime);
         Assert.That(fetched!.EndsAt, Is.Null);
         Assert.That(fetched.ParticipantCount, Is.EqualTo(1));
 
@@ -162,10 +185,10 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(2, "guest"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         await _repository.UpdateRoomHost(room.Id, 2);
 
-        Room? fetched = await _repository.GetRoom(room.Id);
+        Room? fetched = await _repository.GetRoom(room.Id, ServerIdentify.Realtime);
         Assert.That(fetched!.HostId, Is.EqualTo(2));
     }
 
@@ -175,7 +198,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         Playlist item = await _repository.AddItemToPlaylist(
             new MultiplayerPlaylistItem
             {
@@ -203,13 +226,14 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Assert.That(await _repository.AnyScoreTokenExistsFor(item.Id), Is.True);
     }
 
-    [Test]
-    public async Task UpdateRoomSettings_ShouldPersistSettings()
+    [TestCase(ServerIdentify.Realtime)]
+    [TestCase(ServerIdentify.Stable)]
+    public async Task UpdateRoomSettings_ShouldPersistSettings(ServerIdentify source)
     {
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, source);
         MultiplayerRoomSettings newSettings = new()
         {
             Name = "renamed",
@@ -221,12 +245,14 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         };
         await _repository.UpdateRoomSettings(room.Id, newSettings);
 
-        Room? fetched = await _repository.GetRoom(room.Id);
-        Assert.That(fetched!.Name, Is.EqualTo("renamed"));
+        _context.ChangeTracker.Clear();
+        Room? fetched = await _repository.GetRoom(room.Id, source);
+        Assert.That(fetched!.Source, Is.EqualTo(source));
+        Assert.That(fetched.Name, Is.EqualTo("renamed"));
         Assert.That(fetched.Type, Is.EqualTo(OsuMatchType.TeamVersus));
         Assert.That(fetched.QueueMode, Is.EqualTo(OsuQueueMode.AllPlayers));
         Assert.That(fetched.AutoSkip, Is.True);
-        Assert.That(fetched.MaxParticipants, Is.EqualTo(8));
+        Assert.That(fetched.MaxParticipants, Is.EqualTo(backend == RepositoryBackend.PostgreSql ? (byte?)8 : null));
     }
 
     [Test]
@@ -235,10 +261,10 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         await _repository.UpdateRoomStatus(room.Id, MultiplayerRoomState.Playing);
 
-        Room? fetched = await _repository.GetRoom(room.Id);
+        Room? fetched = await _repository.GetRoom(room.Id, ServerIdentify.Realtime);
         Assert.That(fetched!.Status, Is.EqualTo(RoomStatus.Playing));
     }
 
@@ -248,11 +274,11 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         DateTimeOffset endDate = DateTimeOffset.UtcNow.AddHours(1);
         await _repository.SetRoomEndDate(room.Id, endDate);
 
-        Room? fetched = await _repository.GetRoom(room.Id);
+        Room? fetched = await _repository.GetRoom(room.Id, ServerIdentify.Realtime);
         Assert.That(fetched!.EndsAt, Is.EqualTo(endDate));
     }
 
@@ -262,7 +288,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         Playlist item = await _repository.AddItemToPlaylist(CreatePlaylistItem(100), room.Id, 1);
 
         MultiplayerPlaylistItem editedItem = item.ToMultiplayerPlaylistItem();
@@ -280,7 +306,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         Playlist item = await _repository.AddItemToPlaylist(CreatePlaylistItem(100), room.Id, 1);
 
         await _repository.RemoveItemToPlaylist(item.Id, room.Id, 1);
@@ -295,7 +321,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
         Users.Add(CreateUser(1, "host"));
         await _context.SaveChangesAsync();
 
-        Room room = await _repository.CreateRoom(CreateRoom(), 1);
+        Room room = await _repository.CreateRoom(CreateRoom(), 1, ServerIdentify.Realtime);
         await _repository.AddUserToRoom(room.Id, 1);
         await _repository.AddItemToPlaylist(
             new MultiplayerPlaylistItem
@@ -310,7 +336,7 @@ public class RoomRepositoryTests(RepositoryBackend backend)
 
         await _repository.DeleteRoom(room.Id);
 
-        Assert.That(await _repository.GetRoom(room.Id), Is.Null);
+        Assert.That(await _repository.GetRoom(room.Id, ServerIdentify.Realtime), Is.Null);
         Assert.That(await Playlists.CountAsync(p => p.RoomId == room.Id), Is.EqualTo(0));
         Assert.That(await RoomParticipatedUsers.CountAsync(rpu => rpu.RoomId == room.Id), Is.EqualTo(0));
     }

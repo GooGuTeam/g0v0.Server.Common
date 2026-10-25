@@ -79,9 +79,13 @@ Dual-backend EF Core: MySQL (legacy v1 schema) and PostgreSQL (v2). Selection is
 
 Multiplayer room state is persisted through three shared models: `Room`, `Playlist` (table `room_playlists` on MySQL,
 `playlists` on PostgreSQL) and `RoomParticipatedUser`. `IRoomRepository` is the single persistence contract used by the
-Realtime server; both backends implement the full set of room/playlist/participant operations, including
+Realtime and Stable servers; both backends implement the full set of room/playlist/participant operations, including
 `AnyScoreTokenExistsFor` (guards `RemovePlaylistItem` against deleting items with associated score tokens).
 
+- `Room.Source` identifies the creating server using `ServerIdentify`. Both backends store the enum name in an
+  indexed `varchar(32)` column with a `Realtime` default for historical rooms. `CreateRoom` and `GetRoom` require
+  an explicit source; `GetRoom` filters by both ID and source. Source is not a mutable room setting. PostgreSQL uses
+  the `AddRoomSource` EF migration; legacy MySQL requires the `84cceb652fe5` migration from `osu_lazer_api` before deploy.
 - MySQL mappings live in `Database/MySQL/Configurations/RoomConfig.cs` and `PlaylistConfig.cs`. Only fields EF Core
   cannot infer are mapped explicitly: the `rooms`/`room_playlists` table names, native MySQL enum columns for
   `category`/`type`/`queue_mode`/`status`/`win_condition`, `datetime` columns for `DateTimeOffset` values, JSON columns
