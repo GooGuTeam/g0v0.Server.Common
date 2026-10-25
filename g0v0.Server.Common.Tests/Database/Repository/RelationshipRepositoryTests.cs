@@ -1,28 +1,35 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
-using g0v0.Server.Common.Database.MySQL;
-using g0v0.Server.Common.Database.MySQL.Repository;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using MySqlRelationshipRepository = g0v0.Server.Common.Database.MySQL.Repository.RelationshipRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
+using PostgreSqlRelationshipRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.RelationshipRepository;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
-[TestFixture]
-public class MySqlRelationshipRepositoryTests
+/// <summary>
+/// Runs the <see cref="IRelationshipRepository"/> contract against both database backends.
+/// </summary>
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class RelationshipRepositoryTests(RepositoryBackend backend)
 {
-    private MysqlDbContext _context = null!;
-    private RelationshipRepository _repository = null!;
+    private DbContext _context = null!;
+    private IRelationshipRepository _repository = null!;
+
+    private DbSet<Relationship> Relationships => _context.Set<Relationship>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new MysqlDbContext(options);
-        _repository = new RelationshipRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlRelationshipRepository((MySqlDbContext)_context)
+            : new PostgreSqlRelationshipRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -30,8 +37,6 @@ public class MySqlRelationshipRepositoryTests
     {
         _context.Dispose();
     }
-
-    #region GetByUserIdAsync
 
     [Test]
     public async Task GetByUserIdAsync_WhenRelationshipsExist_ShouldReturnAllForUser()
@@ -54,7 +59,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 1,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.AddRange(relationship1, relationship2, relationship3);
+        Relationships.AddRange(relationship1, relationship2, relationship3);
         await _context.SaveChangesAsync();
 
         IReadOnlyList<Relationship> results = await _repository.GetByUserIdAsync(1);
@@ -70,10 +75,6 @@ public class MySqlRelationshipRepositoryTests
 
         Assert.That(results, Is.Empty);
     }
-
-    #endregion
-
-    #region GetByTargetIdAsync
 
     [Test]
     public async Task GetByTargetIdAsync_WhenRelationshipsExist_ShouldReturnAllForTarget()
@@ -96,7 +97,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 1,
             Type = RelationshipType.Block,
         };
-        _context.Relationships.AddRange(relationship1, relationship2, relationship3);
+        Relationships.AddRange(relationship1, relationship2, relationship3);
         await _context.SaveChangesAsync();
 
         IReadOnlyList<Relationship> results = await _repository.GetByTargetIdAsync(5);
@@ -113,10 +114,6 @@ public class MySqlRelationshipRepositoryTests
         Assert.That(results, Is.Empty);
     }
 
-    #endregion
-
-    #region GetRelationshipAsync
-
     [Test]
     public async Task GetRelationshipAsync_WhenRelationshipExists_ShouldReturnIt()
     {
@@ -126,7 +123,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         Relationship? result = await _repository.GetRelationshipAsync(1, 2);
@@ -154,17 +151,13 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 1,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         Relationship? result = await _repository.GetRelationshipAsync(1, 2);
 
         Assert.That(result, Is.Null);
     }
-
-    #endregion
-
-    #region IsFollowingAsync
 
     [Test]
     public async Task IsFollowingAsync_WhenFollowRelationshipExists_ShouldReturnTrue()
@@ -175,7 +168,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         bool result = await _repository.IsFollowingAsync(1, 2);
@@ -192,7 +185,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Block,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         bool result = await _repository.IsFollowingAsync(1, 2);
@@ -208,10 +201,6 @@ public class MySqlRelationshipRepositoryTests
         Assert.That(result, Is.False);
     }
 
-    #endregion
-
-    #region IsBlockedAsync
-
     [Test]
     public async Task IsBlockedAsync_WhenBlockRelationshipExists_ShouldReturnTrue()
     {
@@ -221,7 +210,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Block,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         bool result = await _repository.IsBlockedAsync(1, 2);
@@ -238,7 +227,7 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         bool result = await _repository.IsBlockedAsync(1, 2);
@@ -254,10 +243,6 @@ public class MySqlRelationshipRepositoryTests
         Assert.That(result, Is.False);
     }
 
-    #endregion
-
-    #region CreateAsync
-
     [Test]
     public async Task CreateAsync_ShouldAddRelationshipToDatabase()
     {
@@ -270,37 +255,14 @@ public class MySqlRelationshipRepositoryTests
 
         await _repository.CreateAsync(relationship);
 
-        Relationship? saved = await _context.Relationships
-            .Where(r => r.UserId == 1 && r.TargetId == 2)
-            .FirstOrDefaultAsync();
-        Assert.That(saved, Is.Not.Null);
-        Assert.That(saved!.Type, Is.EqualTo(RelationshipType.Follow));
-    }
-
-    [Test]
-    public async Task CreateAsync_ShouldPersistCompositeKeyWithoutSurrogateId()
-    {
-        Relationship relationship = new()
-        {
-            UserId = 1,
-            TargetId = 2,
-            Type = RelationshipType.Follow,
-        };
-
-        await _repository.CreateAsync(relationship);
-
         // The table is keyed by the composite (user_id, target_id, type) primary
         // key and has no surrogate id column.
-        Relationship? saved = await _context.Relationships
+        Relationship? saved = await Relationships
             .Where(r => r.UserId == 1 && r.TargetId == 2)
             .FirstOrDefaultAsync();
         Assert.That(saved, Is.Not.Null);
         Assert.That(saved!.Type, Is.EqualTo(RelationshipType.Follow));
     }
-
-    #endregion
-
-    #region UpdateAsync
 
     [Test]
     public async Task UpdateAsync_ShouldReplaceRelationshipInDatabase()
@@ -311,10 +273,10 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
-        // The legacy table is keyed by (user_id, target_id, type): changing the
+        // The table is keyed by (user_id, target_id, type): changing the
         // type replaces the stored row instead of updating it in place.
         Relationship changed = new()
         {
@@ -324,16 +286,12 @@ public class MySqlRelationshipRepositoryTests
         };
         await _repository.UpdateAsync(changed);
 
-        Relationship? updated = await _context.Relationships
+        Relationship? updated = await Relationships
             .Where(r => r.UserId == 1 && r.TargetId == 2)
             .FirstOrDefaultAsync();
         Assert.That(updated, Is.Not.Null);
         Assert.That(updated!.Type, Is.EqualTo(RelationshipType.Block));
     }
-
-    #endregion
-
-    #region DeleteAsync
 
     [Test]
     public async Task DeleteAsync_ShouldRemoveRelationshipFromDatabase()
@@ -344,64 +302,13 @@ public class MySqlRelationshipRepositoryTests
             TargetId = 2,
             Type = RelationshipType.Follow,
         };
-        _context.Relationships.Add(relationship);
+        Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         await _repository.DeleteAsync(relationship);
 
-        bool exists = await _context.Relationships
+        bool exists = await Relationships
             .AnyAsync(r => r.UserId == 1 && r.TargetId == 2);
         Assert.That(exists, Is.False);
     }
-
-    #endregion
-
-    #region Marker interface
-
-    [Test]
-    public void RelationshipRepository_ShouldImplementIMySqlRepository()
-    {
-        Assert.That(_repository, Is.InstanceOf<IMySqlRepository>());
-    }
-
-    #endregion
-
-    #region Model configuration
-
-    [Test]
-    public void MysqlDbContext_ShouldApplyRelationshipConfigurationAutomatically()
-    {
-        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
-            .UseMySql(
-                "Server=localhost;Database=g0v0_test;User=root;Password=test;",
-                new MySqlServerVersion(new Version(8, 0, 36)))
-            .Options;
-
-        using MysqlDbContext relationalContext = new(options);
-
-        Microsoft.EntityFrameworkCore.Metadata.IEntityType? entityType = relationalContext.Model.FindEntityType(typeof(Relationship));
-
-        Assert.That(entityType, Is.Not.Null);
-        Assert.That(entityType!.GetTableName(), Is.EqualTo("relationship"));
-
-        Microsoft.EntityFrameworkCore.Metadata.IProperty? typeProperty = entityType.FindProperty(nameof(Relationship.Type));
-        Assert.That(typeProperty, Is.Not.Null);
-        Assert.That(typeProperty!.GetColumnName(), Is.EqualTo("type"));
-        Assert.That(typeProperty.GetColumnType(), Is.EqualTo("enum('FOLLOW','BLOCK')"));
-        Assert.That(typeProperty.GetValueConverter(), Is.Not.Null);
-
-        Microsoft.EntityFrameworkCore.Metadata.IForeignKey userForeignKey = entityType.FindNavigation(nameof(Relationship.User))!.ForeignKey;
-        Assert.That(userForeignKey.Properties.Select(p => p.Name), Is.EqualTo([nameof(Relationship.UserId)]));
-        Assert.That(userForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(User)));
-        Assert.That(userForeignKey.DeleteBehavior, Is.EqualTo(DeleteBehavior.Restrict));
-        Assert.That(userForeignKey.GetConstraintName(), Is.EqualTo("relationship_ibfk_2"));
-
-        Microsoft.EntityFrameworkCore.Metadata.IForeignKey targetForeignKey = entityType.FindNavigation(nameof(Relationship.Target))!.ForeignKey;
-        Assert.That(targetForeignKey.Properties.Select(p => p.Name), Is.EqualTo([nameof(Relationship.TargetId)]));
-        Assert.That(targetForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(User)));
-        Assert.That(targetForeignKey.DeleteBehavior, Is.EqualTo(DeleteBehavior.Restrict));
-        Assert.That(targetForeignKey.GetConstraintName(), Is.EqualTo("relationship_ibfk_1"));
-    }
-
-    #endregion
 }

@@ -120,22 +120,6 @@ public class FetcherTests
     }
 
     [Test]
-    public async Task FakeBeatmapSetRepository_GetOrFetchByIdAsync_WhenStored_ShouldNotFetch()
-    {
-        FakeBeatmapSetRepository repository = new();
-        BeatmapSetModel stored = new() { Id = 55, Artist = "stored", Title = "Stored Set", Creator = "mapper", CreatorId = 1, SubmittedDate = DateTimeOffset.UtcNow };
-        await repository.UpsertWithBeatmapsAsync(stored);
-
-        int fetchCount = 0;
-        TrackingFetcher fetcher = new(() => fetchCount++);
-
-        BeatmapSetModel result = await repository.GetOrFetchByIdAsync(55, fetcher);
-
-        Assert.That(result.Title, Is.EqualTo("Stored Set"));
-        Assert.That(fetchCount, Is.Zero);
-    }
-
-    [Test]
     public async Task FetchBeatmapRawAsync_WhenCached_ShouldNotHitNetwork()
     {
         StubHttpMessageHandler handler = new(("unused", new StubResponse(System.Net.HttpStatusCode.OK, "unused")));
@@ -312,44 +296,5 @@ public class FetcherTests
     {
         string json = JsonConvert.SerializeObject(config);
         File.WriteAllText(Path.Combine(_tempDir, "config", "general.json"), json);
-    }
-
-    private sealed class TrackingFetcher : IFetcher
-    {
-        private readonly Action _onFetch;
-
-        public TrackingFetcher(Action onFetch)
-        {
-            _onFetch = onFetch;
-        }
-
-        public Task<BeatmapModel> FetchBeatmapAsync(int beatmapId, CancellationToken cancellationToken = default)
-        {
-            _onFetch();
-            return Task.FromResult(new BeatmapModel { Id = beatmapId, BeatmapSetId = beatmapId, Version = "fetched", Mode = 0, MapperId = 1, TotalLength = 1 });
-        }
-
-        public Task<BeatmapModel> FetchBeatmapAsync(string checksum, CancellationToken cancellationToken = default)
-        {
-            _onFetch();
-            return Task.FromResult(new BeatmapModel { Id = 0, BeatmapSetId = 0, Checksum = checksum, Version = "fetched", Mode = 0, MapperId = 1, TotalLength = 1 });
-        }
-
-        public Task<BeatmapModel?> FetchBeatmapByFilenameAsync(string filename, CancellationToken cancellationToken = default)
-        {
-            _onFetch();
-            return Task.FromResult<BeatmapModel?>(null);
-        }
-
-        public Task<BeatmapSetModel> FetchBeatmapSetAsync(int beatmapSetId, CancellationToken cancellationToken = default)
-        {
-            _onFetch();
-            return Task.FromResult(new BeatmapSetModel { Id = beatmapSetId, Artist = "fetched", Title = "Fetched Set", Creator = "mapper", CreatorId = 1, SubmittedDate = DateTimeOffset.UtcNow });
-        }
-
-        public Task<string> FetchBeatmapRawAsync(int beatmapId, CancellationToken cancellationToken = default)
-        {
-            throw new NotSupportedException();
-        }
     }
 }

@@ -17,7 +17,7 @@ Run from the repo root:
 
 - Build: `dotnet build`
 - Test all: `dotnet test`
-- Single fixture: `dotnet test --filter "FullyQualifiedName~MySqlBeatmapRepositoryTests"`
+- Single fixture: `dotnet test --filter "FullyQualifiedName~BeatmapRepositoryTests"`
 - Format check (CI runs this): `dotnet format --verify-no-changes`
 - Apply formatting fixes: `dotnet format`
 - Install InspectCode: `dotnet tool install --global JetBrains.ReSharper.GlobalTools --version 2026.2.1`
@@ -116,7 +116,46 @@ registered; `AddStorage` additionally needs `IPathProvider` for local storage. R
 ## Tests
 
 - NUnit 4 + `Microsoft.EntityFrameworkCore.InMemory`. No real database, Redis, or S3 is needed.
-- Convention: each repository has paired `MySql*` and `PostgreSql*` fixtures using
-  `UseInMemoryDatabase(Guid.NewGuid().ToString())` for isolation. When adding a new repository, add both.
+- Convention: one fixture per repository, parameterised over both backends with
+  `[TestFixture(RepositoryBackend.MySql)]` + `[TestFixture(RepositoryBackend.PostgreSql)]` (see
+  `Database/Repository/RepositoryTestContexts.cs`). The fixture holds the interface type and builds the
+  backend implementation in `SetUp`; entities are reached through `_context.Set<T>()`. When adding a new
+  repository, add one fixture — never a per-backend copy.
 - The test project sets `<NoWarn>SA0001;SA1600;SA1602;CS1591</NoWarn>` — XML doc warnings are intentionally suppressed in tests, do
   not "fix" them by adding doc comments everywhere.
+
+### Test quality bar
+
+A test earns its place only by exercising a **branch of production code**. Write the assertion so that deleting or
+breaking the production line under test fails the test. `Database/Repository/BeatmapRepositoryTests.cs` is the
+reference shape: a few tests, each driving one real behaviour.
+
+Do not add tests that only restate a declaration. The following were removed as part of this cleanup and must not
+come back:
+
+- **Constants and constructor echoes** — `new ConfigFileAttribute("x")` then `FileName == "x"`, or reading a
+  `[AttributeUsage]` back off the attribute class. The compiler already enforces these.
+- **Attribute-presence reflection** — "the attribute I just applied can be read back" /
+  `XxxAttributeTests` that only inspect `AttributeTargets`. `ReloadableAttribute`'s real behaviour
+  (reload touches only marked properties) is covered by `ConfigManagerTests.Reload_*`.
+- **Marker-interface assertions** — `Assert.That(_repository, Is.InstanceOf<IMySqlRepository>())`. The contract
+  that matters is the DI wiring, covered by `ServiceCollectionExtensionTests.AddRepositories_*`.
+- **Schema-shape assertions** — reading `GetTableName()`/`GetColumnName()`/`GetColumnType()` off an entity type
+  to assert the MySQL/PostgreSQL mapping. That tests "which database are we", not the repository.
+- **Tautologies** — `Is.Not.Null` on a value a neighbouring assertion already proves `Is.Empty`, or
+  `Assert.DoesNotThrow(() => new X())` duplicating a test that asserts the actual result.
+- **Tests of test doubles** — exercising a `Fake*`/`Stub*` helper in `*.Tests` instead of production code.
+- **Permanently ignored tests** — `[Ignore]` with a reason that will never change is dead weight; delete it rather
+  than leaving it skipped forever.
+
+Avoid duplicates:
+
+- One behaviour, one test. If two tests share a body verbatim, keep the one with the more informative name/comment.
+- No per-backend copies. Both backends are covered by the single parameterised fixture; where a backend genuinely
+  differs (MySQL ignores `tournament_mode` because the legacy schema has no such column; MySQL notification names
+  are stored `UPPER_SNAKE_CASE`), branch inside the test with an explicit `backend == RepositoryBackend.MySql`
+  and a comment saying why.
+- No boundary-value sweeps (`int.MinValue`/`-1`/`0`/`1`/`int.MaxValue`) when the implementation funnels them
+  through one code path; one representative case is enough.
+- A test name must match its assertion. `..._ShouldSucceedForPartialMatch` that asserts failure is a bug in the
+  test, not a comment.

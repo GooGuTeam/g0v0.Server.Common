@@ -1,29 +1,34 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
-using g0v0.Server.Common.Database.MySQL;
-using g0v0.Server.Common.Database.MySQL.Repository;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using osu.Game.Online.Chat;
+using MySqlChatRepository = g0v0.Server.Common.Database.MySQL.Repository.ChatRepository;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using PostgreSqlChatRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.ChatRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
-[TestFixture]
-public class MySqlChatRepositoryTests
+/// <summary>
+/// Runs the <see cref="IChatRepository"/> contract against both database backends.
+/// </summary>
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class ChatRepositoryTests(RepositoryBackend backend)
 {
-    private MysqlDbContext _context = null!;
-    private ChatRepository _repository = null!;
+    private DbContext _context = null!;
+    private IChatRepository _repository = null!;
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new MysqlDbContext(options);
-        _repository = new ChatRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlChatRepository((MySqlDbContext)_context)
+            : new PostgreSqlChatRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]

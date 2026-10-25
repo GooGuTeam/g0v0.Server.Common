@@ -1,29 +1,36 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
-using g0v0.Server.Common.Database.PostgreSQL;
-using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using g0v0.Server.Common.Database.Models;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using osu.Game.Beatmaps;
-using BeatmapModel = g0v0.Server.Common.Database.Models.Beatmap;
+using BeatmapOnlineStatus = osu.Game.Beatmaps.BeatmapOnlineStatus;
+using MySqlBeatmapRepository = g0v0.Server.Common.Database.MySQL.Repository.BeatmapRepository;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using PostgreSqlBeatmapRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.BeatmapRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
-[TestFixture]
-public class PostgreSqlBeatmapRepositoryTests
+/// <summary>
+/// Runs the <see cref="IBeatmapRepository"/> contract against both database backends.
+/// </summary>
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class BeatmapRepositoryTests(RepositoryBackend backend)
 {
-    private PostgreSqlDbContext _context = null!;
-    private BeatmapRepository _repository = null!;
+    private DbContext _context = null!;
+    private IBeatmapRepository _repository = null!;
+
+    private DbSet<Beatmap> Beatmaps => _context.Set<Beatmap>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new PostgreSqlDbContext(options);
-        _repository = new BeatmapRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlBeatmapRepository((MySqlDbContext)_context)
+            : new PostgreSqlBeatmapRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -35,10 +42,10 @@ public class PostgreSqlBeatmapRepositoryTests
     [Test]
     public async Task GetByChecksumAsync_WhenBeatmapExists_ShouldReturnBeatmap()
     {
-        _context.Beatmaps.Add(CreateBeatmap(id: 1, checksum: "pg-checksum"));
+        Beatmaps.Add(CreateBeatmap(id: 1, checksum: "abc-checksum"));
         await _context.SaveChangesAsync();
 
-        BeatmapModel? result = await _repository.GetByChecksumAsync("pg-checksum");
+        Beatmap? result = await _repository.GetByChecksumAsync("abc-checksum");
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result!.Id, Is.EqualTo(1));
@@ -47,27 +54,26 @@ public class PostgreSqlBeatmapRepositoryTests
     [Test]
     public async Task GetByMapperIdAsync_WhenBeatmapsExist_ShouldReturnMatchingBeatmaps()
     {
-        _context.Beatmaps.AddRange(
+        Beatmaps.AddRange(
             CreateBeatmap(id: 1, mapperId: 100),
             CreateBeatmap(id: 2, mapperId: 100),
             CreateBeatmap(id: 3, mapperId: 200));
         await _context.SaveChangesAsync();
 
-        IReadOnlyList<BeatmapModel> results = await _repository.GetByMapperIdAsync(100);
+        IReadOnlyList<Beatmap> results = await _repository.GetByMapperIdAsync(100);
 
         Assert.That(results, Has.Count.EqualTo(2));
-        Assert.That(results, Has.All.Matches<BeatmapModel>(beatmap => beatmap.MapperId == 100));
+        Assert.That(results, Has.All.Matches<Beatmap>(beatmap => beatmap.MapperId == 100));
     }
 
     [Test]
     public async Task GetOrFetchByIdAsync_WhenBeatmapExists_ShouldNotFetch()
     {
-        BeatmapModel beatmap = CreateBeatmap(id: 321);
-        _context.Beatmaps.Add(beatmap);
+        Beatmaps.Add(CreateBeatmap(id: 321));
         await _context.SaveChangesAsync();
 
         FakeFetcher fetcher = new();
-        BeatmapModel result = await _repository.GetOrFetchByIdAsync(321, fetcher);
+        Beatmap result = await _repository.GetOrFetchByIdAsync(321, fetcher);
 
         Assert.That(result.Id, Is.EqualTo(321));
         Assert.That(fetcher.BeatmapFetchCount, Is.Zero);
@@ -77,7 +83,7 @@ public class PostgreSqlBeatmapRepositoryTests
     public async Task GetOrFetchByIdAsync_WhenBeatmapMissing_ShouldFetchAndReturn()
     {
         FakeFetcher fetcher = new(beatmapFactory: id => CreateBeatmap(id: id));
-        BeatmapModel result = await _repository.GetOrFetchByIdAsync(321, fetcher);
+        Beatmap result = await _repository.GetOrFetchByIdAsync(321, fetcher);
 
         Assert.That(result.Id, Is.EqualTo(321));
         Assert.That(fetcher.BeatmapFetchCount, Is.EqualTo(1));
@@ -89,37 +95,32 @@ public class PostgreSqlBeatmapRepositoryTests
         FakeFetcher fetcher = new(exception: new InvalidOperationException("boom"));
 
         Assert.ThrowsAsync<InvalidOperationException>(() => _repository.GetOrFetchByIdAsync(321, fetcher));
-        Assert.That(_context.Beatmaps.Any(b => b.Id == 321), Is.False);
+        Assert.That(Beatmaps.Any(b => b.Id == 321), Is.False);
     }
 
     [Test]
     public async Task CreateUpdateDeleteAsync_ShouldPersistBeatmapChanges()
     {
-        BeatmapModel beatmap = CreateBeatmap(id: 10, version: "Hard");
+        Beatmap beatmap = CreateBeatmap(id: 10, version: "Hard");
 
         await _repository.CreateAsync(beatmap);
         beatmap.Version = "Extra";
         await _repository.UpdateAsync(beatmap);
         await _repository.DeleteAsync(beatmap);
 
-        bool exists = await _context.Beatmaps.AnyAsync(b => b.Id == 10);
+        bool exists = await Beatmaps.AnyAsync(b => b.Id == 10);
         Assert.That(exists, Is.False);
     }
 
-    [Test]
-    public void BeatmapRepository_ShouldImplementIPostgreSqlRepository()
-    {
-        Assert.That(_repository, Is.InstanceOf<IPostgreSqlRepository>());
-    }
-
-    private static BeatmapModel CreateBeatmap(
+    private static Beatmap CreateBeatmap(
         int id,
-        int mapperId = 789,
+        int beatmapSetId = 456,
         string? checksum = "checksum_1",
-        string version = "Insane") => new()
+        string version = "Insane",
+        int mapperId = 789) => new()
         {
             Id = id,
-            BeatmapSetId = 456,
+            BeatmapSetId = beatmapSetId,
             Url = $"https://osu.example/beatmaps/{id}",
             Mode = 3,
             DifficultyRating = 5.2,

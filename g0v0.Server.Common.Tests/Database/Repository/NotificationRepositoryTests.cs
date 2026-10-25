@@ -1,31 +1,37 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
-using g0v0.Server.Common.Database.PostgreSQL;
-using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using MySqlNotificationRepository = g0v0.Server.Common.Database.MySQL.Repository.NotificationRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
+using PostgreSqlNotificationRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.NotificationRepository;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
 /// <summary>
-/// Runs the <see cref="NotificationRepository"/> against an in-memory PostgreSql context.
+/// Runs the <see cref="INotificationRepository"/> contract against both database backends.
 /// </summary>
-[TestFixture]
-public class PostgreSqlNotificationRepositoryTests
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class NotificationRepositoryTests(RepositoryBackend backend)
 {
-    private PostgreSqlDbContext _context = null!;
-    private NotificationRepository _repository = null!;
+    private DbContext _context = null!;
+    private INotificationRepository _repository = null!;
+
+    private DbSet<Notification> Notifications => _context.Set<Notification>();
+
+    private DbSet<UserNotification> UserNotifications => _context.Set<UserNotification>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new PostgreSqlDbContext(options);
-        _repository = new NotificationRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlNotificationRepository((MySqlDbContext)_context)
+            : new PostgreSqlNotificationRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -51,10 +57,10 @@ public class PostgreSqlNotificationRepositoryTests
         Notification stored = await _repository.CreateAsync(notification, [2, 3]);
 
         Assert.That(stored.Id, Is.GreaterThan(0));
-        Assert.That(_context.Notifications.Count(), Is.EqualTo(1));
-        Assert.That(_context.UserNotifications.Count(), Is.EqualTo(2));
-        Assert.That(_context.UserNotifications.Select(record => record.UserId), Is.EquivalentTo([2, 3]));
-        Assert.That(_context.UserNotifications.All(record => !record.IsRead), Is.True);
+        Assert.That(Notifications.Count(), Is.EqualTo(1));
+        Assert.That(UserNotifications.Count(), Is.EqualTo(2));
+        Assert.That(UserNotifications.Select(record => record.UserId), Is.EquivalentTo([2, 3]));
+        Assert.That(UserNotifications.All(record => !record.IsRead), Is.True);
     }
 
     [Test]
@@ -107,9 +113,11 @@ public class PostgreSqlNotificationRepositoryTests
         IReadOnlyList<int> all = await _repository.GetNotificationIdsAsync([], objectType: null, objectId: null, id: null);
         Assert.That(all, Is.EquivalentTo([first.Id, second.Id]));
 
-        // Name filters are case-insensitive because the legacy MySQL enum
-        // stores UPPER_SNAKE_CASE values.
-        IReadOnlyList<int> byName = await _repository.GetNotificationIdsAsync(["channel_team"], objectType: null, objectId: null, id: null);
+        // The legacy MySQL enum stores UPPER_SNAKE_CASE values; production matches
+        // lower-case input through MySQL's case-insensitive collation, which an
+        // in-memory database cannot reproduce.
+        string teamName = backend == RepositoryBackend.MySql ? "CHANNEL_TEAM" : "channel_team";
+        IReadOnlyList<int> byName = await _repository.GetNotificationIdsAsync([teamName], objectType: null, objectId: null, id: null);
         Assert.That(byName, Is.EquivalentTo([second.Id]));
 
         IReadOnlyList<int> byObject = await _repository.GetNotificationIdsAsync([], "channel", objectId: 1, id: null);

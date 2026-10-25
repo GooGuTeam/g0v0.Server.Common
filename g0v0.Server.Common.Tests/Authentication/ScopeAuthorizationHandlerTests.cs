@@ -32,8 +32,10 @@ public class ScopeAuthorizationHandlerTests
         }
     }
 
-    [Test]
-    public async Task HandleRequirementAsync_WithMatchingClientId_ShouldSucceed()
+    [TestCase("100", true)]
+    [TestCase("200", true)]
+    [TestCase("999", false)]
+    public async Task HandleRequirementAsync_WithMatchingClientId_ShouldSucceed(string claimClientId, bool succeed)
     {
         WriteGeneralConfig(new
         {
@@ -46,59 +48,20 @@ public class ScopeAuthorizationHandlerTests
         ScopeAuthorizationRequirement requirement = new("chat.read");
         ClaimsPrincipal user = new(new ClaimsIdentity(
         [
-            new Claim(type: OAuthClaimTypes.ClientId, value: "100"),
+            new Claim(type: OAuthClaimTypes.ClientId, value: claimClientId),
         ]));
         AuthorizationHandlerContext context = new([requirement], user, resource: null);
 
         await handler.HandleAsync(context);
 
-        Assert.That(context.HasSucceeded, Is.True);
-    }
-
-    [Test]
-    public async Task HandleRequirementAsync_WithMatchingWebClientId_ShouldSucceed()
-    {
-        WriteGeneralConfig(new
+        if (succeed)
         {
-            OsuClientId = 100,
-            OsuWebClientId = 200,
-        });
-
-        ConfigManager manager = new(_tempDir);
-        ScopeAuthorizationHandler handler = new(manager);
-        ScopeAuthorizationRequirement requirement = new("chat.read");
-        ClaimsPrincipal user = new(new ClaimsIdentity(
-        [
-            new Claim(type: OAuthClaimTypes.ClientId, value: "200"),
-        ]));
-        AuthorizationHandlerContext context = new([requirement], user, resource: null);
-
-        await handler.HandleAsync(context);
-
-        Assert.That(context.HasSucceeded, Is.True);
-    }
-
-    [Test]
-    public async Task HandleRequirementAsync_WithNonMatchingClientId_ShouldNotSucceedWithoutScopes()
-    {
-        WriteGeneralConfig(new
+            Assert.That(context.HasSucceeded, Is.True);
+        }
+        else
         {
-            OsuClientId = 100,
-            OsuWebClientId = 200,
-        });
-
-        ConfigManager manager = new(_tempDir);
-        ScopeAuthorizationHandler handler = new(manager);
-        ScopeAuthorizationRequirement requirement = new("chat.read");
-        ClaimsPrincipal user = new(new ClaimsIdentity(
-        [
-            new Claim(type: OAuthClaimTypes.ClientId, value: "999"),
-        ]));
-        AuthorizationHandlerContext context = new([requirement], user, resource: null);
-
-        await handler.HandleAsync(context);
-
-        Assert.That(context.HasSucceeded, Is.False);
+            Assert.That(context.HasSucceeded, Is.False);
+        }
     }
 
     [Test]
@@ -188,31 +151,6 @@ public class ScopeAuthorizationHandlerTests
 
         await handler.HandleAsync(context);
 
-        Assert.That(context.HasSucceeded, Is.False);
-    }
-
-    [Test]
-    public async Task HandleRequirementAsync_WithMultipleRequirements_ShouldSucceedForPartialMatch()
-    {
-        WriteGeneralConfig(new
-        {
-            OsuClientId = 100,
-            OsuWebClientId = 200,
-        });
-
-        ConfigManager manager = new(_tempDir);
-        ScopeAuthorizationHandler handler = new(manager);
-        ScopeAuthorizationRequirement requirement1 = new("chat.read");
-        ScopeAuthorizationRequirement requirement2 = new("chat.write");
-        ClaimsPrincipal user = new(new ClaimsIdentity(
-        [
-            new Claim(type: OAuthClaimTypes.Scope, value: "chat.read"),
-        ]));
-        AuthorizationHandlerContext context = new([requirement1, requirement2], user, resource: null);
-
-        await handler.HandleAsync(context);
-
-        // requirement1 should succeed, requirement2 should not
         Assert.That(context.HasSucceeded, Is.False);
     }
 

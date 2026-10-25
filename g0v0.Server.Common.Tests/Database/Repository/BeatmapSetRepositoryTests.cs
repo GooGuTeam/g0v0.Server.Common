@@ -1,30 +1,38 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
-using g0v0.Server.Common.Database.MySQL;
-using g0v0.Server.Common.Database.MySQL.Repository;
+using g0v0.Server.Common.Database.Models;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using osu.Game.Beatmaps;
-using Beatmap = g0v0.Server.Common.Database.Models.Beatmap;
-using BeatmapSet = g0v0.Server.Common.Database.Models.BeatmapSet;
+using BeatmapOnlineStatus = osu.Game.Beatmaps.BeatmapOnlineStatus;
+using MySqlBeatmapSetRepository = g0v0.Server.Common.Database.MySQL.Repository.BeatmapSetRepository;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using PostgreSqlBeatmapSetRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.BeatmapSetRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
-[TestFixture]
-public class MySqlBeatmapSetRepositoryTests
+/// <summary>
+/// Runs the <see cref="IBeatmapSetRepository"/> contract against both database backends.
+/// </summary>
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class BeatmapSetRepositoryTests(RepositoryBackend backend)
 {
-    private MysqlDbContext _context = null!;
-    private BeatmapSetRepository _repository = null!;
+    private DbContext _context = null!;
+    private IBeatmapSetRepository _repository = null!;
+
+    private DbSet<BeatmapSet> BeatmapSets => _context.Set<BeatmapSet>();
+
+    private DbSet<Beatmap> Beatmaps => _context.Set<Beatmap>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new MysqlDbContext(options);
-        _repository = new BeatmapSetRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlBeatmapSetRepository((MySqlDbContext)_context)
+            : new PostgreSqlBeatmapSetRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -36,7 +44,7 @@ public class MySqlBeatmapSetRepositoryTests
     [Test]
     public async Task GetByIdAsync_WhenSetExists_ShouldReturnSet()
     {
-        _context.BeatmapSets.Add(CreateSet(id: 55));
+        BeatmapSets.Add(CreateSet(id: 55));
         await _context.SaveChangesAsync();
 
         BeatmapSet? result = await _repository.GetByIdAsync(55);
@@ -51,7 +59,7 @@ public class MySqlBeatmapSetRepositoryTests
         BeatmapSet set = CreateSet(id: 55);
         set.Beatmaps.Add(CreateBeatmap(id: 1, set.Id));
         set.Beatmaps.Add(CreateBeatmap(id: 2, set.Id));
-        _context.BeatmapSets.Add(set);
+        BeatmapSets.Add(set);
         await _context.SaveChangesAsync();
 
         BeatmapSet? result = await _repository.GetByIdWithBeatmapsAsync(55);
@@ -70,15 +78,15 @@ public class MySqlBeatmapSetRepositoryTests
         BeatmapSet result = await _repository.UpsertWithBeatmapsAsync(set);
 
         Assert.That(result.Id, Is.EqualTo(55));
-        Assert.That(_context.BeatmapSets.Count(), Is.EqualTo(1));
-        Assert.That(_context.Beatmaps.Count(), Is.EqualTo(2));
+        Assert.That(BeatmapSets.Count(), Is.EqualTo(1));
+        Assert.That(Beatmaps.Count(), Is.EqualTo(2));
     }
 
     [Test]
     public async Task UpsertWithBeatmapsAsync_WhenSetExists_ShouldUpdateValues()
     {
         BeatmapSet existing = CreateSet(id: 55);
-        _context.BeatmapSets.Add(existing);
+        BeatmapSets.Add(existing);
         await _context.SaveChangesAsync();
 
         BeatmapSet updated = CreateSet(id: 55);
@@ -95,7 +103,7 @@ public class MySqlBeatmapSetRepositoryTests
     {
         BeatmapSet existing = CreateSet(id: 55);
         existing.Beatmaps.Add(CreateBeatmap(id: 1, 55));
-        _context.BeatmapSets.Add(existing);
+        BeatmapSets.Add(existing);
         await _context.SaveChangesAsync();
 
         BeatmapSet incoming = CreateSet(id: 55);
@@ -103,13 +111,13 @@ public class MySqlBeatmapSetRepositoryTests
 
         await _repository.UpsertWithBeatmapsAsync(incoming);
 
-        Assert.That(_context.Beatmaps.Count(), Is.EqualTo(2));
+        Assert.That(Beatmaps.Count(), Is.EqualTo(2));
     }
 
     [Test]
     public async Task GetOrFetchByIdAsync_WhenSetExists_ShouldNotFetch()
     {
-        _context.BeatmapSets.Add(CreateSet(id: 55));
+        BeatmapSets.Add(CreateSet(id: 55));
         await _context.SaveChangesAsync();
 
         FakeFetcher fetcher = new();
@@ -135,7 +143,7 @@ public class MySqlBeatmapSetRepositoryTests
         FakeFetcher fetcher = new(exception: new InvalidOperationException("boom"));
 
         Assert.ThrowsAsync<InvalidOperationException>(() => _repository.GetOrFetchByIdAsync(55, fetcher));
-        Assert.That(_context.BeatmapSets.Any(s => s.Id == 55), Is.False);
+        Assert.That(BeatmapSets.Any(s => s.Id == 55), Is.False);
     }
 
     [Test]
@@ -157,18 +165,12 @@ public class MySqlBeatmapSetRepositoryTests
     public async Task DeleteAsync_ShouldRemoveSet()
     {
         BeatmapSet set = CreateSet(id: 55);
-        _context.BeatmapSets.Add(set);
+        BeatmapSets.Add(set);
         await _context.SaveChangesAsync();
 
         await _repository.DeleteAsync(set);
 
-        Assert.That(_context.BeatmapSets.Any(s => s.Id == 55), Is.False);
-    }
-
-    [Test]
-    public void BeatmapSetRepository_ShouldImplementIMySqlRepository()
-    {
-        Assert.That(_repository, Is.InstanceOf<IMySqlRepository>());
+        Assert.That(BeatmapSets.Any(s => s.Id == 55), Is.False);
     }
 
     private static BeatmapSet CreateSet(int id)

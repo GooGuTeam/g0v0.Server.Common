@@ -1,28 +1,35 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
-using g0v0.Server.Common.Database.PostgreSQL;
-using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using MySqlOAuthTokenRepository = g0v0.Server.Common.Database.MySQL.Repository.OAuthTokenRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
+using PostgreSqlOAuthTokenRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.OAuthTokenRepository;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
-[TestFixture]
-public class PostgreSqlOAuthTokenRepositoryTests
+/// <summary>
+/// Runs the <see cref="IOAuthTokenRepository"/> contract against both database backends.
+/// </summary>
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class OAuthTokenRepositoryTests(RepositoryBackend backend)
 {
-    private PostgreSqlDbContext _context = null!;
-    private OAuthTokenRepository _repository = null!;
+    private DbContext _context = null!;
+    private IOAuthTokenRepository _repository = null!;
+
+    private DbSet<OAuthToken> OAuthTokens => _context.Set<OAuthToken>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new PostgreSqlDbContext(options);
-        _repository = new OAuthTokenRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlOAuthTokenRepository((MySqlDbContext)_context)
+            : new PostgreSqlOAuthTokenRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -31,25 +38,23 @@ public class PostgreSqlOAuthTokenRepositoryTests
         _context.Dispose();
     }
 
-    #region GetByAccessTokenAsync
-
     [Test]
     public async Task GetByAccessTokenAsync_WhenTokenExistsAndNotExpired_ShouldReturnToken()
     {
         OAuthToken token = new()
         {
-            AccessToken = "pg_valid_token",
-            RefreshToken = "pg_refresh_1",
+            AccessToken = "valid_token",
+            RefreshToken = "refresh_1",
             ExpiresAt = DateTimeOffset.UtcNow.AddHours(1),
             RefreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(1),
         };
-        _context.OAuthTokens.Add(token);
+        OAuthTokens.Add(token);
         await _context.SaveChangesAsync();
 
-        OAuthToken? result = await _repository.GetByAccessTokenAsync("pg_valid_token");
+        OAuthToken? result = await _repository.GetByAccessTokenAsync("valid_token");
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.AccessToken, Is.EqualTo("pg_valid_token"));
+        Assert.That(result!.AccessToken, Is.EqualTo("valid_token"));
     }
 
     [Test]
@@ -57,15 +62,15 @@ public class PostgreSqlOAuthTokenRepositoryTests
     {
         OAuthToken token = new()
         {
-            AccessToken = "pg_expired_token",
-            RefreshToken = "pg_refresh_2",
+            AccessToken = "expired_token",
+            RefreshToken = "refresh_2",
             ExpiresAt = DateTimeOffset.UtcNow.AddHours(-1),
             RefreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(-1),
         };
-        _context.OAuthTokens.Add(token);
+        OAuthTokens.Add(token);
         await _context.SaveChangesAsync();
 
-        OAuthToken? result = await _repository.GetByAccessTokenAsync("pg_expired_token");
+        OAuthToken? result = await _repository.GetByAccessTokenAsync("expired_token");
 
         Assert.That(result, Is.Null);
     }
@@ -73,29 +78,25 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [Test]
     public async Task GetByAccessTokenAsync_WhenTokenDoesNotExist_ShouldReturnNull()
     {
-        OAuthToken? result = await _repository.GetByAccessTokenAsync("pg_nonexistent");
+        OAuthToken? result = await _repository.GetByAccessTokenAsync("nonexistent");
 
         Assert.That(result, Is.Null);
     }
-
-    #endregion
-
-    #region CheckAccessTokenIsValidAsync
 
     [Test]
     public async Task CheckAccessTokenIsValidAsync_WhenTokenExistsAndNotExpired_ShouldReturnTrue()
     {
         OAuthToken token = new()
         {
-            AccessToken = "pg_check_valid",
-            RefreshToken = "pg_refresh_3",
+            AccessToken = "check_valid",
+            RefreshToken = "refresh_3",
             ExpiresAt = DateTimeOffset.UtcNow.AddHours(1),
             RefreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(1),
         };
-        _context.OAuthTokens.Add(token);
+        OAuthTokens.Add(token);
         await _context.SaveChangesAsync();
 
-        bool result = await _repository.CheckAccessTokenIsValidAsync("pg_check_valid");
+        bool result = await _repository.CheckAccessTokenIsValidAsync("check_valid");
 
         Assert.That(result, Is.True);
     }
@@ -105,15 +106,15 @@ public class PostgreSqlOAuthTokenRepositoryTests
     {
         OAuthToken token = new()
         {
-            AccessToken = "pg_check_expired",
-            RefreshToken = "pg_refresh_4",
+            AccessToken = "check_expired",
+            RefreshToken = "refresh_4",
             ExpiresAt = DateTimeOffset.UtcNow.AddHours(-1),
             RefreshTokenExpiresAt = DateTimeOffset.UtcNow.AddDays(-1),
         };
-        _context.OAuthTokens.Add(token);
+        OAuthTokens.Add(token);
         await _context.SaveChangesAsync();
 
-        bool result = await _repository.CheckAccessTokenIsValidAsync("pg_check_expired");
+        bool result = await _repository.CheckAccessTokenIsValidAsync("check_expired");
 
         Assert.That(result, Is.False);
     }
@@ -121,20 +122,8 @@ public class PostgreSqlOAuthTokenRepositoryTests
     [Test]
     public async Task CheckAccessTokenIsValidAsync_WhenTokenDoesNotExist_ShouldReturnFalse()
     {
-        bool result = await _repository.CheckAccessTokenIsValidAsync("pg_nonexistent");
+        bool result = await _repository.CheckAccessTokenIsValidAsync("nonexistent");
 
         Assert.That(result, Is.False);
     }
-
-    #endregion
-
-    #region Marker interface
-
-    [Test]
-    public void OAuthTokenRepository_ShouldImplementIPostgreSqlRepository()
-    {
-        Assert.That(_repository, Is.InstanceOf<IPostgreSqlRepository>());
-    }
-
-    #endregion
 }

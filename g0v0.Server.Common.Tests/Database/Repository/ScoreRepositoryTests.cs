@@ -1,32 +1,43 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
-using g0v0.Server.Common.Database.PostgreSQL;
-using g0v0.Server.Common.Database.PostgreSQL.Repository;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using MySqlScoreRepository = g0v0.Server.Common.Database.MySQL.Repository.ScoreRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
+using PostgreSqlScoreRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.ScoreRepository;
 using ScoreModel = g0v0.Server.Common.Database.Models.Score;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
-[TestFixture]
-public class PostgreSqlScoreRepositoryTests
+/// <summary>
+/// Runs the <see cref="IScoreRepository"/> contract against both database backends.
+/// </summary>
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class ScoreRepositoryTests(RepositoryBackend backend)
 {
-    private PostgreSqlDbContext _context = null!;
-    private ScoreRepository _repository = null!;
+    private DbContext _context = null!;
+    private IScoreRepository _repository = null!;
+
+    private DbSet<ScoreModel> Scores => _context.Set<ScoreModel>();
+
+    private DbSet<ScoreToken> ScoreTokens => _context.Set<ScoreToken>();
+
+    private DbSet<LeaderboardScore> LeaderboardScores => _context.Set<LeaderboardScore>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<PostgreSqlDbContext> options = new DbContextOptionsBuilder<PostgreSqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new PostgreSqlDbContext(options);
-        _repository = new ScoreRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlScoreRepository((MySqlDbContext)_context)
+            : new PostgreSqlScoreRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -51,7 +62,7 @@ public class PostgreSqlScoreRepositoryTests
         noPlaylist.RoomId = 42;
         noPlaylist.Passed = true;
         noPlaylist.PlaylistItemId = null;
-        _context.Scores.AddRange(passing, failed, otherRoom, noPlaylist);
+        Scores.AddRange(passing, failed, otherRoom, noPlaylist);
         await _context.SaveChangesAsync();
 
         IReadOnlyList<ScoreModel> results = await _repository.GetPassingScoresForRoomAsync(42);
@@ -60,9 +71,57 @@ public class PostgreSqlScoreRepositoryTests
     }
 
     [Test]
+    public async Task GetByIdAsync_WhenScoreExists_ShouldReturnScore()
+    {
+        ScoreModel score = CreateScore(id: 111);
+        Scores.Add(score);
+        await _context.SaveChangesAsync();
+
+        ScoreModel? result = await _repository.GetByIdAsync(111);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result!.Id, Is.EqualTo(111));
+            Assert.That(result.Rank, Is.EqualTo(ScoreRank.S));
+            Assert.That(result.Statistics[HitResult.Great], Is.EqualTo(320));
+        });
+    }
+
+    [Test]
+    public async Task GetByBeatmapIdAsync_WhenScoresExist_ShouldReturnMatchingScores()
+    {
+        Scores.AddRange(
+            CreateScore(id: 1, beatmapId: 50),
+            CreateScore(id: 2, beatmapId: 50),
+            CreateScore(id: 3, beatmapId: 99));
+        await _context.SaveChangesAsync();
+
+        IReadOnlyList<ScoreModel> results = await _repository.GetByBeatmapIdAsync(50);
+
+        Assert.That(results, Has.Count.EqualTo(2));
+        Assert.That(results, Has.All.Matches<ScoreModel>(s => s.BeatmapId == 50));
+    }
+
+    [Test]
+    public async Task GetByUserIdAsync_WhenScoresExist_ShouldReturnMatchingScores()
+    {
+        Scores.AddRange(
+            CreateScore(id: 1, userId: 7),
+            CreateScore(id: 2, userId: 7),
+            CreateScore(id: 3, userId: 8));
+        await _context.SaveChangesAsync();
+
+        IReadOnlyList<ScoreModel> results = await _repository.GetByUserIdAsync(7);
+
+        Assert.That(results, Has.Count.EqualTo(2));
+        Assert.That(results, Has.All.Matches<ScoreModel>(s => s.UserId == 7));
+    }
+
+    [Test]
     public async Task GetRecentByUserIdAndModeAsync_ShouldReturnOrderedLimitedScores()
     {
-        _context.Scores.AddRange(
+        Scores.AddRange(
             CreateScore(id: 1, userId: 7, mode: 3, endedAt: new DateTimeOffset(2026, 5, 1, 0, 0, 0, TimeSpan.Zero)),
             CreateScore(id: 2, userId: 7, mode: 3, endedAt: new DateTimeOffset(2026, 5, 3, 0, 0, 0, TimeSpan.Zero)),
             CreateScore(id: 3, userId: 7, mode: 0, endedAt: new DateTimeOffset(2026, 5, 4, 0, 0, 0, TimeSpan.Zero)));
@@ -70,17 +129,32 @@ public class PostgreSqlScoreRepositoryTests
 
         IReadOnlyList<ScoreModel> results = await _repository.GetRecentByUserIdAndModeAsync(7, 3, 2);
 
-        Assert.That(results.Select(score => score.Id), Is.EqualTo(new long[] { 2, 1 }));
+        Assert.That(results.Select(s => s.Id), Is.EqualTo(new long[] { 2, 1 }));
+    }
+
+    [Test]
+    public async Task GetBestByUserIdAndModeAsync_ShouldReturnOrderedLimitedScores()
+    {
+        Scores.AddRange(
+            CreateScore(id: 1, userId: 7, mode: 0, pp: 120),
+            CreateScore(id: 2, userId: 7, mode: 0, pp: 350),
+            CreateScore(id: 3, userId: 7, mode: 0, pp: 250),
+            CreateScore(id: 4, userId: 7, mode: 3, pp: 999));
+        await _context.SaveChangesAsync();
+
+        IReadOnlyList<ScoreModel> results = await _repository.GetBestByUserIdAndModeAsync(7, 0, 3);
+
+        Assert.That(results.Select(s => s.Id), Is.EqualTo(new long[] { 2, 3, 1 }));
     }
 
     [Test]
     public async Task GetScoreByToken_WhenTokenHasScore_ShouldReturnScore()
     {
-        ScoreModel score = CreateScore(id: 42);
-        _context.Scores.Add(score);
-        _context.ScoreTokens.Add(new ScoreToken
+        ScoreModel score = CreateScore(id: 500);
+        Scores.Add(score);
+        ScoreTokens.Add(new ScoreToken
         {
-            Id = 4242,
+            Id = 600,
             ScoreId = score.Id,
             Score = score,
             UserId = score.UserId,
@@ -89,31 +163,98 @@ public class PostgreSqlScoreRepositoryTests
         });
         await _context.SaveChangesAsync();
 
-        ScoreModel? result = await _repository.GetScoreByToken(4242);
+        ScoreModel? result = await _repository.GetScoreByToken(600);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Id, Is.EqualTo(42));
+        Assert.That(result!.Id, Is.EqualTo(500));
+    }
+
+    [Test]
+    public async Task GetScoreByToken_WhenTokenHasNoScore_ShouldReturnNull()
+    {
+        ScoreTokens.Add(new ScoreToken
+        {
+            Id = 601,
+            UserId = 1,
+            BeatmapId = 2,
+            RulesetId = 0,
+        });
+        await _context.SaveChangesAsync();
+
+        ScoreModel? result = await _repository.GetScoreByToken(601);
+
+        Assert.That(result, Is.Null);
     }
 
     [Test]
     public async Task MarkScoreHasReplay_WhenScoreExists_ShouldSetHasReplay()
     {
-        _context.Scores.Add(CreateScore(id: 55, hasReplay: false));
+        Scores.Add(CreateScore(id: 700, hasReplay: false));
         await _context.SaveChangesAsync();
 
-        await _repository.MarkScoreHasReplay(55);
+        await _repository.MarkScoreHasReplay(700);
 
-        bool hasReplay = await _context.Scores
-            .Where(score => score.Id == 55)
+        bool hasReplay = await Scores
+            .Where(score => score.Id == 700)
             .Select(score => score.HasReplay)
             .SingleAsync();
         Assert.That(hasReplay, Is.True);
     }
 
     [Test]
-    public void ScoreRepository_ShouldImplementIPostgreSqlRepository()
+    public async Task CreateAsync_ShouldPersistScore()
     {
-        Assert.That(_repository, Is.InstanceOf<IPostgreSqlRepository>());
+        ScoreModel score = CreateScore(id: 1234, checksum: "persist-me");
+
+        await _repository.CreateAsync(score);
+
+        ScoreModel? persisted = await Scores.SingleOrDefaultAsync(s => s.Id == 1234);
+        Assert.That(persisted, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(persisted!.BeatmapChecksum, Is.EqualTo("persist-me"));
+            Assert.That(persisted.Statistics[HitResult.Great], Is.EqualTo(320));
+            Assert.That(persisted.MaximumStatistics[HitResult.Great], Is.EqualTo(400));
+        });
+    }
+
+    [Test]
+    public async Task UpdateAsync_ShouldPersistChanges()
+    {
+        ScoreModel score = CreateScore(id: 4321, pp: 200);
+        Scores.Add(score);
+        await _context.SaveChangesAsync();
+
+        score.Pp = 420;
+        score.Rank = ScoreRank.XH;
+        score.Statistics[HitResult.Miss] = 0;
+        score.Statistics.Remove(HitResult.LargeTickMiss);
+        score.MaximumStatistics[HitResult.Perfect] = 99;
+        await _repository.UpdateAsync(score);
+
+        ScoreModel? updated = await Scores.SingleOrDefaultAsync(s => s.Id == 4321);
+        Assert.That(updated, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(updated!.Pp, Is.EqualTo(420));
+            Assert.That(updated.Rank, Is.EqualTo(ScoreRank.XH));
+            Assert.That(updated.Statistics[HitResult.Miss], Is.EqualTo(0));
+            Assert.That(updated.Statistics.ContainsKey(HitResult.LargeTickMiss), Is.False);
+            Assert.That(updated.MaximumStatistics[HitResult.Perfect], Is.EqualTo(99));
+        });
+    }
+
+    [Test]
+    public async Task DeleteAsync_ShouldRemoveScore()
+    {
+        ScoreModel score = CreateScore(id: 999);
+        Scores.Add(score);
+        await _context.SaveChangesAsync();
+
+        await _repository.DeleteAsync(score);
+
+        bool exists = await Scores.AnyAsync(s => s.Id == 999);
+        Assert.That(exists, Is.False);
     }
 
     [Test]
@@ -134,7 +275,7 @@ public class PostgreSqlScoreRepositoryTests
         AddLeaderboardEntry(aliceBest);
         AddLeaderboardEntry(aliceLower);
         AddLeaderboardEntry(bobBest);
-        _context.Scores.AddRange(aliceBest, aliceLower, bobBest, failed);
+        Scores.AddRange(aliceBest, aliceLower, bobBest, failed);
         await _context.SaveChangesAsync();
 
         IReadOnlyList<ScoreModel> leaderboard = await _repository.GetBeatmapLeaderboardAsync(200, 0, limit: 50);
@@ -154,7 +295,7 @@ public class PostgreSqlScoreRepositoryTests
         lazer.ClassicTotalScore = 0;
         AddLeaderboardEntry(stable);
         AddLeaderboardEntry(lazer);
-        _context.Scores.AddRange(stable, lazer);
+        Scores.AddRange(stable, lazer);
         await _context.SaveChangesAsync();
 
         IReadOnlyList<ScoreModel> all = await _repository.GetBeatmapLeaderboardAsync(200, 0, limit: 50);
@@ -180,7 +321,7 @@ public class PostgreSqlScoreRepositoryTests
         nomod.Mods = [];
         AddLeaderboardEntry(hidden);
         AddLeaderboardEntry(nomod);
-        _context.Scores.AddRange(hidden, nomod);
+        Scores.AddRange(hidden, nomod);
         await _context.SaveChangesAsync();
 
         IReadOnlyList<ScoreModel> withHd = await _repository.GetBeatmapLeaderboardAsync(200, 0, limit: 50, modAcronyms: ["HD"]);
@@ -204,7 +345,7 @@ public class PostgreSqlScoreRepositoryTests
         worse.Passed = true;
         AddLeaderboardEntry(best);
         AddLeaderboardEntry(worse);
-        _context.Scores.AddRange(best, worse);
+        Scores.AddRange(best, worse);
         await _context.SaveChangesAsync();
 
         int count = await _repository.CountBeatmapLeaderboardAsync(200, 0);
@@ -221,48 +362,65 @@ public class PostgreSqlScoreRepositoryTests
 
     private static ScoreModel CreateScore(
         long id,
+        int beatmapId = 200,
         int userId = 300,
         int mode = 0,
+        string checksum = "0123456789abcdef0123456789abcdef",
+        double pp = 250,
         bool hasReplay = true,
-        DateTimeOffset? endedAt = null) => new()
+        DateTimeOffset? endedAt = null)
+    {
+        return new ScoreModel
         {
             Id = id,
             Accuracy = 0.9876,
-            BeatmapChecksum = "0123456789abcdef0123456789abcdef",
+            BeatmapChecksum = checksum,
             ClassicTotalScore = 123456789,
             ClassicTotalScoreWithoutMods = 120000000,
             EndedAt = endedAt ?? new DateTimeOffset(2026, 5, 17, 12, 0, 0, TimeSpan.Zero),
             HasReplay = hasReplay,
             MaxCombo = 1234,
             Mods =
-        [
-            new APIMod { Acronym = "HD" },
-        ],
+            [
+                new APIMod { Acronym = "HD" },
+            ],
             PlaylistItemId = 77,
-            Pp = 250,
+            Pp = pp,
             Rank = ScoreRank.S,
             RoomId = 88,
             StartedAt = new DateTimeOffset(2026, 5, 17, 11, 58, 0, TimeSpan.Zero),
             TotalScore = 987654321,
             TotalScoreWithoutMods = 876543210,
             Type = "solo_score",
-            BeatmapId = 200,
+            BeatmapId = beatmapId,
             UserId = userId,
             Mode = mode,
             Processed = true,
             Ranked = true,
-            Passed = true,
             Statistics = new Dictionary<HitResult, int>
             {
                 [HitResult.Great] = 320,
+                [HitResult.Ok] = 45,
+                [HitResult.Meh] = 6,
+                [HitResult.Miss] = 1,
+                [HitResult.Perfect] = 12,
+                [HitResult.Good] = 8,
+                [HitResult.LargeTickMiss] = 2,
+                [HitResult.LargeTickHit] = 15,
+                [HitResult.SliderTailHit] = 16,
+                [HitResult.SmallTickHit] = 25,
             },
             MaximumStatistics = new Dictionary<HitResult, int>
             {
                 [HitResult.Great] = 400,
+                [HitResult.Ok] = 60,
+                [HitResult.Meh] = 10,
+                [HitResult.Miss] = 2,
             },
         };
+    }
 
-    private void AddLeaderboardEntry(ScoreModel score) => _context.LeaderboardScores.Add(new LeaderboardScore
+    private void AddLeaderboardEntry(ScoreModel score) => LeaderboardScores.Add(new LeaderboardScore
     {
         ScoreId = score.Id,
         UserId = score.UserId,

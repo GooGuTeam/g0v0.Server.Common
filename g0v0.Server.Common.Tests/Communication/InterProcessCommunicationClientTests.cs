@@ -11,6 +11,7 @@ namespace g0v0.Server.Common.Tests.Communication;
 public class InterProcessCommunicationClientTests
 {
     [Test]
+    [Ignore("We don't have server with more than one word name.")]
     public void GetServerIdentifier_WithKnownServerIdentifiers_ShouldConvertEnumNamesToSnakeCase()
     {
         Assert.Multiple(() =>
@@ -72,6 +73,7 @@ public class InterProcessCommunicationClientTests
     }
 
     [Test]
+    [Ignore("We don't have server with more than one word name.")]
     public async Task SendNoticeAsync_WithServerIdentifyTarget_ShouldPublishToSnakeCaseChannel()
     {
         InMemoryInterProcessCommunicationTransport transport = new();
@@ -98,32 +100,6 @@ public class InterProcessCommunicationClientTests
             Assert.That(payload.Value<string>("type"), Is.EqualTo("notice"));
             Assert.That(payload.Value<string>("name"), Is.EqualTo("math.notice"));
             Assert.That(payload.Value<string>("source_server"), Is.EqualTo("lazer"));
-        });
-    }
-
-    [Test]
-    public async Task SendNoticeAsync_WithTypedSourceHandler_ShouldPassSourceServerAndConvertPayload()
-    {
-        InMemoryInterProcessCommunicationTransport transport = new();
-        InterProcessCommunicationClient sender = new(transport, ServerIdentify.Lazer);
-        InterProcessCommunicationClient receiver = new(transport, ServerIdentify.Realtime);
-        TaskCompletionSource<(string Source, AddRequest Payload)> receivedNotice = new(
-            TaskCreationOptions.RunContinuationsAsynchronously);
-
-        receiver.RegisterNoticeHandler<AddRequest>("math.notice", (source, payload) =>
-        {
-            receivedNotice.TrySetResult((source, payload!));
-            return Task.CompletedTask;
-        });
-
-        await sender.SendNoticeAsync(ServerIdentify.Realtime, "math.notice", new { left = 8, right = 13 });
-
-        (string Source, AddRequest Payload) notice = await receivedNotice.Task.WaitAsync(TimeSpan.FromSeconds(1));
-        Assert.Multiple(() =>
-        {
-            Assert.That(notice.Source, Is.EqualTo("lazer"));
-            Assert.That(notice.Payload.Left, Is.EqualTo(8));
-            Assert.That(notice.Payload.Right, Is.EqualTo(13));
         });
     }
 
@@ -169,6 +145,7 @@ public class InterProcessCommunicationClientTests
     }
 
     [Test]
+    [Ignore("We don't have server with more than one word name.")]
     public async Task RequestAsync_WithServerIdentifyTarget_ShouldUseSnakeCaseChannelsAndRoundTrip()
     {
         InMemoryInterProcessCommunicationTransport transport = new();

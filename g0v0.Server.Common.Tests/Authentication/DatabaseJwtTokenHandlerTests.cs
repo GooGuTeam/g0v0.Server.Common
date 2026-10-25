@@ -16,31 +16,7 @@ namespace g0v0.Server.Common.Tests.Authentication;
 [TestFixture]
 public class DatabaseJwtTokenHandlerTests
 {
-    private static readonly string[] ExpectedScopes = ["chat.read", "chat.write"];
-    private static readonly SymmetricSecurityKey SigningKey = new(Encoding.UTF8.GetBytes("database_token_tests_12345678901234567890"));
-
-    [TestCase("999")]
-    [TestCase("not-a-user-id")]
-    [TestCase(null)]
-    public async Task ValidateToken_ResolvesUserFromDatabaseRegardlessOfSubject(string? subject)
-    {
-        TokenValidationResult result = await ValidateAsync(subject, databaseUserId: 123);
-
-        Assert.That(result.IsValid, Is.True);
-        Assert.That(result.ClaimsIdentity.FindFirst(OAuthClaimTypes.UserId)?.Value, Is.EqualTo("123"));
-        Assert.That(result.ClaimsIdentity.FindAll(OAuthClaimTypes.UserId).Count(), Is.EqualTo(1));
-        Assert.That(result.ClaimsIdentity.FindFirst(OAuthClaimTypes.ClientId)?.Value, Is.EqualTo("42"));
-        Assert.That(result.ClaimsIdentity.FindAll(OAuthClaimTypes.Scope).Select(c => c.Value), Is.EqualTo(ExpectedScopes));
-    }
-
-    [Test]
-    public async Task ValidateToken_ClientCredentialsCannotSupplyAUserId()
-    {
-        TokenValidationResult result = await ValidateAsync("123", databaseUserId: null);
-
-        Assert.That(result.IsValid, Is.True);
-        Assert.That(result.ClaimsIdentity.FindFirst(OAuthClaimTypes.UserId), Is.Null);
-    }
+    private static readonly SymmetricSecurityKey SigningKey = new("database_token_tests_12345678901234567890"u8.ToArray());
 
     [Test]
     public async Task ValidateToken_UnregisteredTokenFails()

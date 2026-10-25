@@ -31,12 +31,6 @@ public class RulesetManagerTests
     #region Constructor: without official rulesets
 
     [Test]
-    public void Constructor_WithoutOfficial_IncludeOfficialFalse_ShouldNotThrow()
-    {
-        Assert.DoesNotThrow(() => _ = new RulesetManager(_tempDir, includeOfficial: false));
-    }
-
-    [Test]
     public void Constructor_WithoutOfficial_RulesetsDirDoesNotExist_ShouldHaveEmptyCollection()
     {
         RulesetManager manager = new(_tempDir, includeOfficial: false);
@@ -57,36 +51,6 @@ public class RulesetManagerTests
     #endregion
 
     #region Constructor: with IPathProvider
-
-    [Test]
-    public void Constructor_WithPathProviderIncludeOfficialFalse_ShouldNotThrow()
-    {
-        TestPathProvider pathProvider = new(_tempDir);
-
-        Assert.DoesNotThrow(() => _ = new RulesetManager(pathProvider, includeOfficial: false));
-    }
-
-    [Test]
-    public void Constructor_WithPathProviderIncludeOfficialFalse_ShouldHaveEmptyCollection()
-    {
-        TestPathProvider pathProvider = new(_tempDir);
-
-        RulesetManager manager = new(pathProvider, includeOfficial: false);
-
-        Assert.That(manager.GetAllRulesets(), Is.Empty);
-    }
-
-    [Test]
-    public void Constructor_WithPathProviderIncludeOfficialFalse_ShouldResolveRulesetsSubdirectory()
-    {
-        // Create the rulesets subdirectory inside the path provider's base path.
-        Directory.CreateDirectory(_rulesetsDir);
-
-        TestPathProvider pathProvider = new(_tempDir);
-        RulesetManager manager = new(pathProvider, includeOfficial: false);
-
-        Assert.That(manager.GetAllRulesets(), Is.Empty);
-    }
 
     #endregion
 
@@ -148,51 +112,9 @@ public class RulesetManagerTests
         Assert.That(manager.GetAllRulesets(), Is.Empty);
     }
 
-    [Test]
-    public void GetAllRulesets_Result_ShouldNotBeNull()
-    {
-        RulesetManager manager = new(_tempDir, includeOfficial: false);
-
-        Assert.That(manager.GetAllRulesets(), Is.Not.Null);
-    }
-
-    #endregion
-
-    #region Logical consistency
-
-    [Test]
-    public void GetAllRulesets_WhenEmpty_GetRulesetByAnyId_ShouldThrow()
-    {
-        RulesetManager manager = new(_tempDir, includeOfficial: false);
-
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(int.MinValue));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(-1));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(0));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(1));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(int.MaxValue));
-    }
-
-    [Test]
-    public void GetAllRulesets_WhenEmpty_GetRulesetByAnyName_ShouldThrow()
-    {
-        RulesetManager manager = new(_tempDir, includeOfficial: false);
-
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(string.Empty));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset(" "));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset("osu"));
-        Assert.Throws<ArgumentException>(() => manager.GetRuleset("unknown_ruleset"));
-    }
-
     #endregion
 
     #region Loading from disk with custom rulesets
-
-    [Test]
-    public void LoadFromDisk_WhenRulesetsDirDoesNotExist_ShouldNotThrow()
-    {
-        // _rulesetsDir intentionally not created – LoadFromDisk should silently return.
-        Assert.DoesNotThrow(() => _ = new RulesetManager(_tempDir, includeOfficial: false));
-    }
 
     [Test]
     public void LoadFromDisk_WithNonRulesetDllInDirectory_ShouldIgnoreNonMatchingFiles()

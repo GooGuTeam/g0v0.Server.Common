@@ -1,31 +1,35 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using g0v0.Server.Common.Database.Models;
-using g0v0.Server.Common.Database.MySQL;
-using g0v0.Server.Common.Database.MySQL.Repository;
+using g0v0.Server.Common.Database.Repository;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using MySqlDbContext = g0v0.Server.Common.Database.MySQL.MysqlDbContext;
+using MySqlUserStatisticsRepository = g0v0.Server.Common.Database.MySQL.Repository.UserStatisticsRepository;
+using PostgreSqlDbContext = g0v0.Server.Common.Database.PostgreSQL.PostgreSqlDbContext;
+using PostgreSqlUserStatisticsRepository = g0v0.Server.Common.Database.PostgreSQL.Repository.UserStatisticsRepository;
 
 namespace g0v0.Server.Common.Tests.Database.Repository;
 
 /// <summary>
-/// Runs the <see cref="UserStatisticsRepository"/> against an in-memory Mysql context.
+/// Runs the <see cref="IUserStatisticsRepository"/> contract against both database backends.
 /// </summary>
-[TestFixture]
-public class MySqlUserStatisticsRepositoryTests
+[TestFixture(RepositoryBackend.MySql)]
+[TestFixture(RepositoryBackend.PostgreSql)]
+public class UserStatisticsRepositoryTests(RepositoryBackend backend)
 {
-    private MysqlDbContext _context = null!;
-    private UserStatisticsRepository _repository = null!;
+    private DbContext _context = null!;
+    private IUserStatisticsRepository _repository = null!;
+
+    private DbSet<UserStatistics> UserStatistics => _context.Set<UserStatistics>();
 
     [SetUp]
     public void SetUp()
     {
-        DbContextOptions<MysqlDbContext> options = new DbContextOptionsBuilder<MysqlDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new MysqlDbContext(options);
-        _repository = new UserStatisticsRepository(_context);
+        _context = RepositoryTestContexts.Create(backend);
+        _repository = backend == RepositoryBackend.MySql
+            ? new MySqlUserStatisticsRepository((MySqlDbContext)_context)
+            : new PostgreSqlUserStatisticsRepository((PostgreSqlDbContext)_context);
     }
 
     [TearDown]
@@ -49,8 +53,8 @@ public class MySqlUserStatisticsRepositoryTests
 
         await _repository.CreateAsync(statistics);
 
-        Assert.That(_context.UserStatistics.Count(), Is.EqualTo(1));
-        UserStatistics stored = _context.UserStatistics.Single();
+        Assert.That(UserStatistics.Count(), Is.EqualTo(1));
+        UserStatistics stored = UserStatistics.Single();
         Assert.That(stored.UserId, Is.EqualTo(1));
         Assert.That(stored.Mode, Is.EqualTo(0));
         Assert.That(stored.Pp, Is.EqualTo(1234.5));
@@ -95,7 +99,7 @@ public class MySqlUserStatisticsRepositoryTests
 
         await _repository.UpdateAsync(statistics);
 
-        UserStatistics stored = _context.UserStatistics.Single();
+        UserStatistics stored = UserStatistics.Single();
         Assert.That(stored.Pp, Is.EqualTo(900));
         Assert.That(stored.PlayCount, Is.EqualTo(42));
     }

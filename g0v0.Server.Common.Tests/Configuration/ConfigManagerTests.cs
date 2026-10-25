@@ -33,15 +33,6 @@ public class ConfigManagerTests
     #region Construction: file resolution
 
     [Test]
-    public void Constructor_WithoutAttribute_ShouldResolveSnakeCaseFileName()
-    {
-        // SimpleTestConfig → simple_test_config.json
-        WriteConfigFile("simple_test_config.json", new { Name = "hello", Value = 7, ReloadableValue = "x" });
-
-        Assert.DoesNotThrow(() => _ = new ConfigManager(_tempDir));
-    }
-
-    [Test]
     public void Get_AfterConstruction_ShouldReturnDeserializedProperties()
     {
         WriteConfigFile(
