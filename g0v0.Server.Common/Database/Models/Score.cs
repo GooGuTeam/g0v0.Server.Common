@@ -83,6 +83,10 @@ public class Score
     /// </summary>
     public bool HasReplay { get; set; }
 
+    /// <summary>Gets the replay storage key.</summary>
+    [NotMapped]
+    public string ReplayFilename => FormattableString.Invariant($"replays/{Id}_{BeatmapId}_{UserId}_lazer_replay.osr");
+
     /// <summary>
     /// Gets or sets the total score.
     /// </summary>
