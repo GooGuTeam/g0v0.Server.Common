@@ -174,6 +174,29 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.ToTable("beatmap_playcounts", (string)null);
                 });
 
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.BeatmapRating", b =>
+                {
+                    b.Property<int>("BeatmapSetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("beatmap_set_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer")
+                        .HasColumnName("rating");
+
+                    b.HasKey("BeatmapSetId", "UserId")
+                        .HasName("pk_beatmap_ratings");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_beatmap_ratings_user_id");
+
+                    b.ToTable("beatmap_ratings", (string)null);
+                });
+
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.BeatmapSet", b =>
                 {
                     b.Property<int>("Id")
@@ -529,6 +552,29 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasDatabaseName("ix_chat_user_channels_hidden");
 
                     b.ToTable("chat_user_channels", (string)null);
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.FavouriteBeatmapSet", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("BeatmapSetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("beatmap_set_id");
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.HasKey("UserId", "BeatmapSetId")
+                        .HasName("pk_favourite_beatmapset");
+
+                    b.HasIndex("BeatmapSetId")
+                        .HasDatabaseName("ix_favourite_beatmapset_beatmap_set_id");
+
+                    b.ToTable("favourite_beatmapset", (string)null);
                 });
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.LeaderboardScore", b =>
@@ -1403,6 +1449,60 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.ToTable("score_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.Screenshot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Hits")
+                        .HasColumnType("integer")
+                        .HasColumnName("hits");
+
+                    b.Property<DateTimeOffset>("LastAccess")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_access");
+
+                    b.Property<string>("Sha256Hash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("sha256_hash");
+
+                    b.Property<DateTimeOffset>("Timestamp")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("timestamp");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("url");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_screenshots");
+
+                    b.HasIndex(new[] { "Hits", "Timestamp" }, "ix_screenshots_hits_timestamp")
+                        .HasDatabaseName("ix_screenshots_hits_timestamp");
+
+                    b.HasIndex(new[] { "Sha256Hash" }, "ix_screenshots_sha256_hash")
+                        .HasDatabaseName("ix_screenshots_sha256_hash");
+
+                    b.HasIndex(new[] { "UserId", "Sha256Hash" }, "ix_screenshots_user_hash")
+                        .HasDatabaseName("ix_screenshots_user_id_sha256_hash");
+
+                    b.HasIndex(new[] { "UserId" }, "ix_screenshots_user_id")
+                        .HasDatabaseName("ix_screenshots_user_id");
+
+                    b.ToTable("screenshots", (string)null);
+                });
+
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.SilenceUser", b =>
                 {
                     b.Property<int>("Id")
@@ -1756,6 +1856,27 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.Navigation("BeatmapSet");
                 });
 
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.BeatmapRating", b =>
+                {
+                    b.HasOne("g0v0.Server.Common.Database.Models.BeatmapSet", "BeatmapSet")
+                        .WithMany()
+                        .HasForeignKey("BeatmapSetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_beatmap_ratings_beatmapsets_beatmap_set_id");
+
+                    b.HasOne("g0v0.Server.Common.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_beatmap_ratings_users_user_id");
+
+                    b.Navigation("BeatmapSet");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.BestScore", b =>
                 {
                     b.HasOne("g0v0.Server.Common.Database.Models.Score", "Score")
@@ -1785,6 +1906,27 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasConstraintName("fk_chat_messages_users_sender_id");
 
                     b.Navigation("Channel");
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.FavouriteBeatmapSet", b =>
+                {
+                    b.HasOne("g0v0.Server.Common.Database.Models.BeatmapSet", "BeatmapSet")
+                        .WithMany()
+                        .HasForeignKey("BeatmapSetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_favourite_beatmapset_beatmapsets_beatmap_set_id");
+
+                    b.HasOne("g0v0.Server.Common.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_favourite_beatmapset_users_user_id");
+
+                    b.Navigation("BeatmapSet");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.LeaderboardScore", b =>

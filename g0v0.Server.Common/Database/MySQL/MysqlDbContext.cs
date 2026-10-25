@@ -139,6 +139,15 @@ public class MysqlDbContext : DbContext
     /// </summary>
     public DbSet<MonthlyPlaycount> MonthlyPlaycounts { get; set; } = null!;
 
+    /// <summary>Gets or sets the FavouriteBeatmapSet records.</summary>
+    public DbSet<FavouriteBeatmapSet> FavouriteBeatmapSets { get; set; } = null!;
+
+    /// <summary>Gets or sets the BeatmapRating records.</summary>
+    public DbSet<BeatmapRating> BeatmapRatings { get; set; } = null!;
+
+    /// <summary>Gets or sets the Screenshot records.</summary>
+    public DbSet<Screenshot> Screenshots { get; set; } = null!;
+
     /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
