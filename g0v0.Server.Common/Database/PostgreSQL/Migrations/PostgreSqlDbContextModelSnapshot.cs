@@ -1706,6 +1706,26 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.UserAchievement", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("integer")
+                        .HasColumnName("achievement_id");
+
+                    b.Property<DateTimeOffset>("AchievedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("achieved_at");
+
+                    b.HasKey("UserId", "AchievementId")
+                        .HasName("pk_user_achievements");
+
+                    b.ToTable("user_achievements", (string)null);
+                });
+
             modelBuilder.Entity("g0v0.Server.Common.Database.Models.UserNotification", b =>
                 {
                     b.Property<long>("Id")
@@ -2114,6 +2134,18 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("fk_trusted_devices_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("g0v0.Server.Common.Database.Models.UserAchievement", b =>
+                {
+                    b.HasOne("g0v0.Server.Common.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_achievements_users_user_id");
 
                     b.Navigation("User");
                 });

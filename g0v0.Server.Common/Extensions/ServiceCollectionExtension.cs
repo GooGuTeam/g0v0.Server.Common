@@ -1,6 +1,7 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using System.Reflection;
+using g0v0.Server.Common.Achievements;
 using g0v0.Server.Common.Authentication;
 using g0v0.Server.Common.Caching;
 using g0v0.Server.Common.Communication;
@@ -192,6 +193,22 @@ public static class ServiceCollectionExtension
         services.AddScoped<IFetcher>(serviceProvider => serviceProvider.GetRequiredService<Fetcher>());
         services.AddScoped<IBeatmapSearchSource>(serviceProvider => serviceProvider.GetRequiredService<Fetcher>());
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the shared score-based achievement evaluator and persistence service.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Requires repositories, rulesets, the fetcher, and score utilities to be registered beforehand.
+    /// </remarks>
+    public static IServiceCollection AddAchievements(this IServiceCollection services)
+    {
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddScoped<IAchievementEvaluator, AchievementEvaluator>();
+        services.TryAddScoped<IAchievementService, AchievementService>();
         return services;
     }
 

@@ -124,5 +124,6 @@ public sealed class ScoreProcessingService(IFetcher fetcher, IBeatmapRepository 
         double length = playable.CalculatePlayableBounds().end / 1000 / osu.Game.Utils.ModUtils.CalculateRateWithMods(mods);
         int playTime = (int)Math.Max(0, Math.Min(length, (score.EndedAt - score.StartedAt).TotalSeconds));
         await scores.CompleteProcessingAsync(score, playTime);
+        score.Processed = true;
     }
 }

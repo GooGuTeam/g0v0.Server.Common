@@ -1,0 +1,1679 @@
+[
+  {
+    "definition": {
+      "id": 1,
+      "name": "Rising Star",
+      "description": "Can't go forward without the first steps.",
+      "icon": "osu-skill-pass-1"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 2,
+      "name": "Constellation Prize",
+      "description": "Definitely not a consolation prize. Now things start getting hard!",
+      "icon": "osu-skill-pass-2"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 3,
+      "name": "Building Confidence",
+      "description": "Oh, you've SO got this.",
+      "icon": "osu-skill-pass-3"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 4,
+      "name": "Insanity Approaches",
+      "description": "You're not twitching, you're just ready.",
+      "icon": "osu-skill-pass-4"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 5,
+      "name": "These Clarion Skies",
+      "description": "Everything seems so clear now.",
+      "icon": "osu-skill-pass-5"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 6,
+      "name": "Above and Beyond",
+      "description": "A cut above the rest.",
+      "icon": "osu-skill-pass-6"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 7,
+      "name": "Supremacy",
+      "description": "All marvel before your prowess.",
+      "icon": "osu-skill-pass-7"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 8,
+      "name": "Absolution",
+      "description": "My god, you're full of stars!",
+      "icon": "osu-skill-pass-8"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 9,
+      "name": "Event Horizon",
+      "description": "No force dares to pull you under.",
+      "icon": "osu-skill-pass-9"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 9,
+    "maximum": 10,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 10,
+      "name": "Phantasm",
+      "description": "Fevered is your passion, extraordinary is your skill.",
+      "icon": "osu-skill-pass-10"
+    },
+    "rule": "skill_pass",
+    "mode": 0,
+    "minimum": 10,
+    "maximum": 11,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 11,
+      "name": "Totality",
+      "description": "All the notes. Every single one.",
+      "icon": "osu-skill-fc-1"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 12,
+      "name": "Business As Usual",
+      "description": "Two to go, please.",
+      "icon": "osu-skill-fc-2"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 13,
+      "name": "Building Steam",
+      "description": "Hey, this isn't so bad.",
+      "icon": "osu-skill-fc-3"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 14,
+      "name": "Moving Forward",
+      "description": "Bet you feel good about that.",
+      "icon": "osu-skill-fc-4"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 15,
+      "name": "Paradigm Shift",
+      "description": "Surprisingly difficult.",
+      "icon": "osu-skill-fc-5"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 16,
+      "name": "Anguish Quelled",
+      "description": "Don't choke.",
+      "icon": "osu-skill-fc-6"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 17,
+      "name": "Never Give Up",
+      "description": "Excellence is its own reward.",
+      "icon": "osu-skill-fc-7"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 18,
+      "name": "Aberration",
+      "description": "They said it couldn't be done. They were wrong.",
+      "icon": "osu-skill-fc-8"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 19,
+      "name": "Chosen",
+      "description": "Reign among the Prometheans, where you belong.",
+      "icon": "osu-skill-fc-9"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 9,
+    "maximum": 10,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 20,
+      "name": "Unfathomable",
+      "description": "You have no equal.",
+      "icon": "osu-skill-fc-10"
+    },
+    "rule": "skill_fc",
+    "mode": 0,
+    "minimum": 10,
+    "maximum": 11,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 21,
+      "name": "500 Combo",
+      "description": "500 big ones! You''re moving up in the world!",
+      "icon": "osu-combo-500"
+    },
+    "rule": "combo",
+    "mode": 0,
+    "minimum": 500,
+    "maximum": 750,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 22,
+      "name": "750 Combo",
+      "description": "750 notes back to back? Woah.",
+      "icon": "osu-combo-750"
+    },
+    "rule": "combo",
+    "mode": 0,
+    "minimum": 750,
+    "maximum": 1000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 23,
+      "name": "1000 Combo",
+      "description": "A thousand reasons why you rock at this game.",
+      "icon": "osu-combo-1000"
+    },
+    "rule": "combo",
+    "mode": 0,
+    "minimum": 1000,
+    "maximum": 2000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 24,
+      "name": "2000 Combo",
+      "description": "Nothing can stop you now.",
+      "icon": "osu-combo-2000"
+    },
+    "rule": "combo",
+    "mode": 0,
+    "minimum": 2000,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 25,
+      "name": "My First Don",
+      "description": "Marching to the beat of your own drum. Literally.",
+      "icon": "taiko-skill-pass-1"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 26,
+      "name": "Katsu Katsu Katsu",
+      "description": "Hora! Izuko!",
+      "icon": "taiko-skill-pass-2"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 27,
+      "name": "Not Even Trying",
+      "description": "Muzukashii? Not even.",
+      "icon": "taiko-skill-pass-3"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 28,
+      "name": "Face Your Demons",
+      "description": "The first trials are now behind you, but are you a match for the Oni?",
+      "icon": "taiko-skill-pass-4"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 29,
+      "name": "The Demon Within",
+      "description": "No rest for the wicked.",
+      "icon": "taiko-skill-pass-5"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 30,
+      "name": "Drumbreaker",
+      "description": "Too strong.",
+      "icon": "taiko-skill-pass-6"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 31,
+      "name": "The Godfather",
+      "description": "You are the Don of Dons.",
+      "icon": "taiko-skill-pass-7"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 32,
+      "name": "Rhythm Incarnate",
+      "description": "Feel the beat. Become the beat.",
+      "icon": "taiko-skill-pass-8"
+    },
+    "rule": "skill_pass",
+    "mode": 1,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 33,
+      "name": "Keeping Time",
+      "description": "Don, then katsu. Don, then katsu..",
+      "icon": "taiko-skill-fc-1"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 34,
+      "name": "To Your Own Beat",
+      "description": "Straight and steady.",
+      "icon": "taiko-skill-fc-2"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 35,
+      "name": "Big Drums",
+      "description": "Bigger scores to match.",
+      "icon": "taiko-skill-fc-3"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 36,
+      "name": "Adversity Overcome",
+      "description": "Difficult? Not for you.",
+      "icon": "taiko-skill-fc-4"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 37,
+      "name": "Demonslayer",
+      "description": "An Oni felled forevermore.",
+      "icon": "taiko-skill-fc-5"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 38,
+      "name": "Rhythm's Call",
+      "description": "Heralding true skill.",
+      "icon": "taiko-skill-fc-6"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 39,
+      "name": "Time Everlasting",
+      "description": "Not a single beat escapes you.",
+      "icon": "taiko-skill-fc-7"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 40,
+      "name": "The Drummer's Throne",
+      "description": "Percussive brilliance befitting royalty alone.",
+      "icon": "taiko-skill-fc-8"
+    },
+    "rule": "skill_fc",
+    "mode": 1,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 41,
+      "name": "A Slice Of Life",
+      "description": "Hey, this fruit catching business isn't bad.",
+      "icon": "fruits-skill-pass-1"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 42,
+      "name": "Dashing Ever Forward",
+      "description": "Fast is how you do it.",
+      "icon": "fruits-skill-pass-2"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 43,
+      "name": "Zesty Disposition",
+      "description": "No scurvy for you, not with that much fruit.",
+      "icon": "fruits-skill-pass-3"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 44,
+      "name": "Hyperdash ON!",
+      "description": "Time and distance is no obstacle to you.",
+      "icon": "fruits-skill-pass-4"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 45,
+      "name": "It's Raining Fruit",
+      "description": "And you can catch them all.",
+      "icon": "fruits-skill-pass-5"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 46,
+      "name": "Fruit Ninja",
+      "description": "Legendary techniques.",
+      "icon": "fruits-skill-pass-6"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 47,
+      "name": "Dreamcatcher",
+      "description": "No fruit, only dreams now.",
+      "icon": "fruits-skill-pass-7"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 48,
+      "name": "Lord of the Catch",
+      "description": "Your kingdom kneels before you.",
+      "icon": "fruits-skill-pass-8"
+    },
+    "rule": "skill_pass",
+    "mode": 2,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 49,
+      "name": "Sweet And Sour",
+      "description": "Apples and oranges, literally.",
+      "icon": "fruits-skill-fc-1"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 50,
+      "name": "Reaching The Core",
+      "description": "The seeds of future success.",
+      "icon": "fruits-skill-fc-2"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 51,
+      "name": "Clean Platter",
+      "description": "Clean only of failure. It is completely full, otherwise.",
+      "icon": "fruits-skill-fc-3"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 52,
+      "name": "Between The Rain",
+      "description": "No umbrella needed.",
+      "icon": "fruits-skill-fc-4"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 53,
+      "name": "Addicted",
+      "description": "That was an overdose?",
+      "icon": "fruits-skill-fc-5"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 54,
+      "name": "Quickening",
+      "description": "A dash above normal limits.",
+      "icon": "fruits-skill-fc-6"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 55,
+      "name": "Supersonic",
+      "description": "Faster than is reasonably necessary.",
+      "icon": "fruits-skill-fc-7"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 56,
+      "name": "Dashing Scarlet",
+      "description": "Speed beyond mortal reckoning.",
+      "icon": "fruits-skill-fc-8"
+    },
+    "rule": "skill_fc",
+    "mode": 2,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 57,
+      "name": "First Steps",
+      "description": "It isn't 9-to-5, but 1-to-9. Keys, that is.",
+      "icon": "mania-skill-pass-1"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 58,
+      "name": "No Normal Player",
+      "description": "Not anymore, at least.",
+      "icon": "mania-skill-pass-2"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 59,
+      "name": "Impulse Drive",
+      "description": "Not quite hyperspeed, but getting close.",
+      "icon": "mania-skill-pass-3"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 60,
+      "name": "Hyperspeed",
+      "description": "Woah.",
+      "icon": "mania-skill-pass-4"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 61,
+      "name": "Ever Onwards",
+      "description": "Another challenge is just around the corner.",
+      "icon": "mania-skill-pass-5"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 62,
+      "name": "Another Surpassed",
+      "description": "Is there no limit to your skills?",
+      "icon": "mania-skill-pass-6"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 63,
+      "name": "Extra Credit",
+      "description": "See me after class.",
+      "icon": "mania-skill-pass-7"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 64,
+      "name": "Maniac",
+      "description": "There's just no stopping you.",
+      "icon": "mania-skill-pass-8"
+    },
+    "rule": "skill_pass",
+    "mode": 3,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 65,
+      "name": "Keystruck",
+      "description": "The beginning of a new story",
+      "icon": "mania-skill-fc-1"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 1,
+    "maximum": 2,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 66,
+      "name": "Keying In",
+      "description": "Finding your groove.",
+      "icon": "mania-skill-fc-2"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 2,
+    "maximum": 3,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 67,
+      "name": "Hyperflow",
+      "description": "You can *feel* the rhythm.",
+      "icon": "mania-skill-fc-3"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 3,
+    "maximum": 4,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 68,
+      "name": "Breakthrough",
+      "description": "Many skills mastered, rolled into one.",
+      "icon": "mania-skill-fc-4"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 4,
+    "maximum": 5,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 69,
+      "name": "Everything Extra",
+      "description": "Giving your all is giving everything you have.",
+      "icon": "mania-skill-fc-5"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 5,
+    "maximum": 6,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 70,
+      "name": "Level Breaker",
+      "description": "Finesse beyond reason",
+      "icon": "mania-skill-fc-6"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 6,
+    "maximum": 7,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 71,
+      "name": "Step Up",
+      "description": "A precipice rarely seen.",
+      "icon": "mania-skill-fc-7"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 7,
+    "maximum": 8,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 72,
+      "name": "Behind The Veil",
+      "description": "Supernatural!",
+      "icon": "mania-skill-fc-8"
+    },
+    "rule": "skill_fc",
+    "mode": 3,
+    "minimum": 8,
+    "maximum": 9,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 73,
+      "name": "5,000 Plays",
+      "description": "There's a lot more where that came from",
+      "icon": "osu-plays-5000"
+    },
+    "rule": "playcount",
+    "mode": 0,
+    "minimum": 5000,
+    "maximum": 15000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 74,
+      "name": "15,000 Plays",
+      "description": "Must.. click.. circles..",
+      "icon": "osu-plays-15000"
+    },
+    "rule": "playcount",
+    "mode": 0,
+    "minimum": 15000,
+    "maximum": 25000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 75,
+      "name": "25,000 Plays",
+      "description": "There's no going back.",
+      "icon": "osu-plays-25000"
+    },
+    "rule": "playcount",
+    "mode": 0,
+    "minimum": 25000,
+    "maximum": 50000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 76,
+      "name": "50,000 Plays",
+      "description": "You're here forever.",
+      "icon": "osu-plays-50000"
+    },
+    "rule": "playcount",
+    "mode": 0,
+    "minimum": 50000,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 77,
+      "name": "30,000 Drum Hits",
+      "description": "Did that drum have a face?",
+      "icon": "taiko-hits-30000"
+    },
+    "rule": "tth",
+    "mode": 1,
+    "minimum": 30000,
+    "maximum": 300000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 78,
+      "name": "300,000 Drum Hits",
+      "description": "The rhythm never stops.",
+      "icon": "taiko-hits-300000"
+    },
+    "rule": "tth",
+    "mode": 1,
+    "minimum": 300000,
+    "maximum": 3000000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 79,
+      "name": "3,000,000 Drum Hits",
+      "description": "Truly, the Don of dons.",
+      "icon": "taiko-hits-3000000"
+    },
+    "rule": "tth",
+    "mode": 1,
+    "minimum": 3000000,
+    "maximum": 30000000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 80,
+      "name": "30,000,000 Drum Hits",
+      "description": "Your rhythm, eternal.",
+      "icon": "taiko-hits-30000000"
+    },
+    "rule": "tth",
+    "mode": 1,
+    "minimum": 30000000,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 81,
+      "name": "Catch 20,000 fruits",
+      "description": "That is a lot of dietary fiber.",
+      "icon": "fruits-hits-20000"
+    },
+    "rule": "tth",
+    "mode": 2,
+    "minimum": 20000,
+    "maximum": 200000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 82,
+      "name": "Catch 200,000 fruits",
+      "description": "So, I heard you like fruit...",
+      "icon": "fruits-hits-200000"
+    },
+    "rule": "tth",
+    "mode": 2,
+    "minimum": 200000,
+    "maximum": 2000000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 83,
+      "name": "Catch 2,000,000 fruits",
+      "description": "Downright healthy.",
+      "icon": "fruits-hits-2000000"
+    },
+    "rule": "tth",
+    "mode": 2,
+    "minimum": 2000000,
+    "maximum": 20000000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 84,
+      "name": "Catch 20,000,000 fruits",
+      "description": "Nothing left behind.",
+      "icon": "fruits-hits-20000000"
+    },
+    "rule": "tth",
+    "mode": 2,
+    "minimum": 20000000,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 85,
+      "name": "40,000 Keys",
+      "description": "Just the start of the rainbow.",
+      "icon": "mania-hits-40000"
+    },
+    "rule": "tth",
+    "mode": 3,
+    "minimum": 40000,
+    "maximum": 400000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 86,
+      "name": "400,000 Keys",
+      "description": "Four hundred thousand and still not even close.",
+      "icon": "mania-hits-400000"
+    },
+    "rule": "tth",
+    "mode": 3,
+    "minimum": 400000,
+    "maximum": 4000000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 87,
+      "name": "4,000,000 Keys",
+      "description": "Is this the end of the rainbow?",
+      "icon": "mania-hits-4000000"
+    },
+    "rule": "tth",
+    "mode": 3,
+    "minimum": 4000000,
+    "maximum": 40000000,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 88,
+      "name": "40,000,000 Keys",
+      "description": "When someone asks which keys you play, the answer is now 'yes'.",
+      "icon": "mania-hits-40000000"
+    },
+    "rule": "tth",
+    "mode": 3,
+    "minimum": 40000000,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 89,
+      "name": "Finality",
+      "description": "High stakes, no regrets.",
+      "icon": "all-intro-suddendeath"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "SD"
+  },
+  {
+    "definition": {
+      "id": 90,
+      "name": "Perfectionist",
+      "description": "Accept nothing but the best.",
+      "icon": "all-intro-perfect"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "PF"
+  },
+  {
+    "definition": {
+      "id": 91,
+      "name": "Rock Around The Clock",
+      "description": "You can't stop the rock.",
+      "icon": "all-intro-hardrock"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "HR"
+  },
+  {
+    "definition": {
+      "id": 92,
+      "name": "Time And A Half",
+      "description": "Having a right ol' time. One and a half of them, almost.",
+      "icon": "all-intro-doubletime"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "DT"
+  },
+  {
+    "definition": {
+      "id": 93,
+      "name": "Sweet Rave Party",
+      "description": "Founded in the fine tradition of changing things that were just fine as they were.",
+      "icon": "all-intro-nightcore"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "NC"
+  },
+  {
+    "definition": {
+      "id": 94,
+      "name": "Blindsight",
+      "description": "I can see just perfectly.",
+      "icon": "all-intro-hidden"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "HD"
+  },
+  {
+    "definition": {
+      "id": 95,
+      "name": "Are You Afraid Of The Dark?",
+      "description": "Harder than it looks, probably because it's hard to look.",
+      "icon": "all-intro-flashlight"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "FL"
+  },
+  {
+    "definition": {
+      "id": 96,
+      "name": "Dial It Right Back",
+      "description": "Sometimes you just want to take it easy.",
+      "icon": "all-intro-easy"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "EZ"
+  },
+  {
+    "definition": {
+      "id": 97,
+      "name": "Risk Averse",
+      "description": "Safety nets are fun!",
+      "icon": "all-intro-nofail"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "NF"
+  },
+  {
+    "definition": {
+      "id": 98,
+      "name": "Slowboat",
+      "description": "You got there. Eventually.",
+      "icon": "all-intro-halftime"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "HT"
+  },
+  {
+    "definition": {
+      "id": 99,
+      "name": "Burned Out",
+      "description": "One cannot always spin to win.",
+      "icon": "all-intro-spunout"
+    },
+    "rule": "mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "SO"
+  },
+  {
+    "definition": {
+      "id": 100,
+      "name": "Gear Shift",
+      "description": "Tailor your experience to your perfect fit.",
+      "icon": "all-intro-conversion"
+    },
+    "rule": "category_mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "Conversion"
+  },
+  {
+    "definition": {
+      "id": 101,
+      "name": "Game Night",
+      "description": "Mum said it's my turn with the beatmap!",
+      "icon": "all-intro-fun"
+    },
+    "rule": "category_mod",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": "Fun"
+  },
+  {
+    "definition": {
+      "id": 105,
+      "name": "Jackpot",
+      "description": "Lucky sevens is a mild understatement.",
+      "icon": "all-secret-jackpot"
+    },
+    "rule": "jackpot",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 106,
+      "name": "Nonstop",
+      "description": "Breaks? What are those?",
+      "icon": "all-secret-nonstop"
+    },
+    "rule": "nonstop",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 107,
+      "name": "Time Dilation",
+      "description": "Longer is shorter when all is said and done.",
+      "icon": "all-secret-tidi"
+    },
+    "rule": "time_dilation",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 108,
+      "name": "To The Core",
+      "description": "In for a penny, in for a pound. Pounding bass, that is.",
+      "icon": "all-secret-tothecore"
+    },
+    "rule": "to_the_core",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 109,
+      "name": "When You See It",
+      "description": "Three numbers which will haunt you forevermore.",
+      "icon": "all-secret-when-you-see-it"
+    },
+    "rule": "wysi",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 110,
+      "name": "Prepared",
+      "description": "Do it for real next time.",
+      "icon": "all-secret-prepared"
+    },
+    "rule": "prepared",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 111,
+      "name": "Reckless Abandon",
+      "description": "Throw it all to the wind.",
+      "icon": "all-secret-reckless"
+    },
+    "rule": "reckless_adandon",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 112,
+      "name": "Lights Out",
+      "description": "The party's just getting started.",
+      "icon": "all-secret-lightsout"
+    },
+    "rule": "lights_out",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 113,
+      "name": "Camera Shy",
+      "description": "Stop being cute.",
+      "icon": "all-secret-uguushy"
+    },
+    "rule": "camera_shy",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 114,
+      "name": "The Sun of All Fears",
+      "description": "Unfortunate.",
+      "icon": "all-secret-nuked"
+    },
+    "rule": "the_sun_of_all_fears",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 115,
+      "name": "Hour Before The Down",
+      "description": "Eleven skies of everlasting sunrise.",
+      "icon": "all-secret-hourbeforethedawn"
+    },
+    "rule": "hour_before_the_down",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 116,
+      "name": "Slow And Steady",
+      "description": "Win the race, or start again.",
+      "icon": "all-secret-slowandsteady"
+    },
+    "rule": "slow_and_steady",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 117,
+      "name": "No Time To Spare",
+      "description": "Places to be, things to do.",
+      "icon": "all-secret-ntts"
+    },
+    "rule": "no_time_to_spare",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 118,
+      "name": "Sognare",
+      "description": "A dream in stop-motion, soon forever gone.",
+      "icon": "all-secret-sognare"
+    },
+    "rule": "sognare",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 119,
+      "name": "Realtor Extraordinaire",
+      "description": "An acre-wide stride.",
+      "icon": "all-secret-realtor"
+    },
+    "rule": "realtor_extraordinaire",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 120,
+      "name": "Impeccable",
+      "description": "Speed matters not to the exemplary.",
+      "icon": "all-secret-impeccable"
+    },
+    "rule": "impeccable",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 121,
+      "name": "Aeon",
+      "description": "In the mire of thawing time, memory shall be your guide.",
+      "icon": "all-secret-aeon"
+    },
+    "rule": "aeon",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 122,
+      "name": "Quick Maths",
+      "description": "Beats per minute over... this isn't quick at all!",
+      "icon": "all-secret-quickmaffs"
+    },
+    "rule": "quick_maths",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 123,
+      "name": "Kaleidoscope",
+      "description": "So many pretty colours. Most of them red.",
+      "icon": "all-secret-kaleidoscope"
+    },
+    "rule": "kaleidoscope",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 124,
+      "name": "Valediction",
+      "description": "One last time.",
+      "icon": "all-secret-valediction"
+    },
+    "rule": "valediction",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 127,
+      "name": "Right On Time",
+      "description": "The first minute is always the hardest.",
+      "icon": "all-secret-rightontime"
+    },
+    "rule": "right_on_time",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 128,
+      "name": "Not Again",
+      "description": "Regret everything.",
+      "icon": "all-secret-notagain"
+    },
+    "rule": "not_again",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 129,
+      "name": "Deliberation",
+      "description": "The challenge remains.",
+      "icon": "all-secret-deliberation"
+    },
+    "rule": "deliberation",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 130,
+      "name": "Clarity",
+      "description": "And yet in our memories, you remain crystal clear.",
+      "icon": "all-secret-clarity"
+    },
+    "rule": "clarity",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 131,
+      "name": "Autocreation",
+      "description": "Absolute rule.",
+      "icon": "all-secret-autocreation"
+    },
+    "rule": "autocreation",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 132,
+      "name": "Value Your Identity",
+      "description": "As perfect as you are.",
+      "icon": "all-secret-identity"
+    },
+    "rule": "value_your_identity",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 133,
+      "name": "By The Skin Of The Teeth",
+      "description": "You're that accurate.",
+      "icon": "all-secret-skinoftheteeth"
+    },
+    "rule": "by_the_skin_of_the_teeth",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  },
+  {
+    "definition": {
+      "id": 134,
+      "name": "Meticulous Mayhem",
+      "description": "How did we get here?",
+      "icon": "all-secret-meticulousmayhem"
+    },
+    "rule": "meticulous_mayhem",
+    "mode": -1,
+    "minimum": 0,
+    "maximum": 0,
+    "mod": null
+  }
+]

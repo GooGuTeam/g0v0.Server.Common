@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Achievements/medals.json"/>
+    </ItemGroup>
+
+    <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
         <PackageReference Include="AWSSDK.S3" Version="4.0.100.2"/>
         <PackageReference Include="BCrypt.Net-Next" Version="4.2.0"/>

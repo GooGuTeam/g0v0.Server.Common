@@ -59,6 +59,9 @@ public class MysqlDbContext : DbContext
     /// </summary>
     public DbSet<BeatmapSet> BeatmapSets { get; set; } = null!;
 
+    /// <summary>Gets or sets the unlocked user medals.</summary>
+    public DbSet<UserAchievement> UserAchievements { get; set; } = null!;
+
     /// <summary>
     /// Gets or sets the scores table set.
     /// </summary>
