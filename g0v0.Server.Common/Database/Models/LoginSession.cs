@@ -76,7 +76,7 @@ public class LoginSession
     /// <summary>
     /// Gets or sets the device hash.
     /// </summary>
-    [StringLength(64)]
+    [Column(TypeName = "text")]
     public string? DeviceHash { get; set; }
 
     /// <summary>

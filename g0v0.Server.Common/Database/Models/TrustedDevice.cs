@@ -43,9 +43,9 @@ public class TrustedDevice
     public string ClientType { get; set; } = "web";
 
     /// <summary>
-    /// Gets or sets the device hash.
+    /// Gets or sets the device hash, including the full client hash (ch) for stable clients.
     /// </summary>
-    [StringLength(64)]
+    [Column(TypeName = "text")]
     public string? DeviceHash { get; set; }
 
     /// <summary>

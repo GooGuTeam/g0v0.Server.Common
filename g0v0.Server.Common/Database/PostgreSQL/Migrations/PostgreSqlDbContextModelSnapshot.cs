@@ -737,8 +737,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("DeviceHash")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("text")
                         .HasColumnName("device_hash");
 
                     b.Property<int?>("DeviceId")
@@ -1571,8 +1570,7 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("DeviceHash")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
+                        .HasColumnType("text")
                         .HasColumnName("device_hash");
 
                     b.Property<DateTimeOffset?>("ExpiresAt")
