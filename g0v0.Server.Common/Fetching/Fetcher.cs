@@ -21,13 +21,13 @@ namespace g0v0.Server.Common.Fetching;
 /// <param name="beatmapSetRepository">The beatmap set repository.</param>
 /// <param name="beatmapRepository">The beatmap repository, used to reuse a difficulty that is already stored.</param>
 /// <param name="logger">The logger.</param>
-public class Fetcher(
+public partial class Fetcher(
     IHttpService httpService,
     ConfigManager configManager,
     IStringCache cache,
     IBeatmapSetRepository beatmapSetRepository,
     IBeatmapRepository beatmapRepository,
-    ILogger<Fetcher> logger) : IFetcher, IDisposable
+    ILogger<Fetcher> logger) : IFetcher, IBeatmapSearchSource, IDisposable
 {
     private const string OAuthEndpoint = "https://osu.ppy.sh/oauth/token";
     private const string BeatmapLookupEndpoint = "https://osu.ppy.sh/api/v2/beatmaps/lookup";

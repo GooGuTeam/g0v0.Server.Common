@@ -190,6 +190,7 @@ public static class ServiceCollectionExtension
 
         services.AddScoped<Fetcher>();
         services.AddScoped<IFetcher>(serviceProvider => serviceProvider.GetRequiredService<Fetcher>());
+        services.AddScoped<IBeatmapSearchSource>(serviceProvider => serviceProvider.GetRequiredService<Fetcher>());
 
         return services;
     }

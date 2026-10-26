@@ -12,7 +12,7 @@ using BeatmapSetModel = g0v0.Server.Common.Database.Models.BeatmapSet;
 namespace g0v0.Server.Common.Tests.Fetching;
 
 [TestFixture]
-public class FetcherTests
+public partial class FetcherTests
 {
     private string _tempDir = null!;
 
