@@ -46,4 +46,11 @@ public interface IUserStatisticsRepository
     /// <param name="statistics">The statistics to update.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     Task UpdateAsync(UserStatistics statistics);
+
+    /// <summary>Atomically increments the number of replay views received by a user in one mode.</summary>
+    /// <param name="userId">The replay owner's ID.</param>
+    /// <param name="mode">The score's stored mode, including relax and autopilot variants.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing persistence.</returns>
+    Task IncrementReplayViewsAsync(int userId, int mode, CancellationToken cancellationToken = default);
 }

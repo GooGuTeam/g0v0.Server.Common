@@ -62,4 +62,26 @@ public class UserStatisticsRepository(MysqlDbContext context) : IUserStatisticsR
         context.UserStatistics.Update(statistics);
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public async Task IncrementReplayViewsAsync(int userId, int mode, CancellationToken cancellationToken = default)
+    {
+        IQueryable<UserStatistics> query = context.UserStatistics.Where(statistics => statistics.UserId == userId && statistics.Mode == mode);
+        if (context.Database.IsRelational())
+        {
+            await query.ExecuteUpdateAsync(
+                setters => setters.SetProperty(
+                    statistics => statistics.ReplaysWatchedByOthers,
+                    statistics => statistics.ReplaysWatchedByOthers + 1),
+                cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        UserStatistics? statistics = await query.SingleOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+        if (statistics is not null)
+        {
+            statistics.ReplaysWatchedByOthers++;
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
 }

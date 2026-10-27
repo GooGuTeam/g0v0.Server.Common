@@ -316,6 +316,22 @@ public class BeatmapSearchServiceTests
             return Task.CompletedTask;
         }
 
+        public Task<bool> TrySetAsync(string key, string value, TimeSpan expiry)
+        {
+            if (Unavailable)
+            {
+                throw new InvalidOperationException("cache unavailable");
+            }
+
+            if (Values.ContainsKey(key))
+            {
+                return Task.FromResult(false);
+            }
+
+            Values[key] = (value, expiry);
+            return Task.FromResult(true);
+        }
+
         public Task DeleteAsync(string key)
         {
             Values.TryRemove(key, out _);

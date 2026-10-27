@@ -105,6 +105,24 @@ public class UserStatisticsRepositoryTests(RepositoryBackend backend)
     }
 
     [Test]
+    public async Task IncrementReplayViewsAsync_OnlyChangesTheOwnerAndStoredMode()
+    {
+        await _repository.CreateAsync(new UserStatistics { UserId = 1, Mode = 4, ReplaysWatchedByOthers = 7, PlayCount = 12 });
+        await _repository.CreateAsync(new UserStatistics { UserId = 1, Mode = 0, ReplaysWatchedByOthers = 3 });
+        await _repository.CreateAsync(new UserStatistics { UserId = 2, Mode = 4, ReplaysWatchedByOthers = 5 });
+
+        await _repository.IncrementReplayViewsAsync(1, 4);
+        await _repository.IncrementReplayViewsAsync(1, 4);
+        await _repository.IncrementReplayViewsAsync(99, 4);
+
+        Assert.That((await _repository.GetByUserIdAndModeAsync(1, 4))!.ReplaysWatchedByOthers, Is.EqualTo(9));
+        Assert.That((await _repository.GetByUserIdAndModeAsync(1, 4))!.PlayCount, Is.EqualTo(12));
+        Assert.That((await _repository.GetByUserIdAndModeAsync(1, 0))!.ReplaysWatchedByOthers, Is.EqualTo(3));
+        Assert.That((await _repository.GetByUserIdAndModeAsync(2, 4))!.ReplaysWatchedByOthers, Is.EqualTo(5));
+        Assert.That(UserStatistics.Count(), Is.EqualTo(3));
+    }
+
+    [Test]
     public async Task GetGlobalRankAsync_ShouldRankByPerformancePoints()
     {
         await _repository.CreateAsync(new UserStatistics { UserId = 1, Mode = 0, Pp = 100 });

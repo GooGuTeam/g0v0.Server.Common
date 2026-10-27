@@ -26,6 +26,12 @@ public class RedisStringCache(IConnectionMultiplexer connectionMultiplexer) : IS
     }
 
     /// <inheritdoc/>
+    public Task<bool> TrySetAsync(string key, string value, TimeSpan expiry)
+    {
+        return _database.StringSetAsync(key, value, expiry, When.NotExists);
+    }
+
+    /// <inheritdoc/>
     public Task DeleteAsync(string key)
     {
         return _database.KeyDeleteAsync(key);

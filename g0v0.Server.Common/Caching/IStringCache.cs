@@ -24,6 +24,15 @@ public interface IStringCache
     Task SetAsync(string key, string value, TimeSpan expiry);
 
     /// <summary>
+    /// Sets a cached value only when the key does not already exist.
+    /// </summary>
+    /// <param name="key">The cache key.</param>
+    /// <param name="value">The value to cache.</param>
+    /// <param name="expiry">The time-to-live.</param>
+    /// <returns><see langword="true"/> when the value was stored; otherwise, <see langword="false"/>.</returns>
+    Task<bool> TrySetAsync(string key, string value, TimeSpan expiry);
+
+    /// <summary>
     /// Deletes a cached value.
     /// </summary>
     /// <param name="key">The cache key.</param>
