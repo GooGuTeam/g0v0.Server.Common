@@ -188,7 +188,7 @@ public partial class Fetcher(
             SubmittedDate = dto.SubmittedDate ?? DateTimeOffset.MinValue,
             RankedDate = dto.RankedDate,
             LastUpdatedDate = dto.LastUpdated,
-            Covers = BeatmapCovers.ToGameCovers(dto.Covers),
+            Covers = dto.Covers is null ? default : dto.Covers.ToGameCovers(),
             Genre = dto.Genre ?? default,
             Language = dto.Language ?? default,
             CurrentNominations = dto.CurrentNominations,
@@ -200,12 +200,10 @@ public partial class Fetcher(
         };
     }
 
-    private static Beatmap MapBeatmap(OsuBeatmap dto, int beatmapSetId, OsuBeatmapSetCovers? setCovers)
+    private static Beatmap MapBeatmap(OsuBeatmap dto, int beatmapSetId)
     {
         return new Beatmap
         {
-            // The API publishes covers per set; every difficulty inherits them.
-            Covers = BeatmapCovers.FromBeatmapSet(setCovers),
             Id = dto.Id,
             BeatmapSetId = beatmapSetId,
             Url = dto.Url ?? string.Empty,
@@ -328,7 +326,7 @@ public partial class Fetcher(
 
         foreach (OsuBeatmap beatmapDto in beatmaps.Values)
         {
-            set.Beatmaps.Add(MapBeatmap(beatmapDto, set.Id, setDto.Covers));
+            set.Beatmaps.Add(MapBeatmap(beatmapDto, set.Id));
         }
 
         return await beatmapSetRepository.UpsertWithBeatmapsAsync(set).ConfigureAwait(false);

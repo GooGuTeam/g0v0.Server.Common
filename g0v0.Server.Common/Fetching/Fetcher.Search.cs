@@ -28,7 +28,7 @@ public partial class Fetcher
             BeatmapSet set = MapSet(dto);
             foreach (OsuBeatmap difficulty in (dto.Beatmaps ?? []).Concat(dto.Converts ?? []).DistinctBy(map => (map.Id, map.ModeInt)))
             {
-                set.Beatmaps.Add(MapBeatmap(difficulty, set.Id, dto.Covers));
+                set.Beatmaps.Add(MapBeatmap(difficulty, set.Id));
             }
 
             sets.Add(set);

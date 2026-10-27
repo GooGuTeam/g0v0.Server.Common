@@ -60,11 +60,6 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("circles_count");
 
-                    b.Property<string>("Covers")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("covers");
-
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");

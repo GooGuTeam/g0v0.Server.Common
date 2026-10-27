@@ -37,4 +37,18 @@ internal sealed class OsuBeatmapSetCovers
 
     [JsonProperty("slimcover@2x")]
     public string? SlimCover2X { get; set; }
+
+    /// <summary>
+    /// Creates the game library's covers value from this API covers object.
+    /// </summary>
+    /// <returns>The mapped covers.</returns>
+    internal osu.Game.Beatmaps.BeatmapSetOnlineCovers ToGameCovers() => new()
+    {
+        CoverLowRes = Cover ?? string.Empty,
+        Cover = Cover2X ?? string.Empty,
+        CardLowRes = Card ?? string.Empty,
+        Card = Card2X ?? string.Empty,
+        ListLowRes = List ?? string.Empty,
+        List = List2X ?? string.Empty,
+    };
 }
