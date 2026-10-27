@@ -35,6 +35,7 @@ public static class ServiceCollectionExtension
     /// <remarks>
     /// Requires ConfigManager and IPathProvider. An absent config/geoip.json uses default settings.
     /// </remarks>
+    // ReSharper disable once InconsistentNaming
     public static IServiceCollection AddGeoIP(this IServiceCollection services)
     {
         services.TryAddSingleton<GeoIPConfig>(provider => provider.GetRequiredService<ConfigManager>().TryGet<GeoIPConfig>() ?? new GeoIPConfig());

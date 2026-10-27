@@ -71,7 +71,7 @@ public class RulesetManager
     /// </summary>
     /// <param name="rulesetId">The legacy ID of the ruleset to retrieve.</param>
     /// <returns>The <see cref="Ruleset"/> instance matching the given ID.</returns>
-    /// <param cref="ArgumentException">Thrown when no ruleset is registered with the specified <paramref name="rulesetId"/>.</param>
+    /// <exception cref="ArgumentException">Thrown when no ruleset is registered with the specified <paramref name="rulesetId"/>.</exception>
     public Ruleset GetRuleset(int rulesetId)
     {
         return _rulesetsById.TryGetValue(rulesetId, out Ruleset? ruleset)
@@ -84,7 +84,7 @@ public class RulesetManager
     /// </summary>
     /// <param name="shortName">The short name of the ruleset to retrieve.</param>
     /// <returns>The <see cref="Ruleset"/> instance matching the given short name.</returns>
-    /// <param cref="ArgumentException">Thrown when no ruleset is registered with the specified <paramref name="shortName"/>.</param>
+    /// <exception cref="ArgumentException">Thrown when no ruleset is registered with the specified <paramref name="shortName"/>.</exception>
     public Ruleset GetRuleset(string shortName)
     {
         return _rulesets.TryGetValue(shortName, out Ruleset? ruleset)

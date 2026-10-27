@@ -46,13 +46,15 @@ public sealed class ReplayService(
         }
 
         byte[]? frames = ExtractFrames(replay, mode);
-        if (frames is not null && score.UserId != viewerId)
+        if (frames is null || score.UserId == viewerId)
         {
-            string lockKey = $"view:score_replay:{score.Id}:{viewerId}";
-            if (await replayViewLocks.TrySetAsync(lockKey, "1", ReplayDownloadCountInterval).ConfigureAwait(false))
-            {
-                await statistics.IncrementReplayViewsAsync(score.UserId, score.Mode, cancellationToken).ConfigureAwait(false);
-            }
+            return frames;
+        }
+
+        string lockKey = $"view:score_replay:{score.Id}:{viewerId}";
+        if (await replayViewLocks.TrySetAsync(lockKey, "1", ReplayDownloadCountInterval).ConfigureAwait(false))
+        {
+            await statistics.IncrementReplayViewsAsync(score.UserId, score.Mode, cancellationToken).ConfigureAwait(false);
         }
 
         return frames;

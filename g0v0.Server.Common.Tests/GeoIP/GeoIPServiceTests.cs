@@ -1,5 +1,8 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+// ReSharper disable AccessToDisposedClosure
+// ReSharper disable InconsistentNaming
+// ReSharper disable LoopCanBePartlyConvertedToQuery
 using System.Net;
 using System.Security.Cryptography;
 using g0v0.Server.Common.Configuration;
@@ -81,7 +84,7 @@ public class GeoIPServiceTests
     [Test]
     public void MissingDatabasesReturnOnlyTheNormalizedIpWithoutNetworkAccess()
     {
-        using GeoIPService service = createService();
+        using GeoIPService service = CreateService();
         GeoIPLookupResult result = service.Lookup("::ffff:81.2.69.142");
         Assert.That(result, Is.EqualTo(new GeoIPLookupResult("81.2.69.142")));
         Assert.That(_handler.RequestCount, Is.Zero);
@@ -91,8 +94,8 @@ public class GeoIPServiceTests
     [Test]
     public void LoadsCountryAndAsnDatabasesAndSupportsIpv6AndUnknownAddresses()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         Assert.Multiple(() =>
         {
             Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso));
@@ -109,9 +112,9 @@ public class GeoIPServiceTests
     [Test]
     public void ACorruptLocalDatabaseDoesNotPreventUsingTheOtherEdition()
     {
-        writeLocalDatabases();
-        File.WriteAllBytes(databasePath("Country"), [0, 1, 2]);
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        File.WriteAllBytes(DatabasePath("Country"), [0, 1, 2]);
+        using GeoIPService service = CreateService();
         Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.Null);
         Assert.That(service.Lookup("8.8.8.8").Asn, Is.EqualTo(_asn));
     }
@@ -119,27 +122,27 @@ public class GeoIPServiceTests
     [Test]
     public async Task DownloadsMissingDatabasesAndSkipsFreshOnes()
     {
-        using GeoIPService service = createService();
+        using GeoIPService service = CreateService();
         await service.UpdateAsync();
         Assert.Multiple(() =>
         {
             Assert.That(_handler.RequestCount, Is.EqualTo(4));
             Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso));
             Assert.That(service.Lookup("8.8.8.8").Asn, Is.EqualTo(_asn));
-            Assert.That(File.ReadAllBytes(databasePath("Country")), Is.EqualTo(_handler.CountryData));
-            Assert.That(File.ReadAllBytes(databasePath("ASN")), Is.EqualTo(_handler.AsnData));
+            Assert.That(File.ReadAllBytes(DatabasePath("Country")), Is.EqualTo(_handler.CountryData));
+            Assert.That(File.ReadAllBytes(DatabasePath("ASN")), Is.EqualTo(_handler.AsnData));
         });
 
         await service.UpdateAsync();
         Assert.That(_handler.RequestCount, Is.EqualTo(4));
-        Assert.That(Directory.EnumerateFiles(Path.GetDirectoryName(databasePath("Country"))!, "*.tmp"), Is.Empty);
+        Assert.That(Directory.EnumerateFiles(Path.GetDirectoryName(DatabasePath("Country"))!, "*.tmp"), Is.Empty);
     }
 
     [Test]
     public async Task UpdatesStaleDatabasesAndSupportsForcedUpdates()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         await service.UpdateAsync();
         Assert.That(_handler.RequestCount, Is.Zero);
         _clock.UtcNow += TimeSpan.FromDays(9);
@@ -155,31 +158,31 @@ public class GeoIPServiceTests
     [TestCase("ASN")]
     public void BadChecksumPreservesBothReadersAndExistingFiles(string edition)
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         _handler.BadChecksumEdition = edition;
         Assert.ThrowsAsync<InvalidDataException>(() => service.UpdateAsync(force: true));
-        assertOldDatabasesRemainUsable(service);
+        AssertOldDatabasesRemainUsable(service);
     }
 
     [Test]
     public void VerifiedButCorruptDatabaseDoesNotReplaceAnExistingFile()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         byte[] original = _handler.CountryData;
         _handler.CountryData = [0, 1, 2];
         Assert.ThrowsAsync<InvalidDatabaseException>(() => service.UpdateAsync(force: true));
-        Assert.That(File.ReadAllBytes(databasePath("Country")), Is.EqualTo(original));
+        Assert.That(File.ReadAllBytes(DatabasePath("Country")), Is.EqualTo(original));
         Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso));
-        Assert.That(Directory.EnumerateFiles(Path.GetDirectoryName(databasePath("Country"))!, "*.tmp"), Is.Empty);
+        Assert.That(Directory.EnumerateFiles(Path.GetDirectoryName(DatabasePath("Country"))!, "*.tmp"), Is.Empty);
     }
 
     [Test]
     public void RejectsDatabaseFromTheWrongEditionEvenWhenChecksumIsValid()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         _handler.CountryData = _handler.AsnData;
         Assert.ThrowsAsync<InvalidDataException>(() => service.UpdateAsync(force: true));
         Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso));
@@ -188,28 +191,28 @@ public class GeoIPServiceTests
     [Test]
     public void FailedHttpRequestsLeaveExistingDatabasesAvailable()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         _handler.FailHttp = true;
         Assert.ThrowsAsync<HttpRequestException>(() => service.UpdateAsync(force: true));
-        assertOldDatabasesRemainUsable(service);
+        AssertOldDatabasesRemainUsable(service);
     }
 
     [Test]
     public void CancellationCleansTemporaryFilesAndPreservesReaders()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         using CancellationTokenSource cancellation = new();
         _handler.BeforeDownload = cancellation.Cancel;
         Assert.CatchAsync<OperationCanceledException>(() => service.UpdateAsync(force: true, cancellationToken: cancellation.Token));
-        assertOldDatabasesRemainUsable(service);
+        AssertOldDatabasesRemainUsable(service);
     }
 
     [Test]
     public async Task ConcurrentUpdateChecksDownloadEachEditionOnlyOnce()
     {
-        using GeoIPService service = createService();
+        using GeoIPService service = CreateService();
         await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => service.UpdateAsync()));
         Assert.That(_handler.RequestCount, Is.EqualTo(4));
         Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso));
@@ -218,8 +221,8 @@ public class GeoIPServiceTests
     [Test]
     public async Task LookupsRemainValidDuringDatabaseReplacement()
     {
-        writeLocalDatabases();
-        using GeoIPService service = createService();
+        WriteLocalDatabases();
+        using GeoIPService service = CreateService();
         Task lookups = Task.Run(() => Parallel.For(0, 1000, _ =>
             Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso))));
         await Task.WhenAll(lookups, service.UpdateAsync(force: true));
@@ -228,7 +231,7 @@ public class GeoIPServiceTests
     [Test]
     public void DisposeIsIdempotentAndPreventsFurtherLookups()
     {
-        GeoIPService service = createService();
+        GeoIPService service = CreateService();
         service.Dispose();
         Assert.DoesNotThrow(service.Dispose);
         Assert.Throws<ObjectDisposedException>(() => service.Lookup("8.8.8.8"));
@@ -270,36 +273,36 @@ public class GeoIPServiceTests
         Assert.That(worker.ExecuteTask!.IsFaulted, Is.False);
     }
 
-    private static byte[] readFixture(string name)
+    private static byte[] ReadFixture(string name)
     {
         return File.ReadAllBytes(Path.Combine(DatabaseDirectory, name));
     }
 
-    private GeoIPService createService()
+    private GeoIPService CreateService()
     {
         return new GeoIPService(_config, new TestPathProvider(_root), new TestClientFactory(_handler), NullLogger<GeoIPService>.Instance, _clock);
     }
 
-    private string databasePath(string edition) => Path.Combine(_root, _config.DatabaseDirectory, $"GeoLite2-{edition}.mmdb");
+    private string DatabasePath(string edition) => Path.Combine(_root, _config.DatabaseDirectory, $"GeoLite2-{edition}.mmdb");
 
-    private void writeLocalDatabases()
+    private void WriteLocalDatabases()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(databasePath("Country"))!);
-        File.WriteAllBytes(databasePath("Country"), _handler.CountryData);
-        File.WriteAllBytes(databasePath("ASN"), _handler.AsnData);
-        File.SetLastWriteTimeUtc(databasePath("Country"), _clock.UtcNow.UtcDateTime);
-        File.SetLastWriteTimeUtc(databasePath("ASN"), _clock.UtcNow.UtcDateTime);
+        Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath("Country"))!);
+        File.WriteAllBytes(DatabasePath("Country"), _handler.CountryData);
+        File.WriteAllBytes(DatabasePath("ASN"), _handler.AsnData);
+        File.SetLastWriteTimeUtc(DatabasePath("Country"), _clock.UtcNow.UtcDateTime);
+        File.SetLastWriteTimeUtc(DatabasePath("ASN"), _clock.UtcNow.UtcDateTime);
     }
 
-    private void assertOldDatabasesRemainUsable(GeoIPService service)
+    private void AssertOldDatabasesRemainUsable(GeoIPService service)
     {
         Assert.Multiple(() =>
         {
             Assert.That(service.Lookup("81.2.69.142").CountryIso, Is.EqualTo(_countryIso));
             Assert.That(service.Lookup("8.8.8.8").Asn, Is.EqualTo(_asn));
-            Assert.That(File.ReadAllBytes(databasePath("Country")), Is.EqualTo(_handler.CountryData));
-            Assert.That(File.ReadAllBytes(databasePath("ASN")), Is.EqualTo(_handler.AsnData));
-            Assert.That(Directory.EnumerateFiles(Path.GetDirectoryName(databasePath("Country"))!, "*.tmp"), Is.Empty);
+            Assert.That(File.ReadAllBytes(DatabasePath("Country")), Is.EqualTo(_handler.CountryData));
+            Assert.That(File.ReadAllBytes(DatabasePath("ASN")), Is.EqualTo(_handler.AsnData));
+            Assert.That(Directory.EnumerateFiles(Path.GetDirectoryName(DatabasePath("Country"))!, "*.tmp"), Is.Empty);
         });
     }
 
@@ -324,8 +327,8 @@ public class GeoIPServiceTests
     {
         private int _requestCount;
 
-        public byte[] CountryData { get; set; } = readFixture("GeoLite2-Country.mmdb");
-        public byte[] AsnData { get; } = readFixture("GeoLite2-ASN.mmdb");
+        public byte[] CountryData { get; set; } = ReadFixture("GeoLite2-Country.mmdb");
+        public byte[] AsnData { get; } = ReadFixture("GeoLite2-ASN.mmdb");
         public string? BadChecksumEdition { get; set; }
         public bool FailHttp { get; set; }
         public Action? BeforeDownload { get; set; }

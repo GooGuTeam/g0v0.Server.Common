@@ -21,8 +21,8 @@ Run from the repo root:
 - Format check (CI runs this): `dotnet format --verify-no-changes`
 - Apply formatting fixes: `dotnet format`
 - Install InspectCode: `dotnet tool install --global JetBrains.ReSharper.GlobalTools --version 2026.2.1`
-- InspectCode: `jb inspectcode g0v0.Server.Common.sln --no-build --no-updates --severity=WARNING --output=artifacts/inspectcode.sarif`
-- Strict build like CI: `dotnet build --configuration Release /warnaserror`
+- InspectCode: `jb inspectcode g0v0.Server.Common.sln --no-build --no-updates --severity=WARNING --swea --output=artifacts/inspectcode.sarif`
+- Strict build like CI: `dotnet build --no-restore --configuration Release /warnaserror`
 
 CI (`.github/workflows/ci.yml`) runs three jobs: build, code style/quality, and tests. The code-style job runs
 `dotnet format --verify-no-changes`, a `/warnaserror` build, and warning-level JetBrains InspectCode. It prints every

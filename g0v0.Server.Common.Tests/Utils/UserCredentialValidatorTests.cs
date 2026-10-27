@@ -7,6 +7,8 @@ namespace g0v0.Server.Common.Tests.Utils;
 
 public class UserCredentialValidatorTests
 {
+    private static readonly string[] RequiredPasswordErrors = ["Password is required"];
+
     [TestCase("peppy")]
     [TestCase("a b")]
     [TestCase("a_b")]
@@ -87,6 +89,6 @@ public class UserCredentialValidatorTests
     [Test]
     public void RejectsAnEmptyPasswordWithItsOwnMessage()
     {
-        Assert.That(UserCredentialValidator.ValidatePassword(null), Is.EqualTo(new[] { "Password is required" }));
+        Assert.That(UserCredentialValidator.ValidatePassword(password: null), Is.EqualTo(RequiredPasswordErrors));
     }
 }

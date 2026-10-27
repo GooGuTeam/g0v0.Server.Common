@@ -1,5 +1,6 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+// ReSharper disable InconsistentNaming
 using System.Net;
 using System.Security.Cryptography;
 using g0v0.Server.Common.Configuration;
@@ -54,7 +55,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
         _timeProvider = timeProvider;
         foreach (string edition in Editions)
         {
-            string? path = latestFile(edition);
+            string? path = LatestFile(edition);
             if (path == null)
             {
                 continue;
@@ -62,7 +63,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
 
             try
             {
-                _readers.Add(edition, openDatabase(path, edition));
+                _readers.Add(edition, OpenDatabase(path, edition));
             }
             catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidDatabaseException or UnauthorizedAccessException)
             {
@@ -122,7 +123,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
             client.Timeout = TimeSpan.FromSeconds(_config.RequestTimeoutSeconds);
             foreach (string edition in Editions)
             {
-                string? path = latestFile(edition);
+                string? path = LatestFile(edition);
                 bool loaded;
                 lock (_readersLock)
                 {
@@ -135,7 +136,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
                     continue;
                 }
 
-                (string temporaryPath, DatabaseReader reader) = await downloadAsync(client, edition, cancellationToken).ConfigureAwait(false);
+                (string temporaryPath, DatabaseReader reader) = await DownloadAsync(client, edition, cancellationToken).ConfigureAwait(false);
                 pending.Add((edition, temporaryPath, reader));
             }
 
@@ -150,7 +151,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
                 while (pending.Count > 0)
                 {
                     (string edition, string path, DatabaseReader reader) = pending[0];
-                    File.Move(path, Path.Combine(_directory, filename(edition)), overwrite: true);
+                    File.Move(path, Path.Combine(_directory, Filename(edition)), overwrite: true);
                     if (_readers.Remove(edition, out DatabaseReader? previous))
                     {
                         previous.Dispose();
@@ -213,9 +214,9 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
         }
     }
 
-    private static string filename(string edition) => $"GeoLite2-{edition}.mmdb";
+    private static string Filename(string edition) => $"GeoLite2-{edition}.mmdb";
 
-    private static DatabaseReader openDatabase(string path, string edition)
+    private static DatabaseReader OpenDatabase(string path, string edition)
     {
         DatabaseReader reader = new(path, FileAccessMode.Memory);
         if (reader.Metadata.DatabaseType.EndsWith($"-{edition}", StringComparison.Ordinal))
@@ -233,7 +234,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
     [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "Updated the GeoIP {Edition} database.")]
     private static partial void logUpdated(ILogger logger, string edition);
 
-    private string? latestFile(string edition)
+    private string? LatestFile(string edition)
     {
         return Directory.Exists(_directory)
             ? Directory.EnumerateFiles(_directory, $"GeoLite2-{edition}*.mmdb")
@@ -241,9 +242,9 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
             : null;
     }
 
-    private async Task<(string Path, DatabaseReader Reader)> downloadAsync(HttpClient client, string edition, CancellationToken cancellationToken)
+    private async Task<(string Path, DatabaseReader Reader)> DownloadAsync(HttpClient client, string edition, CancellationToken cancellationToken)
     {
-        string name = filename(edition);
+        string name = Filename(edition);
         Uri source = new(_config.DatabaseBaseUrl.AbsoluteUri.TrimEnd('/') + "/");
         string checksum = await client.GetStringAsync(new Uri(source, name + ".sha256sum"), cancellationToken).ConfigureAwait(false);
         string? expectedHash = checksum.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
@@ -277,7 +278,7 @@ public sealed partial class GeoIPService : IGeoIPService, IDisposable
                 throw new InvalidDataException($"SHA256 checksum mismatch for {name}.");
             }
 
-            reader = openDatabase(temporaryPath, edition);
+            reader = OpenDatabase(temporaryPath, edition);
             return (temporaryPath, reader);
         }
         catch

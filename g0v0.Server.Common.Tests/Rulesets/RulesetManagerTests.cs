@@ -1,6 +1,5 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
-using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Rulesets;
 using NUnit.Framework;
 
@@ -47,10 +46,6 @@ public class RulesetManagerTests
 
         Assert.That(manager.GetAllRulesets(), Is.Empty);
     }
-
-    #endregion
-
-    #region Constructor: with IPathProvider
 
     #endregion
 
@@ -161,23 +156,4 @@ public class RulesetManagerTests
 
     #endregion
 
-    #region Helper types
-
-    /// <summary>
-    /// A minimal <see cref="IPathProvider"/> implementation for testing purposes.
-    /// Returns the provided base path.
-    /// </summary>
-    private sealed class TestPathProvider : IPathProvider
-    {
-        public TestPathProvider(string basePath)
-        {
-            GetBasePathResult = basePath;
-        }
-
-        public string GetBasePathResult { get; }
-
-        public string GetBasePath() => GetBasePathResult;
-    }
-
-    #endregion
 }

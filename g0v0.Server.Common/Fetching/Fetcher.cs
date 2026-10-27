@@ -88,7 +88,7 @@ public partial class Fetcher(
             beatmap = await TryFetchByFilenameAsync(name + ".osu", cancellationToken).ConfigureAwait(false);
         }
 
-        return beatmap is null ? null : await persistAsync(beatmap, cancellationToken).ConfigureAwait(false);
+        return beatmap is null ? null : await PersistAsync(beatmap, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -261,7 +261,7 @@ public partial class Fetcher(
     /// on the API side did not include the requested difficulty - without it the caller would get a
     /// detached entity whose ID every later foreign key rejects.
     /// </remarks>
-    private async Task<Beatmap> persistAsync(Beatmap beatmap, CancellationToken cancellationToken)
+    private async Task<Beatmap> PersistAsync(Beatmap beatmap, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         Beatmap? stored = await beatmapRepository.GetByIdAsync(beatmap.Id).ConfigureAwait(false);

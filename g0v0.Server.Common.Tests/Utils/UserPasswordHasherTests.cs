@@ -40,8 +40,8 @@ public class UserPasswordHasherTests
         Assert.Multiple(() =>
         {
             Assert.That(UserPasswordHasher.VerifyDigest(Digest, "$2b$not-a-hash"), Is.False);
-            Assert.That(UserPasswordHasher.VerifyDigest(Digest, null), Is.False);
-            Assert.That(UserPasswordHasher.VerifyDigest(null, "$2b$04$abcdefghijklmnopqrstuuvRd6479mlTDECYXOIYMV5.3yuvdazPi"), Is.False);
+            Assert.That(UserPasswordHasher.VerifyDigest(Digest, hash: null), Is.False);
+            Assert.That(UserPasswordHasher.VerifyDigest(digest: null, hash: "$2b$04$abcdefghijklmnopqrstuuvRd6479mlTDECYXOIYMV5.3yuvdazPi"), Is.False);
         });
     }
 
@@ -65,7 +65,7 @@ public class UserPasswordHasherTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(UserPasswordHasher.VerifyPassword(null, hash), Is.False);
+            Assert.That(UserPasswordHasher.VerifyPassword(password: null, hash), Is.False);
             Assert.That(UserPasswordHasher.VerifyPassword(string.Empty, hash), Is.False);
         });
     }

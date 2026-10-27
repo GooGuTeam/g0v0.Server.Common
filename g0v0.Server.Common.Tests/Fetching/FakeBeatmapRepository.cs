@@ -17,7 +17,7 @@ internal sealed class FakeBeatmapRepository : IBeatmapRepository
 
     public Task<Beatmap?> GetByChecksumAsync(string checksum)
     {
-        Beatmap? match = _beatmaps.Values.FirstOrDefault(beatmap => beatmap.Checksum == checksum);
+        Beatmap? match = _beatmaps.Values.FirstOrDefault(beatmap => string.Equals(beatmap.Checksum, checksum, StringComparison.Ordinal));
         return Task.FromResult(match);
     }
 
@@ -26,7 +26,7 @@ internal sealed class FakeBeatmapRepository : IBeatmapRepository
         string? version = BeatmapFilename.ExtractVersion(filename);
         IReadOnlyList<Beatmap> matches = version is null
             ? []
-            : _beatmaps.Values.Where(beatmap => beatmap.Version == version).ToArray();
+            : _beatmaps.Values.Where(beatmap => string.Equals(beatmap.Version, version, StringComparison.Ordinal)).ToArray();
         return Task.FromResult(matches);
     }
 
