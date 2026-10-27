@@ -144,6 +144,11 @@ public class GeneralConfig
     public string? FrontendUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the additional URLs allowed by the realtime server's CORS policy.
+    /// </summary>
+    public string[] CORSAllowUrls { get; set; } = [];
+
+    /// <summary>
     /// Gets the frontend URL, falling back to the server URL when none is configured.
     /// </summary>
     [JsonIgnore]
@@ -154,5 +159,23 @@ public class GeneralConfig
     /// </summary>
     public string GeneralServerUrl => ServerUrl.AddSuffix("/");
 
+    /// <summary>
+    /// Gets all configured CORS origins with both trailing-slash forms.
+    /// </summary>
+    /// <returns>The distinct configured CORS origins.</returns>
+    public string[] GetCorsAllowUrls()
+    {
+        return CORSAllowUrls
+            .Append(FrontendUrl)
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .Select(url => url!.Trim())
+            .SelectMany(url =>
+            {
+                string urlWithoutTrailingSlash = url.TrimEnd('/');
+                return new[] { urlWithoutTrailingSlash, $"{urlWithoutTrailingSlash}/" };
+            })
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
     #endregion
 }
