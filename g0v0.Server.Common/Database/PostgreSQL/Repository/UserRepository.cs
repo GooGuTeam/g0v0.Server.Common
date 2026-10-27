@@ -13,6 +13,8 @@ namespace g0v0.Server.Common.Database.PostgreSQL.Repository;
 /// <param name="context">The database context.</param>
 public class UserRepository(PostgreSqlDbContext context) : IUserRepository, IPostgreSqlRepository
 {
+    private const int MinimumUserAutoIncrement = 4;
+
     /// <inheritdoc/>
     public async Task<User?> GetByIdAsync(int userId)
     {
@@ -69,6 +71,7 @@ public class UserRepository(PostgreSqlDbContext context) : IUserRepository, IPos
     /// <inheritdoc/>
     public async Task CreateAsync(User user)
     {
+        await EnsureMinimumUserAutoIncrementAsync().ConfigureAwait(false);
         await context.Users.AddAsync(user).ConfigureAwait(false);
         await context.SaveChangesAsync().ConfigureAwait(false);
     }
@@ -76,6 +79,8 @@ public class UserRepository(PostgreSqlDbContext context) : IUserRepository, IPos
     /// <inheritdoc/>
     public async Task CreateAsync(User user, IReadOnlyList<int> statisticsModes, CancellationToken cancellationToken = default)
     {
+        await EnsureMinimumUserAutoIncrementAsync(cancellationToken).ConfigureAwait(false);
+
         await using IDbContextTransaction? transaction = context.Database.IsRelational()
             ? await context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)
             : null;
@@ -102,5 +107,38 @@ public class UserRepository(PostgreSqlDbContext context) : IUserRepository, IPos
     {
         context.Users.Update(user);
         await context.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    private async Task EnsureMinimumUserAutoIncrementAsync(CancellationToken cancellationToken = default)
+    {
+        if (!context.Database.IsRelational() || !context.Database.IsNpgsql())
+        {
+            return;
+        }
+
+        long? nextId = await context.Database
+            .SqlQueryRaw<long?>(
+                """
+                SELECT COALESCE(last_value + increment_by, start_value) AS "Value"
+                FROM pg_sequences
+                WHERE to_regclass(format('%I.%I', schemaname, sequencename)) =
+                    pg_get_serial_sequence('users', 'id')::regclass
+                """)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (nextId is null or >= MinimumUserAutoIncrement)
+        {
+            return;
+        }
+
+        await context.Database.ExecuteSqlRawAsync(
+            """
+            SELECT setval(
+                pg_get_serial_sequence('users', 'id'),
+                GREATEST(3, COALESCE((SELECT MAX(id) FROM users), 0)),
+                true)
+            """,
+            cancellationToken).ConfigureAwait(false);
     }
 }

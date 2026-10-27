@@ -14,6 +14,8 @@ namespace g0v0.Server.Common.Database.MySQL.Repository;
 /// <param name="context">The database context.</param>
 public class UserRepository(MysqlDbContext context) : IUserRepository, IMySqlRepository
 {
+    private const int MinimumUserAutoIncrement = 4;
+
     /// <inheritdoc/>
     public async Task<User?> GetByIdAsync(int userId)
     {
@@ -70,6 +72,7 @@ public class UserRepository(MysqlDbContext context) : IUserRepository, IMySqlRep
     /// <inheritdoc/>
     public async Task CreateAsync(User user)
     {
+        await EnsureMinimumUserAutoIncrementAsync().ConfigureAwait(false);
         await context.Users.AddAsync(user).ConfigureAwait(false);
         UserConfig.SupplyLegacyColumns(context.Entry(user));
         await context.SaveChangesAsync().ConfigureAwait(false);
@@ -78,6 +81,8 @@ public class UserRepository(MysqlDbContext context) : IUserRepository, IMySqlRep
     /// <inheritdoc/>
     public async Task CreateAsync(User user, IReadOnlyList<int> statisticsModes, CancellationToken cancellationToken = default)
     {
+        await EnsureMinimumUserAutoIncrementAsync(cancellationToken).ConfigureAwait(false);
+
         await using IDbContextTransaction? transaction = context.Database.IsRelational()
             ? await context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)
             : null;
@@ -109,5 +114,32 @@ public class UserRepository(MysqlDbContext context) : IUserRepository, IMySqlRep
         // the CLR defaults over the legacy privilege flags and limits.
         UserConfig.SupplyLegacyColumns(context.Entry(user));
         await context.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    private async Task EnsureMinimumUserAutoIncrementAsync(CancellationToken cancellationToken = default)
+    {
+        if (!context.Database.IsRelational() || !context.Database.IsMySql())
+        {
+            return;
+        }
+
+        int? nextId = await context.Database
+            .SqlQueryRaw<int?>(
+                """
+                SELECT CAST(AUTO_INCREMENT AS SIGNED) AS `Value`
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lazer_users'
+                """)
+            .SingleOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (nextId is null or >= MinimumUserAutoIncrement)
+        {
+            return;
+        }
+
+        await context.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE `lazer_users` AUTO_INCREMENT = 4",
+            cancellationToken).ConfigureAwait(false);
     }
 }
