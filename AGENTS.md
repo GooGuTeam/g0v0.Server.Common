@@ -52,8 +52,9 @@ Enforced by `.editorconfig`, `.globalconfig`, and `stylecop.json`:
 - `Reload<T>()` only copies properties marked `[Reloadable]`; new properties default to "set once at startup".
 - `basePath` typically comes from an injected `IPathProvider`.
 - Shared config classes live here and are consumed by the servers: `GeneralConfig`, `GameConfig`, `ChatConfig`,
-  `VerificationConfig`, `StorageConfiguration`, `GeoIPConfig` and `RegistrationConfig`. Add a new one here rather than
-  in a server project, so every server reads the same schema; the JSON itself still sits in each server's content root.
+  `VerificationConfig` (login verification plus the client IP settings), `StorageConfiguration`, `GeoIPConfig` and
+  `RegistrationConfig`. Add a new one here rather than in a server project, so every server reads the same schema; the
+  JSON itself still sits in each server's content root.
 
 ## Database
 
@@ -154,8 +155,31 @@ MySQL has no design-time factory; do not run `dotnet ef` against the MySQL conte
 ## DI helpers
 
 `Extensions/ServiceCollectionExtension.cs` exposes `AddRepositories`, `AddRedis`, `AddStorage`,
-`AddBackgroundTaskRunner`, `AddOAuthAuthentication`. Most of them require `ConfigurationManager` to already be
-registered; `AddStorage` additionally needs `IPathProvider` for local storage. Register `ConfigurationManager` first.
+`AddBackgroundTaskRunner`, `AddOAuthAuthentication` and `AddClientIp`. Most of them require `ConfigurationManager` to
+already be registered; `AddStorage` additionally needs `IPathProvider` for local storage. Register
+`ConfigurationManager` first.
+
+## Client IP resolution
+
+`ClientIp/` recovers the client address behind reverse proxies and CDNs. It is modelled on `osu_lazer_api`'s
+`get_client_ip` and follows the same trust rules:
+
+- `ClientIpResolver` reads the **connection peer** from `HttpContext.Connection`. The host must not run
+  `UseForwardedHeaders` (or an equivalent rewrite): once the peer carries the forwarded value, the resolver cannot
+  verify that the headers came from a proxy.
+- Forwarding headers are used only when the peer is inside `VerificationConfig.TrustedProxies`. `X-Forwarded-For` is
+  walked from right to left and the first untrusted hop wins, so entries pre-filled by the client are unreachable.
+  `X-Real-IP` is a fallback only when there is no `X-Forwarded-For`.
+- `CF-Connecting-IP` is authoritative only when the last hop is a published Cloudflare edge range.
+- `TrustedProxySourceRefreshService` loads `VerificationConfig.TrustedProxySources` at startup and on an interval. A
+  failed or empty refresh keeps the previous per-URL snapshot, and catch-all ranges (`/0`) are rejected so a publisher
+  cannot make every client trusted.
+- Addresses are normalized (IPv4-mapped IPv6 becomes IPv4) and returned as strings; `127.0.0.1` is the fallback when
+  the peer is missing.
+
+Servers should inject `IClientIpResolver` and call `Resolve(context)` instead of reading
+`Connection.RemoteIpAddress`; `ClientIp/ClientIpResolverTests`, `ProxyRangeParserTests` and
+`TrustedProxySourceRefreshServiceTests` cover the trust, parsing and refresh branches.
 
 ## Tests
 

@@ -1,9 +1,13 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
+using System.Net;
+using g0v0.Server.Common.ClientIp;
 using g0v0.Server.Common.Communication;
+using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.Repository;
 using g0v0.Server.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using StackExchange.Redis;
@@ -154,5 +158,32 @@ public class ServiceCollectionExtensionTests
         Assert.That(handlerDescriptor.Lifetime, Is.EqualTo(ServiceLifetime.Singleton));
 
         Assert.That(optionsDescriptor, Is.Not.Null);
+    }
+
+    [Test]
+    public void AddClientIp_LoadsTrustedProxiesFromVerificationConfig()
+    {
+        string path = Path.Combine(Path.GetTempPath(), "client-ip-config-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.Combine(path, "config"));
+        File.WriteAllText(
+            Path.Combine(path, "config", "verification.json"),
+            "{ \"TrustedProxies\": [\"203.0.113.0/24\"] }");
+        try
+        {
+            ServiceCollection services = new();
+            services.AddSingleton(new ConfigManager(path));
+            services.AddLogging();
+            services.AddClientIp();
+            using ServiceProvider provider = services.BuildServiceProvider();
+            DefaultHttpContext context = new();
+            context.Connection.RemoteIpAddress = IPAddress.Parse("203.0.113.5");
+            context.Request.Headers["X-Forwarded-For"] = "198.51.100.7";
+
+            Assert.That(provider.GetRequiredService<IClientIpResolver>().Resolve(context), Is.EqualTo("198.51.100.7"));
+        }
+        finally
+        {
+            Directory.Delete(path, recursive: true);
+        }
     }
 }

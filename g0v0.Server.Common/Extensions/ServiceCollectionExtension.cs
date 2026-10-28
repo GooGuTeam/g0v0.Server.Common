@@ -4,6 +4,7 @@ using System.Reflection;
 using g0v0.Server.Common.Achievements;
 using g0v0.Server.Common.Authentication;
 using g0v0.Server.Common.Caching;
+using g0v0.Server.Common.ClientIp;
 using g0v0.Server.Common.Communication;
 using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Database.MySQL.Repository;
@@ -44,6 +45,26 @@ public static class ServiceCollectionExtension
         services.TryAddSingleton<GeoIPService>();
         services.TryAddSingleton<IGeoIPService>(provider => provider.GetRequiredService<GeoIPService>());
         services.AddHostedService<GeoIPUpdateService>();
+        return services;
+    }
+
+    /// <summary>
+    /// Registers the client IP resolver and the worker that refreshes published CDN ranges.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The updated service collection.</returns>
+    /// <remarks>
+    /// Requires ConfigManager. The client IP settings live on VerificationConfig; an absent
+    /// config/verification.json trusts loopback and private ranges only, which covers a reverse
+    /// proxy on the same host or container network.
+    /// </remarks>
+    public static IServiceCollection AddClientIp(this IServiceCollection services)
+    {
+        services.TryAddSingleton<VerificationConfig>(provider => provider.GetRequiredService<ConfigManager>().TryGet<VerificationConfig>() ?? new VerificationConfig());
+        services.TryAddSingleton<TrustedProxyRangeStore>();
+        services.TryAddSingleton<IClientIpResolver, ClientIpResolver>();
+        services.AddHttpClient(nameof(TrustedProxySourceRefreshService));
+        services.AddHostedService<TrustedProxySourceRefreshService>();
         return services;
     }
 
