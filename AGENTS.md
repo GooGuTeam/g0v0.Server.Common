@@ -52,9 +52,10 @@ Enforced by `.editorconfig`, `.globalconfig`, and `stylecop.json`:
 - `Reload<T>()` only copies properties marked `[Reloadable]`; new properties default to "set once at startup".
 - `basePath` typically comes from an injected `IPathProvider`.
 - Shared config classes live here and are consumed by the servers: `GeneralConfig`, `GameConfig`, `ChatConfig`,
-  `VerificationConfig` (login verification plus the client IP settings), `StorageConfiguration`, `GeoIPConfig` and
-  `RegistrationConfig`. Add a new one here rather than in a server project, so every server reads the same schema; the
-  JSON itself still sits in each server's content root.
+  `VerificationConfig` (login verification plus the client IP settings), `StorageConfiguration`, `GeoIPConfig`,
+  `RegistrationConfig` and `SentryOptions` (the nested `Sentry` section of a server's own config file). Add a new one
+  here rather than in a server project, so every server reads the same schema; the JSON itself still sits in each
+  server's content root.
 
 ## Database
 
