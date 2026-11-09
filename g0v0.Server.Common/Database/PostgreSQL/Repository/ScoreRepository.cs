@@ -179,6 +179,11 @@ public class ScoreRepository(PostgreSqlDbContext context) : IScoreRepository, IP
             .OrderBy(s => s.Id).Take(limit).ToListAsync().ConfigureAwait(false);
 
     /// <inheritdoc/>
+    public Task<int> CountUnprocessedScoresAsync(string? type = null)
+        => context.Scores.AsNoTracking()
+            .CountAsync(s => !s.Processed && (type == null || s.Type == type));
+
+    /// <inheritdoc/>
     public Task CompleteProcessingAsync(Score score, int playTime = 0)
         => ScoreProcessingPersistence.CompleteAsync(context, score, playTime);
 }

@@ -172,6 +172,13 @@ public interface IScoreRepository
     Task<IReadOnlyList<Score>> GetUnprocessedScoresAsync(long afterId, int limit, string? type = null);
 
     /// <summary>
+    /// Counts the scores that are still waiting to be processed, optionally filtered by source type.
+    /// </summary>
+    /// <param name="type">The score type to filter by, or <see langword="null"/> for every type.</param>
+    /// <returns>The number of unprocessed scores.</returns>
+    Task<int> CountUnprocessedScoresAsync(string? type = null);
+
+    /// <summary>
     /// Saves calculated score fields without overwriting concurrent replay uploads.
     /// </summary>
     /// <param name="score">The successfully calculated score.</param>
