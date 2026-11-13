@@ -1,6 +1,7 @@
 // Copyright (c) GooGuTeam. License under MIT License. See LICENSE in the project root for license information.
 
 using System.Text;
+using g0v0.Server.Common.Configuration;
 using g0v0.Server.Common.Rulesets;
 using osu.Game.Beatmaps;
 using osu.Game.IO;
@@ -17,7 +18,8 @@ namespace g0v0.Server.Common.Utils;
 /// Calculates difficulty and performance using the installed osu! rulesets.
 /// </summary>
 /// <param name="rulesets">The registered rulesets.</param>
-public class ScoreAttributeUtils(RulesetManager rulesets)
+/// <param name="config">The shared gameplay configuration.</param>
+public class ScoreAttributeUtils(RulesetManager rulesets, ConfigManager? config = null)
 {
     /// <summary>
     /// Decodes an osu! file without requiring a filesystem or game database.
@@ -42,7 +44,7 @@ public class ScoreAttributeUtils(RulesetManager rulesets)
     public DifficultyAttributes CalculateDifficultyAttributes(IWorkingBeatmap beatmap, int mode, IEnumerable<APIMod> mods, CancellationToken cancellationToken = default)
     {
         Ruleset ruleset = rulesets.GetRuleset(ScoreModeUtils.GetBaseRulesetId(mode));
-        return ruleset.CreateDifficultyCalculator(beatmap).Calculate(mods.Select(m => m.ToMod(ruleset)), cancellationToken);
+        return ModSpecificCalculation.CreateDifficultyCalculator(ruleset, beatmap, config?.Get<GameConfig>().UseModSpecificCalculation ?? true).Calculate(mods.Select(m => m.ToMod(ruleset)), cancellationToken);
     }
 
     /// <summary>
@@ -53,7 +55,11 @@ public class ScoreAttributeUtils(RulesetManager rulesets)
     /// <returns>The ruleset-specific performance attributes.</returns>
     public PerformanceAttributes CalculatePerformanceAttributes(ScoreInfo score, DifficultyAttributes difficulty)
     {
-        return rulesets.GetRuleset(score.Ruleset.OnlineID).CreatePerformanceCalculator()?.Calculate(score, difficulty)
+        Ruleset ruleset = rulesets.GetRuleset(score.Ruleset.OnlineID);
+        PerformanceCalculator? calculator = (config?.Get<GameConfig>().UseModSpecificCalculation ?? true)
+            ? ruleset.CreateModSpecificPerformanceCalculator()
+            : ruleset.CreatePerformanceCalculator();
+        return calculator?.Calculate(score, difficulty)
             ?? throw new NotSupportedException("The ruleset does not provide performance calculation.");
     }
 

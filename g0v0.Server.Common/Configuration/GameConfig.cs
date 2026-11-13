@@ -11,6 +11,11 @@ namespace g0v0.Server.Common.Configuration;
 public class GameConfig
 {
     /// <summary>
+    /// Gets or sets a value indicating whether mod-specific difficulty and performance algorithms are used.
+    /// </summary>
+    public bool UseModSpecificCalculation { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets a value indicating whether relax rulesets are enabled.
     /// </summary>
     [Reloadable]

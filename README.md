@@ -22,3 +22,14 @@ g0v0 server v2 series is licensed under the [MIT licence](https://opensource.org
 see [the licence file](LICENCE) for more information.
 [tl;dr](https://tldrlegal.com/license/mit-license) you can do whatever you want as long as you **include the original
 copyright and license notice in any copy of the software/source**.
+
+
+### Mod-specific calculation
+
+Set `UseModSpecificCalculation` in `config/game.json` to `true` (the default) for g0v0 mod-specific difficulty and pp algorithms, or `false` for upstream algorithms. Restart the server after changing it. This setting is shared by Stable and Realtime.
+
+```json
+{
+  "UseModSpecificCalculation": true
+}
+```
