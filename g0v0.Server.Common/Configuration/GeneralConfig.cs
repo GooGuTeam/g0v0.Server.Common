@@ -146,6 +146,8 @@ public class GeneralConfig
     /// <summary>
     /// Gets or sets the additional URLs allowed by the realtime server's CORS policy.
     /// </summary>
+    // The public configuration key is CORSAllowUrls; renaming it would break existing config files.
+    // ReSharper disable once InconsistentNaming
     public string[] CORSAllowUrls { get; set; } = [];
 
     /// <summary>
