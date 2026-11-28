@@ -110,6 +110,25 @@ public class ConfigManagerTests
 
     #endregion
 
+    #region Concurrency
+
+    [Test]
+    public void Get_WhenReadConcurrently_ShouldCacheOneInstance()
+    {
+        WriteConfigFile("simple_test_config.json", new { Name = "shared", Value = 7 });
+
+        ConfigManager manager = new(_tempDir);
+        SimpleTestConfig?[] results = new SimpleTestConfig?[16];
+
+        Parallel.For(0, results.Length, index => results[index] = manager.Get<SimpleTestConfig>());
+
+        Assert.That(results, Has.All.Not.Null);
+        Assert.That(results.Distinct().Count(), Is.EqualTo(1));
+        Assert.That(results[0]!.Name, Is.EqualTo("shared"));
+    }
+
+    #endregion
+
     #region Reload
 
     [Test]

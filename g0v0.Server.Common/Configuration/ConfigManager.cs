@@ -22,6 +22,7 @@ public class ConfigManager(string basePath)
 {
     private const string ConfigBasePath = "config";
     private readonly Dictionary<Type, object> _configCache = new();
+    private readonly Lock _configCacheLock = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ConfigManager"/> class using a configuration path provider and loads the configuration from the file.
@@ -40,18 +41,20 @@ public class ConfigManager(string basePath)
     /// <exception cref="InvalidOperationException">Thrown when the configuration file cannot be loaded.</exception>
     public T Get<T>()
     {
-        // try to get cached value
-        if (_configCache.TryGetValue(typeof(T), out object? cachedValue) && cachedValue is T cachedConfig)
+        // The config cache is a singleton, must lock to avoid duplicate writes.
+        lock (_configCacheLock)
         {
-            return cachedConfig;
-        }
+            // try to get cached value
+            if (_configCache.TryGetValue(typeof(T), out object? cachedValue) && cachedValue is T cachedConfig)
+            {
+                return cachedConfig;
+            }
 
-        // otherwise, load from file and cache it
-        T value = LoadConfiguration<T>() ??
-                    throw new InvalidOperationException("Configuration of type " + typeof(T).FullName +
-                                                        " is not loaded.");
-        _configCache.Add(typeof(T), value);
-        return value;
+            // otherwise, load from file and cache it
+            T value = LoadConfiguration<T>() ?? throw new InvalidOperationException($"Configuration of type {typeof(T).FullName} is not loaded.");
+            _configCache.Add(typeof(T), value);
+            return value;
+        }
     }
 
     /// <summary>
